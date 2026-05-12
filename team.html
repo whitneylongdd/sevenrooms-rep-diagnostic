@@ -109,10 +109,11 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .chip.king{background:var(--green-bg);color:var(--green-text)}
 .chip.nodata{background:#f0f0ee;color:var(--text3)}
 .chip.ramp{background:#fdf6e8;color:#7c4f1a;border:1px solid rgba(194,71,10,.15)}
-.sparkline{display:flex;gap:2px;align-items:flex-end;height:24px}
-.spark-bar{flex:1;border-radius:2px 2px 0 0;min-height:2px;background:var(--blue-bg)}
-.spark-bar.has-data{background:#185fa5}
-.spark-bar.zero{background:#e0e0dc}
+.month-breakdown{display:flex;gap:0;margin-top:8px;border-top:1px solid var(--border);padding-top:6px}
+        .mb-col{flex:1;text-align:center}
+        .mb-col .mb-num{font-size:12px;font-weight:700;color:var(--text);line-height:1.3}
+        .mb-col .mb-num.zero{color:#ccc;font-weight:400}
+        .mb-col .mb-mon{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;margin-top:1px}
 
 /* MODAL */
 #modalOverlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:500;display:none;align-items:flex-start;justify-content:center;padding:24px;overflow-y:auto}
@@ -219,9 +220,6 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   <span class="filter-label">Facecard</span>
   <div class="pill-group" id="fcPills"></div>
   <div class="filter-divider"></div>
-  <span class="filter-label">Quarter</span>
-  <div class="pill-group" id="qtrPills"></div>
-  <div class="filter-divider"></div>
   <span class="filter-label">Ramp</span>
   <div class="pill-group" id="rampPills"></div>
   <div class="search-wrap">
@@ -280,7 +278,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     <div class="about-card">
       <div class="term">Won MRR 2026</div>
       <div class="formula">SUM(mrr_final) across filtered reps</div>
-      <div class="def">Total monthly recurring revenue from closed-won deals. When a quarter filter is active, MRR is estimated proportionally: (quarter CW / total CW) × total MRR per rep.</div>
+      <div class="def">Total monthly recurring revenue from closed-won deals. MRR is shown for the full year (Jan–May 2026).</div>
       <div class="source">Source: Raw Data – Opps CW · Column: MRR Final</div>
     </div>
     <div class="about-card">
@@ -298,7 +296,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     <div class="about-card">
       <div class="term">Active Reps</div>
       <div class="formula">COUNT(reps where CW &gt; 0)</div>
-      <div class="def">Number of reps in the filtered view with at least one closed-won deal in the selected period. Updates with quarter filter.</div>
+      <div class="def">Number of reps in the filtered view with at least one closed-won deal Jan–May 2026.</div>
       <div class="source">Source: Raw Data – Opps CW</div>
     </div>
     <div class="about-card">
@@ -344,7 +342,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     <div class="about-card">
       <div class="term">Net New</div>
       <div class="formula">COUNT(deals where type = New)</div>
-      <div class="def">Closed-won deals that are new logo or new subscription, excluding expansion/upsell. Only shown for Full Year view — not broken out by quarter in current data.</div>
+      <div class="def">Closed-won deals that are new logo or new subscription, excluding expansion/upsell. Full-year count (Jan–May 2026).</div>
       <div class="source">Source: Column "Subscription Item Opp Type Detail Category"</div>
     </div>
     <div class="about-card">
@@ -356,7 +354,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     <div class="about-card">
       <div class="term">MRR</div>
       <div class="formula">SUM(MRR Final) for closed-won deals</div>
-      <div class="def">Monthly recurring revenue from closed-won deals in the period. When a quarter is selected, MRR is estimated proportionally based on that quarter's share of total CW deals.</div>
+      <div class="def">Monthly recurring revenue from closed-won deals Jan–May 2026.</div>
       <div class="source">Source: Raw Data – Opps CW · Column: MRR Final</div>
     </div>
     <div class="about-card">
@@ -438,8 +436,8 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
       <div class="def">May 2026 data runs through May 12 only. May CW and MRR figures will be lower than a full month. The trend note calls this out explicitly.</div>
     </div>
     <div class="about-card">
-      <div class="term">Quarter MRR is Estimated</div>
-      <div class="def">When Q1 or Q2 is selected, per-rep MRR is estimated as (quarter CW / total CW) × total MRR. This assumes uniform MRR per deal, which may not be exact.</div>
+      <div class="term">MRR is Full-Year</div>
+      <div class="def">Per-rep MRR is the full-year reported value from the 2026 Rep Productivity Tracker.</div>
     </div>
     <div class="about-card">
       <div class="term">Gong Coverage is Partial</div>
@@ -618,14 +616,6 @@ function gongColorClass(score, max){
 const MONTHS=['jan','feb','mar','apr','may'];
 const MONTH_LABELS=['Jan','Feb','Mar','Apr','May'];
 
-function sparklineHTML(rep){
-  const vals=MONTHS.map(m=>rep[m+'CW']||0);
-  const mx=Math.max(...vals,1);
-  return vals.map((v,i)=>{
-    const h=Math.round((v/mx)*100);
-    return `<div class="spark-bar ${v>0?'has-data':'zero'}" style="height:${Math.max(h,4)}%"></div>`;
-  }).join('');
-}
 
 function avatarColor(name){
   const colors=['#185fa5','#2d7a3a','#ba7517','#6b46c1','#c2470a','#0e7b65','#a32d2d','#1d6b8f'];
@@ -639,30 +629,9 @@ function initials(name){
   return name[0].toUpperCase();
 }
 
-// ── QUARTER HELPERS ──────────────────────────────────────────────────
-function repQCW(r){
-  if(filters.quarter==='Q1')return r.janCW+r.febCW+r.marCW;
-  if(filters.quarter==='Q2')return r.aprCW+r.mayCW;
-  return r.cw2026;
-}
-function repQMRR(r){
-  if(filters.quarter==='All'||r.cw2026===0)return r.mrr2026;
-  const qCW=repQCW(r);
-  return Math.round(r.mrr2026*(qCW/r.cw2026));
-}
-function qMonths(){
-  if(filters.quarter==='Q1')return['jan','feb','mar'];
-  if(filters.quarter==='Q2')return['apr','may'];
-  return['jan','feb','mar','apr','may'];
-}
-function qMonthLabels(){
-  if(filters.quarter==='Q1')return['Jan','Feb','Mar'];
-  if(filters.quarter==='Q2')return['Apr','May'];
-  return['Jan','Feb','Mar','Apr','May'];
-}
 
 // ── FILTER STATE ─────────────────────────────────────────────────────
-let filters={region:'All',manager:'All',facecard:'All',ramp:'All',quarter:'All'};
+let filters={region:'All',manager:'All',facecard:'All',ramp:'All'};
 
 // ── FILTERED REPS ─────────────────────────────────────────────────────
 function filteredReps(){
@@ -672,8 +641,6 @@ function filteredReps(){
     if(r.name.includes('Deactivated'))return false;
     if(filters.region!=='All'&&r.region!==filters.region)return false;
     if(filters.manager!=='All'&&r.manager!==filters.manager)return false;
-    if(filters.quarter==='Q1'&&(r.janCW+r.febCW+r.marCW)===0)return false;
-    if(filters.quarter==='Q2'&&(r.aprCW+r.mayCW)===0)return false;
     if(filters.facecard!=='All'){
       if(filters.facecard==='Ace'&&r.ace===0)return false;
       if(filters.facecard==='Jack'&&r.jack===0)return false;
@@ -696,19 +663,19 @@ function renderSummary(reps){
   const fcField=fc==='Ace'?'ace':fc==='Jack'?'jack':'king';
   const totalCW=fcActive
     ? reps.reduce((s,r)=>s+r[fcField],0)
-    : reps.reduce((s,r)=>s+repQCW(r),0);
-  const totalNN=(!fcActive&&filters.quarter==='All')?reps.reduce((s,r)=>s+r.cwNN,0):null;
-  const totalMRR=reps.reduce((s,r)=>s+repQMRR(r),0);
+    : reps.reduce((s,r)=>s+r.cw2026,0);
+  const totalNN=!fcActive?reps.reduce((s,r)=>s+r.cwNN,0):null;
+  const totalMRR=reps.reduce((s,r)=>s+r.mrr2026,0);
   const wrReps=reps.filter(r=>r.cvr!=null);
   const avgWR=wrReps.length?wrReps.reduce((s,r)=>s+r.cvr,0)/wrReps.length:null;
   const gReps=reps.filter(r=>r.gongOverall!=null);
   const avgGong=gReps.length?gReps.reduce((s,r)=>s+r.gongOverall,0)/gReps.length:null;
-  const activeReps=reps.filter(r=>(fcActive?r[fcField]:repQCW(r))>0).length;
-  const qLabel=filters.quarter==='All'?'Jan–May':filters.quarter==='Q1'?'Jan–Mar':'Apr–May';
-  const cwLabel=fcActive?`${fc} CW 2026`:(filters.quarter==='All'?'Total CW 2026':`CW ${filters.quarter} 2026`);
-  const cwSub=fcActive?'full-year (no qtr split)':(totalNN!=null?totalNN+' net new':'net new N/A by qtr');
-  const mrrLabel=filters.quarter==='All'?'Won MRR 2026':`MRR ${filters.quarter} 2026`;
-  const jackMixBase=fcActive?reps.reduce((s,r)=>s+repQCW(r),0):totalCW;
+  const activeReps=reps.filter(r=>(fcActive?r[fcField]:r.cw2026)>0).length;
+  const qLabel='Jan–May';
+  const cwLabel=fcActive?`${fc} CW 2026`:'Total CW 2026';
+  const cwSub=fcActive?'full-year':(totalNN!=null?totalNN+' net new':'—');
+  const mrrLabel='Won MRR 2026';
+  const jackMixBase=fcActive?reps.reduce((s,r)=>s+r.cw2026,0):totalCW;
   document.getElementById('summaryRow').innerHTML=`
     <div class="sum-card blue"><div class="lbl">${cwLabel}</div><div class="val">${totalCW}</div><div class="sub">${cwSub}</div></div>
     <div class="sum-card green"><div class="lbl">${mrrLabel}</div><div class="val">$${(totalMRR/1000).toFixed(0)}K</div><div class="sub">YTD ${qLabel}</div></div>
@@ -727,15 +694,13 @@ function renderSummary(reps){
 
 // ── TREND BARS ────────────────────────────────────────────────────────
 function renderTrend(reps){
-  const months=qMonths();
-  const labels=qMonthLabels();
-  const allMonths=['jan','feb','mar','apr','may'];
+  const months=['jan','feb','mar','apr','may'];
+  const labels=['Jan','Feb','Mar','Apr','May'];
   const vals=months.map(m=>reps.reduce((s,r)=>s+(r[m+'CW']||0),0));
   const mx=Math.max(...vals,1);
   const bars=vals.map((v,i)=>{
     const h=Math.max(Math.round(v/mx*100),4);
-    const fullIdx=allMonths.indexOf(months[i]);
-    const isMar=(fullIdx===2),isMay=(fullIdx===4);
+    const isMar=(i===2),isMay=(i===4);
     return `<div class="trend-bar-wrap">
       <div class="trend-bar-val">${v}</div>
       <div class="trend-bar ${isMar?'highlight':''}" style="height:${h}px" title="${labels[i]}: ${v} CW"></div>
@@ -743,8 +708,7 @@ function renderTrend(reps){
     </div>`;
   }).join('');
   document.getElementById('trendBars').innerHTML=bars;
-  const note=filters.quarter!=='Q2'?'March spike reflects Q1 end-of-quarter ELQ pull-forward. ':'';
-  document.getElementById('trendNote').textContent=note+'May is partial (data through May 12).';
+  document.getElementById('trendNote').textContent='March spike reflects Q1 end-of-quarter ELQ pull-forward. May is partial (data through May 12).';
 }
 
 // ── FILTER PILLS ─────────────────────────────────────────────────────
@@ -775,9 +739,6 @@ function initFilters(){
   const mEl=document.getElementById('mgrSelect');
   mEl.innerHTML=['All',...mgrs].map(v=>`<option value="${v}">${v==='All'?'All managers':v}</option>`).join('');
   mEl.value='All';
-  // Quarter pills
-  const qEl=document.getElementById('qtrPills');
-  qEl.innerHTML=['All','Q1','Q2'].map(v=>`<div class="pill ${v==='All'?'active':''}" onclick="setFilter('quarter','${v}');updatePills('qtrPills','quarter','${v}')">${v==='All'?'Full Year':v==='Q1'?'Q1 (Jan–Mar)':'Q2 (Apr–May)'}</div>`).join('');
   // Facecard pills
   const fEl=document.getElementById('fcPills');
   fEl.innerHTML=['All','Ace','Jack','King'].map(v=>`<div class="pill ${v==='All'?'active':''}" onclick="setFilter('facecard','${v}');updatePills('fcPills','facecard','${v}')">${v}</div>`).join('');
@@ -789,10 +750,7 @@ function initFilters(){
 function updatePills(containerId, filterKey, val){
   filters[filterKey]=val;
   document.querySelectorAll(`#${containerId} .pill`).forEach(p=>{
-    p.classList.toggle('active', p.textContent===val||(val==='All'&&p.textContent==='All')
-      ||(containerId==='qtrPills'&&val==='All'&&p.textContent==='Full Year')
-      ||(containerId==='qtrPills'&&val==='Q1'&&p.textContent==='Q1 (Jan–Mar)')
-      ||(containerId==='qtrPills'&&val==='Q2'&&p.textContent==='Q2 (Apr–May)'));
+    p.classList.toggle('active', p.textContent===val||(val==='All'&&p.textContent==='All'));
   });
   render();
 }
@@ -801,7 +759,7 @@ function updatePills(containerId, filterKey, val){
 function repCardHTML(r){
   const color=avatarColor(r.name);
   const ini=initials(r.name);
-  const qCW=repQCW(r);
+  const qCW=r.cw2026;
   const tierC=r.cvrTier?tierClass(r.cvrTier):'nodata';
   const tierLabel=r.cvr!=null?r.cvr.toFixed(1)+'% CVR':'No CVR';
   const gongLabel=r.gongOverall!=null?r.gongOverall.toFixed(1)+' Gong':'No Gong';
@@ -824,10 +782,10 @@ function repCardHTML(r){
       </div>
     </div>
     <div class="rep-stats">
-      <div class="rep-stat"><div class="sv">${qCW}</div><div class="sl">${filters.quarter==='All'?'CW \'26':filters.quarter+' CW'}</div></div>
-      <div class="rep-stat"><div class="sv">${filters.quarter==='All'?r.cwNN:'—'}</div><div class="sl">Net New</div></div>
+      <div class="rep-stat"><div class="sv">${qCW}</div><div class="sl">CW '26</div></div>
+      <div class="rep-stat"><div class="sv">${r.cwNN||'—'}</div><div class="sl">Net New</div></div>
       <div class="rep-stat"><div class="sv">${r.sqo2026||'—'}</div><div class="sl">SQOs</div></div>
-      <div class="rep-stat"><div class="sv">${repQMRR(r)>0?'$'+(repQMRR(r)/1000).toFixed(0)+'K':'—'}</div><div class="sl">MRR</div></div>
+      <div class="rep-stat"><div class="sv">${r.mrr2026>0?'$'+(r.mrr2026/1000).toFixed(0)+'K':'—'}</div><div class="sl">MRR</div></div>
     </div>
     <div class="rep-chips">
       <span class="chip ${tierC}">${tierLabel}</span>
@@ -835,7 +793,7 @@ function repCardHTML(r){
       ${isRamping?'<span class="chip ramp">Ramping</span>':''}
     </div>
     ${fcChips?`<div class="rep-chips">${fcChips}</div>`:''}
-    <div class="sparkline">${sparklineHTML(r)}</div>
+    <div class="month-breakdown">${['jan','feb','mar','apr','may'].map((m,i)=>{const v=r[m+'CW']||0;return `<div class="mb-col"><div class="mb-num ${v===0?'zero':''}">${v||'—'}</div><div class="mb-mon">${['J','F','M','A','M'][i]}</div></div>`;}).join('')}</div>
   </div>`;
 }
 
@@ -847,7 +805,7 @@ function openModal(id){
   const r=REP_MAP[id];
   if(!r)return;
   document.getElementById('mName').textContent=r.name;
-  const qCW=repQCW(r);
+  const qCW=r.cw2026;
   const tierC=r.cvrTier?tierClass(r.cvrTier):'nodata';
   document.getElementById('mMeta').innerHTML=[
     r.manager?`<span>📋 ${r.manager}</span>`:'',
