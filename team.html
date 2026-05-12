@@ -216,7 +216,8 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 
 <!-- FILTERS -->
 <div class="seg-toggle">
-  <button class="seg-btn active" data-seg="NAM" onclick="switchSeg('NAM')">🇺🇸 NAM SMB</button>
+  <button class="seg-btn active" data-seg="ALL" onclick="switchSeg('ALL')">🌐 Global</button>
+  <button class="seg-btn" data-seg="NAM" onclick="switchSeg('NAM')">🇺🇸 NAM SMB</button>
   <button class="seg-btn" data-seg="INTL" onclick="switchSeg('INTL')">🌍 INTL SMB</button>
   <button class="seg-btn" data-seg="ENT" onclick="switchSeg('ENT')">🏢 Enterprise</button>
 </div>
@@ -705,13 +706,15 @@ function initials(name){
 
 
 // ── FILTER STATE ─────────────────────────────────────────────────────
-let currentSeg='NAM';
-let activeREPS=REPS_NAM;
+const REPS_ALL=[...REPS_NAM,...REPS_INTL,...REPS_ENT];
+let currentSeg='ALL';
+let activeREPS=REPS_ALL;
 let filters={region:'All',manager:'All',facecard:'All',ramp:'All'};
 
 function switchSeg(seg){
+  if(currentSeg===seg){seg='ALL';}
   currentSeg=seg;
-  activeREPS={NAM:REPS_NAM,INTL:REPS_INTL,ENT:REPS_ENT}[seg];
+  activeREPS={NAM:REPS_NAM,INTL:REPS_INTL,ENT:REPS_ENT,ALL:REPS_ALL}[seg];
   filters={region:'All',manager:'All',facecard:'All',ramp:'All'};
   document.querySelectorAll('.seg-btn').forEach(b=>b.classList.toggle('active',b.dataset.seg===seg));
   initFilters();
@@ -793,7 +796,7 @@ function renderTrend(reps){
     </div>`;
   }).join('');
   document.getElementById('trendBars').innerHTML=bars;
-  const isMar=(currentSeg==='NAM'?'March spike reflects Q1 end-of-quarter ELQ pull-forward. ':'');
+  const isMar=(currentSeg==='NAM'||currentSeg==='ALL'?'March spike reflects Q1 end-of-quarter ELQ pull-forward. ':'');
   document.getElementById('trendNote').textContent=isMar+'May is partial (data through May 12).';
 }
 
