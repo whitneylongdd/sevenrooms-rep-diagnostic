@@ -97,6 +97,18 @@ for row in cw_rows[1:]:
 
 print(f"  Reps with CW: {len(rep)},  total cw2026: {sum(v['cw2026'] for v in rep.values()):,}")
 
+# ── Team-level unique venue counts per month (for TEAM_MONTHLY constant) ──────
+# Uses col J (venue ID) + col AJ (Opp CW Month) — matches spreadsheet COUNTUNIQUEIFS
+team_venues = defaultdict(set)
+CW_MONTH_KEY = {'1/1/2026':'jan','2/1/2026':'feb','3/1/2026':'mar','4/1/2026':'apr','5/1/2026':'may'}
+for row in cw_rows[1:]:
+    venue_id = row[9].strip()  if len(row) > 9  else ''
+    cw_month = row[35].strip() if len(row) > 35 else ''
+    if venue_id and cw_month in CW_MONTH_KEY:
+        team_venues[CW_MONTH_KEY[cw_month]].add(venue_id)
+team_monthly = {mo: len(team_venues.get(mo, set())) for mo in ['jan','feb','mar','apr','may']}
+print(f"  Team monthly unique venues: {team_monthly}")
+
 # ── Pull Opps Created (for sqo2026, sqoT90, cwT90 — all from same tab) ───────
 # Col B (idx 1)  = Opportunity ID
 # Col K (idx 10) = SQO Date (M/D/YYYY exact date)
@@ -195,6 +207,12 @@ def counted_patch(m):
 
 html = re.sub(r'\{id:"[^"]+",name:"[^"]+"[^{}]*\}', counted_patch, html)
 print(f"  Patched {count[0]} rep objects")
+
+# Patch TEAM_MONTHLY constant
+import json as _json
+tm_new = 'const TEAM_MONTHLY=' + _json.dumps(team_monthly).replace(' ','') + ';'
+html = re.sub(r'const TEAM_MONTHLY=\{[^}]+\};', tm_new, html)
+print(f'  TEAM_MONTHLY: {team_monthly}')
 
 with open(HTML_PATH, 'w') as f:
     f.write(html)

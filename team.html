@@ -726,6 +726,7 @@ function initials(name){
 
 // ── FILTER STATE ─────────────────────────────────────────────────────
 const REPS_ALL=[...REPS_NAM,...REPS_INTL,...REPS_ENT];
+const TEAM_MONTHLY={jan:568,feb:654,mar:996,apr:776,may:202};
 let currentSeg='ALL';
 let activeREPS=REPS_ALL;
 let filters={region:'All',manager:'All',facecard:'All',ramp:'All',aeam:'All'};
@@ -810,7 +811,9 @@ function renderSummary(reps){
 function renderTrend(reps){
   const months=['jan','feb','mar','apr','may'];
   const labels=['Jan','Feb','Mar','Apr','May'];
-  const vals=months.map(m=>reps.reduce((s,r)=>s+(r[m+'CW']||0),0));
+  // Use sheet-level unique-venue counts when unfiltered (matches source spreadsheet)
+  const isUnfiltered=currentSeg==='ALL'&&filters.region==='All'&&filters.manager==='All'&&filters.facecard==='All'&&filters.ramp==='All'&&filters.aeam==='All'&&!(document.getElementById('repSearch')||{value:''}).value;
+  const vals=isUnfiltered?months.map(m=>TEAM_MONTHLY[m]):months.map(m=>reps.reduce((s,r)=>s+(r[m+'CW']||0),0));
   const mx=Math.max(...vals,1);
   const bars=vals.map((v,i)=>{
     const h=Math.max(Math.round(v/mx*100),4);
