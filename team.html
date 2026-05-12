@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SevenRooms NAM SMB · Full Team Diagnostic</title>
+<style>
+:root {
+  --bg:#f9f8f6;--surface:#fff;--border:rgba(0,0,0,.08);--border-strong:rgba(0,0,0,.15);
+  --text:#1a1a18;--text2:#6b6b67;--text3:#9c9c96;
+  --radius:12px;--radius-sm:8px;
+  --red:#e24b4a;--red-bg:#fcebeb;--red-text:#a32d2d;
+  --amber:#ba7517;--amber-bg:#faeeda;--amber-text:#854f0b;
+  --green:#2d7a3a;--green-bg:#e4f4e8;--green-text:#1e5228;
+  --blue:#185fa5;--blue-bg:#e6f1fb;--blue-text:#185fa5;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+.page{max-width:1400px;margin:0 auto;padding:24px 20px 60px}
+
+/* header */
+.page-header{margin-bottom:20px}
+.page-title{font-size:21px;font-weight:600}
+.page-subtitle{font-size:12px;color:var(--text2);margin-top:4px;line-height:1.7}
+.page-subtitle a{color:var(--blue);text-decoration:none}
+.page-subtitle a:hover{text-decoration:underline}
+.source-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.source-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:var(--blue-bg);color:var(--blue-text);font-size:11px;font-weight:500;text-decoration:none;border:1px solid rgba(24,95,165,.2)}
+.source-chip:hover{background:#d0e6f9}
+.source-chip svg{flex-shrink:0}
+
+/* summary */
+.summary-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px}
+.summary-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:12px 14px;box-shadow:var(--shadow)}
+.summary-card .label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.summary-card .value{font-size:24px;font-weight:700;line-height:1}
+.summary-card .sub{font-size:11px;color:var(--text3);margin-top:3px}
+
+/* director tabs */
+.dir-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.dir-tab{padding:7px 16px;border-radius:var(--radius-sm);border:1.5px solid var(--border-strong);background:var(--surface);font-size:12px;font-weight:600;cursor:pointer;color:var(--text2);transition:all .15s}
+.dir-tab:hover{border-color:var(--text2);color:var(--text)}
+.dir-tab.active{background:var(--text);color:#fff;border-color:var(--text)}
+.dir-tab .count{display:inline-block;background:rgba(255,255,255,.25);border-radius:999px;padding:0 6px;margin-left:4px;font-size:10px}
+.dir-tab:not(.active) .count{background:rgba(0,0,0,.08)}
+
+/* controls */
+.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.control-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em}
+.pill-group{display:flex;gap:4px;flex-wrap:wrap}
+.pill{padding:4px 11px;border-radius:999px;border:1px solid var(--border-strong);background:var(--surface);font-size:11px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .12s}
+.pill:hover{border-color:var(--text2);color:var(--text)}
+.pill.active{background:var(--text);color:#fff;border-color:var(--text)}
+.controls-sep{width:1px;height:22px;background:var(--border-strong);margin:0 2px}
+.sort-select{padding:4px 9px;border-radius:var(--radius-sm);border:1px solid var(--border-strong);background:var(--surface);font-size:11px;color:var(--text);cursor:pointer}
+.search-input{padding:4px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-strong);background:var(--surface);font-size:12px;color:var(--text);width:180px;outline:none}
+.search-input:focus{border-color:var(--blue)}
+
+/* rep grid */
+.rep-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:28px}
+@media(max-width:1200px){.rep-grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:900px){.rep-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.rep-grid{grid-template-columns:repeat(2,1fr)}}
+.rep-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden;transition:box-shadow .15s,transform .15s;cursor:pointer}
+.rep-card:hover{box-shadow:0 4px 14px rgba(0,0,0,.1);transform:translateY(-1px)}
+.rep-card.hidden{display:none}
+.rep-accent{height:3px}
+.rep-body{padding:12px}
+.rep-top{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+.rep-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.rep-name{font-size:12px;font-weight:600;line-height:1.25}
+.rep-mgr{font-size:10px;color:var(--text2);margin-top:1px}
+.rep-loc{font-size:10px;color:var(--text3);margin-top:1px}
+.rep-badges{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px}
+.badge{font-size:9px;font-weight:600;padding:2px 7px;border-radius:999px;white-space:nowrap}
+.badge-green{background:var(--green-bg);color:var(--green-text)}
+.badge-amber{background:var(--amber-bg);color:var(--amber-text)}
+.badge-red{background:var(--red-bg);color:var(--red-text)}
+.badge-blue{background:var(--blue-bg);color:var(--blue-text)}
+.badge-gray{background:#f1efe8;color:var(--text3)}
+.rep-metrics{display:flex;flex-direction:column;gap:5px}
+.metric-row{display:flex;justify-content:space-between;align-items:center}
+.metric-label{font-size:10px;color:var(--text2)}
+.metric-val{font-size:11px;font-weight:600}
+.metric-val.danger{color:var(--red)}
+.metric-val.warn{color:var(--amber)}
+.metric-val.ok{color:var(--green)}
+.metric-val.muted{color:var(--text3)}
+.mini-bar-wrap{flex:1;margin:0 7px;height:3px;background:#f1efe8;border-radius:99px;position:relative}
+.mini-bar{height:100%;border-radius:99px;position:absolute;top:0;left:0}
+
+/* global tooltip */
+.tooltip-wrap{display:inline-flex;align-items:center}
+.tooltip-icon{width:12px;height:12px;border-radius:50%;background:var(--border-strong);color:var(--text2);font-size:8px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;cursor:help;flex-shrink:0}
+.tooltip-box{display:none!important}
+#global-tooltip{display:none;position:fixed;background:#1a1a18;color:#fff;font-size:11px;line-height:1.5;padding:7px 10px;border-radius:6px;width:220px;z-index:9999;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+
+/* no results */
+.no-results{text-align:center;padding:48px;color:var(--text3);font-size:14px;display:none}
+.no-results.visible{display:block}
+
+/* modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:16px;padding:28px;max-width:600px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal-head{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.modal-avatar{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;flex-shrink:0}
+.modal-name{font-size:18px;font-weight:700}
+.modal-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.modal-close{margin-left:auto;cursor:pointer;font-size:18px;color:var(--text3);background:none;border:none;padding:4px 8px;border-radius:6px}
+.modal-close:hover{background:#f1efe8}
+.modal-section{margin-bottom:18px}
+.modal-section-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:5px}
+.modal-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.modal-metric{background:#fafaf8;border-radius:var(--radius-sm);padding:10px 12px;border:1px solid var(--border)}
+.modal-metric .ml{font-size:10px;color:var(--text3);margin-bottom:3px}
+.modal-metric .mv{font-size:18px;font-weight:700}
+.modal-metric .mb{font-size:10px;color:var(--text3);margin-top:2px}
+.gong-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.gong-cell{text-align:center;padding:8px 6px;border-radius:var(--radius-sm);}
+.gong-cell .gc-label{font-size:9px;color:var(--text3);margin-bottom:3px;line-height:1.3}
+.gong-cell .gc-val{font-size:16px;font-weight:700}
+.gong-scale{font-size:10px;color:var(--text3);margin-top:8px;text-align:center}
+.no-gong{text-align:center;padding:24px;color:var(--text3);font-size:12px;background:#fafaf8;border-radius:var(--radius-sm)}
+</style>
+</head>
+<body>
+
+<!-- Password gate -->
+<div id="pwGate" style="position:fixed;inset:0;background:#f9f8f6;z-index:9999;display:flex;align-items:center;justify-content:center;">
+  <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px;padding:40px 36px;max-width:360px;width:90%;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.08);">
+    <div style="font-size:28px;margin-bottom:12px;">🔒</div>
+    <div style="font-size:18px;font-weight:600;color:#1a1a18;margin-bottom:6px;">SevenRooms NAM SMB</div>
+    <div style="font-size:13px;color:#6b6b67;margin-bottom:24px;">Full Team Diagnostic · May 2026</div>
+    <input type="password" id="pwInput" placeholder="Enter password" autofocus
+      style="width:100%;padding:10px 14px;border:1px solid rgba(0,0,0,.15);border-radius:8px;font-size:14px;outline:none;margin-bottom:10px;box-sizing:border-box;">
+    <div id="pwError" style="font-size:12px;color:#e24b4a;margin-bottom:10px;display:none;">Incorrect password.</div>
+    <button onclick="checkPassword()" style="width:100%;padding:10px;background:#1a1a18;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;">Continue</button>
+  </div>
+</div>
+
+<div id="mainContent" style="display:none;">
+<div class="page">
+
+<div class="page-header">
+  <div class="page-title">SevenRooms NAM SMB · Full Team Diagnostic</div>
+  <div class="page-subtitle">
+    93 reps &nbsp;·&nbsp; Gong Feb 10 – May 11, 2026 &nbsp;·&nbsp; Q2 bookings thru May 11 &nbsp;·&nbsp; Click any card for detail
+  </div>
+  <div class="source-chips">
+    <a class="source-chip" href="https://docs.google.com/spreadsheets/d/1km98s5pAdi5cco56l1lNhIiWi_YTrioXw0UXoE2uoHA/edit#gid=557561918" target="_blank">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Gong Scorecard (90-day)
+    </a>
+    <a class="source-chip" href="https://docs.google.com/spreadsheets/d/1Neac7Xd1LBsesb7NDWOPFK2weEgUbUn3w2BIPJTX5Z8/edit#gid=574388171" target="_blank">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Ramp Tracker (start dates, managers)
+    </a>
+    <a class="source-chip" href="https://docs.google.com/spreadsheets/d/1Neac7Xd1LBsesb7NDWOPFK2weEgUbUn3w2BIPJTX5Z8/edit#gid=0" target="_blank">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Bookings Raw Data (Q2 closed won)
+    </a>
+  </div>
+</div>
+
+<!-- Summary -->
+<div class="summary-grid">
+  <div class="summary-card">
+    <div class="label">Total NAM SMB AEs</div>
+    <div class="value">93</div>
+    <div class="sub">75 fully ramped</div>
+  </div>
+  <div class="summary-card">
+    <div class="label">Avg Gong Score</div>
+    <div class="value">2.5<span style="font-size:13px;font-weight:400;color:var(--text3)"> / 5</span></div>
+    <div class="sub">77 reps scored (90-day)</div>
+  </div>
+  <div class="summary-card">
+    <div class="label">Reps with Q2 Wins</div>
+    <div class="value">54</div>
+    <div class="sub">of 93 (58% have ≥1 won)</div>
+  </div>
+  <div class="summary-card">
+    <div class="label">Q2 Total Won Deals</div>
+    <div class="value">239</div>
+    <div class="sub">Net new + expansion, NAM SMB</div>
+  </div>
+  <div class="summary-card">
+    <div class="label">Ramp &lt; 100%</div>
+    <div class="value">18</div>
+    <div class="sub">still in productivity ramp</div>
+  </div>
+</div>
+
+<!-- Director tabs -->
+<div class="dir-tabs" id="dirTabs">
+  <button class="dir-tab active" data-dir="all" onclick="setDir('all',this)">All <span class="count">93</span></button>
+  <button class="dir-tab" data-dir="Mike Milero" onclick="setDir('Mike Milero',this)">Mike Milero <span class="count"></span></button>
+  <button class="dir-tab" data-dir="Tina Thayer" onclick="setDir('Tina Thayer',this)">Tina Thayer <span class="count"></span></button>
+  <button class="dir-tab" data-dir="Paige Hakim" onclick="setDir('Paige Hakim',this)">Paige Hakim <span class="count"></span></button>
+  <button class="dir-tab" data-dir="other" onclick="setDir('other',this)">Other / Unassigned <span class="count"></span></button>
+</div>
+
+<!-- Manager filter + sort -->
+<div class="controls">
+  <span class="control-label">Manager:</span>
+  <div class="pill-group" id="mgrPills"></div>
+  <div class="controls-sep"></div>
+  <span class="control-label">Sort:</span>
+  <select class="sort-select" onchange="sortReps(this.value)">
+    <option value="name">Name A–Z</option>
+    <option value="wins">Q2 wins ↓</option>
+    <option value="gong">Gong score ↓</option>
+    <option value="tenure">Tenure ↓</option>
+    <option value="ramp">Ramp % ↑</option>
+  </select>
+  <div class="controls-sep"></div>
+  <input class="search-input" type="text" placeholder="🔍 Search rep or city…" oninput="searchReps(this.value)">
+</div>
+
+<!-- Rep grid -->
+<div class="rep-grid" id="repGrid"></div>
+<div class="no-results" id="noResults">No reps match the current filters.</div>
+
+</div><!-- .page -->
+</div><!-- #mainContent -->
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<div id="global-tooltip"></div>
+
+<script>
+// ── DATA ───────────────────────────────────────────────────────────────────
+const REPS = [
+  {
+    id:"amelia_johnson", name:"Amelia Johnson", manager:"Cydney Engle",
+    director:"", location:"Washington, DC",
+    startDate:"10/6/25", tenure:7.1,
+    ramp:0.0, q2Won:0,
+    gongOverall:null, gongCalls:null,
+    gongResearch:null, gongAgenda:null,
+    gongDiscovery:null, gongPain:null,
+    gongGoals:null, gongSolution:null,
+    gongObjection:null, gongNextSteps:null,
+    hasGong:false, initials:"AJ", avatarColor:"#4f6ef7"
+  },
+  {
+    id:"yassmeen_nazzal", name:"Yassmeen Nazzal", manager:"Danielle Papianni",
+    director:"", location:"New York",
+    startDate:"6/30/25", tenure:10.3,
+    ramp:0.0, q2Won:0,
+    gongOverall:null, gongCalls:null,
+    gongResearch:null, gongAgenda:null,
+    gongDiscovery:null, gongPain:null,
+    gongGoals:null, gongSolution:null,
+    gongObjection:null, gongNextSteps:null,
+    hasGong:false, initials:"YN", avatarColor:"#db2777"
+  },
+  {
+    id:"nicholas_syzdek", name:"Nicholas Syzdek", manager:"David Medina",
+    director:"", location:"San Francisco",
+    startDate:"8/18/25", tenure:8.7,
+    ramp:1.0, q2Won:0,
+    gongOverall:null, gongCalls:null,
+    gongResearch:null, gongAgenda:null,
+    gongDiscovery:null, gongPain:null,
+    gongGoals:null, gongSolution:null,
+    gongObjection:null, gongNextSteps:null,
+    hasGong:false, initials:"NS", avatarColor:"#059669"
+  },
+  {
+    id:"cameron_mcrae", name:"Cameron McRae", manager:"David Palic",
+    director:"", location:"San Francisco",
+    startDate:"9/1/25", tenure:8.3,
+    ramp:1.0, q2Won:0,
+    gongOverall:null, gongCalls:null,
+    gongResearch:null, gongAgenda:null,
+    gongDiscovery:null, gongPain:null,
+    gongGoals:null, gongSolution:null,
+    gongObjection:null, gongNextSteps:null,
+    hasGong:false, initials:"CM", avatarColor:"#0891b2"
+  },
+  {
+    id:"yisroel_mentz", name:"Yisroel Mentz", manager:"David Palic",
+    director:"", location:"Los Angeles",
+    startDate:"9/8/25", tenure:8.0,
+    ramp:0.0, q2Won:0,
+    gongOverall:null, gongCalls:null,
+    gongResearch:null, gongAgenda:null,
+    gongDiscovery:null, gongPain:null,
+    gongGoals:null, gongSolution:null,
+    gongObjection:null, gongNextSteps:null,
+    hasGong:false, initials:"YM", avatarColor:"#0891b2"
+  },
+  {
+    id:"ricardo_castaneda", name:"Ricardo Castaneda", manager:"Jaime Lawrence",
+    director:"", location:"Dallas",
+    startDate:"8/18/25", tenure:8.7,
+    ramp:0.0, q2Won:0,
+    gongOverall:null, gongCalls:null,
+    gongResearch:null, gongAgenda:null,
+    gongDiscovery:null, gongPain:null,
+    gongGoals:null, gongSolution:null,
+    gongObjection:null, gongNextSteps:null,
+    hasGong:false, initials:"RC", avatarColor:"#6366f1"
+  },
+  {
+    id:"grace_cirignano", name:"Grace Cirignano", manager:"John Whitaker",
+    director:"", location:"New York",
+    startDate:"4/7/25", tenure:13.1,
+    ramp:0.0, q2Won:0,
+    gongOverall:null, gongCalls:null,
+    gongResearch:null, gongAgenda:null,
+    gongDiscovery:null, gongPain:null,
+    gongGoals:null, gongSolution:null,
+    gongObjection:null, gongNextSteps:null,
+    hasGong:false, initials:"GC", avatarColor:"#ea580c"
+  },
+  {
+    id:"brady_wendeln", name:"Brady Wendeln", manager:"Kurt Pickerell",
+    director:"", location:"Chicago",
+    startDate:"7/1/25", tenure:10.3,
+    ramp:0.0, q2Won:0,
+    gongOverall:null, gongCalls:null,
+    gongResearch:null, gongAgenda:null,
+    gongDiscovery:null, gongPain:null,
+    gongGoals:null, gongSolution:null,
+    gongObjection:null, gongNextSteps:null,
+    hasGong:false, initials:"BW", avatarColor:"#ca8a04"
+  },
+  {
+    id:"alexandra_laraia", name:"Alexandra LaRaia", manager:"Nicholas Davis",
+    director:"", location:"FL",
+    startDate:"", tenure:null,
+    ramp:1.0, q2Won:0,
+    gongOverall:null, gongCalls:null,
+    gongResearch:null, gongAgenda:null,
+    gongDiscovery:null, gongPain:null,
+    gongGoals:null, gongSolution:null,
+    gongObjection:null, gongNextSteps:null,
+    hasGong:false, initials:"AL", avatarColor:"#7c3aed"
+  },
+  {
+    id:"davide_carnevale", name:"Davide Carnevale", manager:"Nicholas Davis",
+    director:"", location:"Miami",
+    startDate:"8/18/25", tenure:8.7,
+    ramp:1.0, q2Won:0,
+    gongOverall:null, gongCalls:null,
+    gongResearch:null, gongAgenda:null,
+    gongDiscovery:null, gongPain:null,
+    gongGoals:null, gongSolution:null,
+    gongObjection:null, gongNextSteps:null,
+    hasGong:false, initials:"DC", avatarColor:"#7c3aed"
+  },
+  {
+    id:"samia_shirel_werner", name:"Samia Shirel Werner", manager:"Nicholas Davis",
+    director:"", location:"",
+    startDate:"", tenure:null,
+    ramp:0.0, q2Won:0,
+    gongOverall:null, gongCalls:null,
+    gongResearch:null, gongAgenda:null,
+    gongDiscovery:null, gongPain:null,
+    gongGoals:null, gongSolution:null,
+    gongObjection:null, gongNextSteps:null,
+    hasGong:false, initials:"SW", avatarColor:"#7c3aed"
+  },
+  {
+    id:"william_taylor", name:"William Taylor", manager:"Nicholas Davis",
+    director:"", location:"Tampa",
+    startDate:"12/14/25", tenure:4.9,
+    ramp:1.0, q2Won:0,
+    gongOverall:null, gongCalls:null,
+    gongResearch:null, gongAgenda:null,
+    gongDiscovery:null, gongPain:null,
+    gongGoals:null, gongSolution:null,
+    gongObjection:null, gongNextSteps:null,
+    hasGong:false, initials:"WT", avatarColor:"#7c3aed"
+  },
+  {
+    id:"robert_crossley", name:"Robert Crossley", manager:"Paige Hakim",
+    director:"", location:"Philadelphia",
+    startDate:"11/3/25", tenure:6.2,
+    ramp:1.0, q2Won:0,
+    gongOverall:null, gongCalls:null,
+    gongResearch:null, gongAgenda:null,
+    gongDiscovery:null, gongPain:null,
+    gongGoals:null, gongSolution:null,
+    gongObjection:null, gongNextSteps:null,
+    hasGong:false, initials:"RC", avatarColor:"#f43f5e"
+  },
+  {
+    id:"jack_marston", name:"Jack Marston", manager:"Tyler Florkowski",
+    director:"", location:"Tampa",
+    startDate:"4/16/18", tenure:96.8,
+    ramp:1.0, q2Won:0,
+    gongOverall:null, gongCalls:null,
+    gongResearch:null, gongAgenda:null,
+    gongDiscovery:null, gongPain:null,
+    gongGoals:null, gongSolution:null,
+    gongObjection:null, gongNextSteps:null,
+    hasGong:false, initials:"JM", avatarColor:"#64748b"
+  },
+  {
+    id:"larry_goffney", name:"Larry Goffney", manager:"Tyler Florkowski",
+    director:"", location:"Houston",
+    startDate:"7/28/25", tenure:9.4,
+    ramp:0.0, q2Won:0,
+    gongOverall:null, gongCalls:null,
+    gongResearch:null, gongAgenda:null,
+    gongDiscovery:null, gongPain:null,
+    gongGoals:null, gongSolution:null,
+    gongObjection:null, gongNextSteps:null,
+    hasGong:false, initials:"LG", avatarColor:"#64748b"
+  },
+  {
+    id:"nicole_derananian", name:"Nicole Derananian", manager:"Tyler Florkowski",
+    director:"", location:"New York",
+    startDate:"8/15/22", tenure:44.8,
+    ramp:0.0, q2Won:0,
+    gongOverall:null, gongCalls:null,
+    gongResearch:null, gongAgenda:null,
+    gongDiscovery:null, gongPain:null,
+    gongGoals:null, gongSolution:null,
+    gongObjection:null, gongNextSteps:null,
+    hasGong:false, initials:"ND", avatarColor:"#64748b"
+  },
+  {
+    id:"brian_torres", name:"Brian Torres", manager:"Tyler Florkowski",
+    director:"Brad Zanoni", location:"Chicago",
+    startDate:"7/15/24", tenure:21.8,
+    ramp:1.0, q2Won:0,
+    gongOverall:3.5, gongCalls:2.0,
+    gongResearch:2.0, gongAgenda:0.0,
+    gongDiscovery:2.5, gongPain:3.5,
+    gongGoals:2.0, gongSolution:4.5,
+    gongObjection:3.5, gongNextSteps:4.5,
+    hasGong:true, initials:"BT", avatarColor:"#64748b"
+  },
+  {
+    id:"anna_navarro", name:"Anna Navarro", manager:"Cydney Engle",
+    director:"Mike Milero", location:"Washington, DC",
+    startDate:"12/1/25", tenure:5.3,
+    ramp:1.0, q2Won:0,
+    gongOverall:3.93, gongCalls:15.0,
+    gongResearch:3.93, gongAgenda:0.0,
+    gongDiscovery:3.47, gongPain:4.0,
+    gongGoals:3.4, gongSolution:4.2,
+    gongObjection:3.73, gongNextSteps:4.93,
+    hasGong:true, initials:"AN", avatarColor:"#4f6ef7"
+  },
+  {
+    id:"doyle_cowart", name:"Doyle Cowart", manager:"Cydney Engle",
+    director:"Mike Milero", location:"DMV",
+    startDate:"", tenure:null,
+    ramp:1.0, q2Won:1,
+    gongOverall:3.0, gongCalls:17.0,
+    gongResearch:3.69, gongAgenda:0.06,
+    gongDiscovery:2.27, gongPain:2.33,
+    gongGoals:1.53, gongSolution:3.8,
+    gongObjection:3.93, gongNextSteps:3.19,
+    hasGong:true, initials:"DC", avatarColor:"#4f6ef7"
+  },
+  {
+    id:"jaison_williams", name:"Jaison Williams", manager:"Cydney Engle",
+    director:"Mike Milero", location:"North Carolina",
+    startDate:"12/15/25", tenure:4.8,
+    ramp:1.0, q2Won:2,
+    gongOverall:2.35, gongCalls:17.0,
+    gongResearch:1.69, gongAgenda:0.06,
+    gongDiscovery:1.94, gongPain:2.92,
+    gongGoals:1.69, gongSolution:2.19,
+    gongObjection:1.88, gongNextSteps:3.75,
+    hasGong:true, initials:"JW", avatarColor:"#4f6ef7"
+  },
+  {
+    id:"jessica_cardenas", name:"Jessica Cardenas", manager:"Cydney Engle",
+    director:"Mike Milero", location:"Atlanta",
+    startDate:"9/8/25", tenure:8.0,
+    ramp:1.0, q2Won:1,
+    gongOverall:2.78, gongCalls:9.0,
+    gongResearch:3.11, gongAgenda:0.11,
+    gongDiscovery:2.44, gongPain:3.14,
+    gongGoals:2.11, gongSolution:2.78,
+    gongObjection:2.56, gongNextSteps:2.56,
+    hasGong:true, initials:"JC", avatarColor:"#4f6ef7"
+  },
+  {
+    id:"kevin_florence", name:"Kevin Florence", manager:"Cydney Engle",
+    director:"Mike Milero", location:"Atlanta",
+    startDate:"7/1/25", tenure:10.3,
+    ramp:1.0, q2Won:0,
+    gongOverall:null, gongCalls:null,
+    gongResearch:null, gongAgenda:null,
+    gongDiscovery:null, gongPain:null,
+    gongGoals:null, gongSolution:null,
+    gongObjection:null, gongNextSteps:null,
+    hasGong:true, initials:"KF", avatarColor:"#4f6ef7"
+  },
+  {
+    id:"kiaya_jay_williams", name:"Kiaya Jay Williams", manager:"Cydney Engle",
+    director:"Mike Milero", location:"Atlanta",
+    startDate:"8/18/25", tenure:8.7,
+    ramp:1.0, q2Won:3,
+    gongOverall:3.43, gongCalls:7.0,
+    gongResearch:3.14, gongAgenda:0.14,
+    gongDiscovery:2.57, gongPain:3.5,
+    gongGoals:2.43, gongSolution:3.43,
+    gongObjection:3.29, gongNextSteps:4.57,
+    hasGong:true, initials:"KW", avatarColor:"#4f6ef7"
+  },
+  {
+    id:"mason_shank", name:"Mason Shank", manager:"Cydney Engle",
+    director:"Mike Milero", location:"Nashville",
+    startDate:"1/5/26", tenure:4.1,
+    ramp:1.0, q2Won:0,
+    gongOverall:2.67, gongCalls:6.0,
+    gongResearch:3.0, gongAgenda:0.17,
+    gongDiscovery:2.17, gongPain:2.67,
+    gongGoals:2.0, gongSolution:2.5,
+    gongObjection:2.5, gongNextSteps:3.33,
+    hasGong:true, initials:"MS", avatarColor:"#4f6ef7"
+  },
+  {
+    id:"mina_hines", name:"Mina Hines", manager:"Cydney Engle",
+    director:"Mike Milero", location:"Washington, DC",
+    startDate:"10/20/25", tenure:6.7,
+    ramp:1.0, q2Won:2,
+    gongOverall:2.5, gongCalls:2.0,
+    gongResearch:3.5, gongAgenda:0.0,
+    gongDiscovery:1.0, gongPain:2.0,
+    gongGoals:0.5, gongSolution:3.0,
+    gongObjection:3.5, gongNextSteps:4.5,
+    hasGong:true, initials:"MH", avatarColor:"#4f6ef7"
+  },
+  {
+    id:"raefe_waltman", name:"Raefe Waltman", manager:"Cydney Engle",
+    director:"Mike Milero", location:"Atlanta",
+    startDate:"8/18/25", tenure:8.7,
+    ramp:1.0, q2Won:3,
+    gongOverall:3.12, gongCalls:8.0,
+    gongResearch:3.29, gongAgenda:0.29,
+    gongDiscovery:1.29, gongPain:2.57,
+    gongGoals:1.29, gongSolution:3.57,
+    gongObjection:2.86, gongNextSteps:4.5,
+    hasGong:true, initials:"RW", avatarColor:"#4f6ef7"
+  },
+  {
+    id:"sarah_wallach", name:"Sarah Wallach", manager:"Cydney Engle",
+    director:"Mike Milero", location:"DMV",
+    startDate:"", tenure:null,
+    ramp:0.0, q2Won:0,
+    gongOverall:null, gongCalls:null,
+    gongResearch:null, gongAgenda:null,
+    gongDiscovery:null, gongPain:null,
+    gongGoals:null, gongSolution:null,
+    gongObjection:null, gongNextSteps:null,
+    hasGong:true, initials:"SW", avatarColor:"#4f6ef7"
+  },
+  {
+    id:"brett_bartholomew", name:"Brett Bartholomew", manager:"Nicholas Davis",
+    director:"Mike Milero", location:"Miami",
+    startDate:"2/10/25", tenure:14.9,
+    ramp:1.0, q2Won:9,
+    gongOverall:3.6, gongCalls:10.0,
+    gongResearch:4.0, gongAgenda:0.0,
+    gongDiscovery:3.0, gongPain:3.0,
+    gongGoals:2.11, gongSolution:4.44,
+    gongObjection:3.89, gongNextSteps:4.4,
+    hasGong:true, initials:"BB", avatarColor:"#7c3aed"
+  },
+  {
+    id:"genesis_rodriguez", name:"Genesis Rodriguez", manager:"Nicholas Davis",
+    director:"Mike Milero", location:"Miami",
+    startDate:"10/20/25", tenure:6.7,
+    ramp:1.0, q2Won:1,
+    gongOverall:1.67, gongCalls:24.0,
+    gongResearch:1.91, gongAgenda:0.0,
+    gongDiscovery:0.7, gongPain:1.64,
+    gongGoals:0.39, gongSolution:1.13,
+    gongObjection:1.17, gongNextSteps:2.61,
+    hasGong:true, initials:"GR", avatarColor:"#7c3aed"
+  },
+  {
+    id:"jakub_drozd", name:"Jakub Drozd", manager:"Nicholas Davis",
+    director:"Mike Milero", location:"Miami",
+    startDate:"10/30/17", tenure:102.3,
+    ramp:1.0, q2Won:5,
+    gongOverall:3.29, gongCalls:17.0,
+    gongResearch:3.94, gongAgenda:0.12,
+    gongDiscovery:2.4, gongPain:2.6,
+    gongGoals:1.64, gongSolution:4.2,
+    gongObjection:4.0, gongNextSteps:4.31,
+    hasGong:true, initials:"JD", avatarColor:"#7c3aed"
+  },
+  {
+    id:"jeremiah_tolbert", name:"Jeremiah Tolbert", manager:"Nicholas Davis",
+    director:"Mike Milero", location:"Miami",
+    startDate:"7/28/25", tenure:9.4,
+    ramp:1.0, q2Won:0,
+    gongOverall:3.14, gongCalls:7.0,
+    gongResearch:2.57, gongAgenda:0.0,
+    gongDiscovery:3.17, gongPain:3.33,
+    gongGoals:0.83, gongSolution:3.67,
+    gongObjection:3.17, gongNextSteps:3.71,
+    hasGong:true, initials:"JT", avatarColor:"#7c3aed"
+  },
+  {
+    id:"klair_davis", name:"Klair Davis", manager:"Nicholas Davis",
+    director:"Mike Milero", location:"Charleston",
+    startDate:"11/3/25", tenure:6.2,
+    ramp:1.0, q2Won:1,
+    gongOverall:2.23, gongCalls:30.0,
+    gongResearch:2.28, gongAgenda:0.14,
+    gongDiscovery:1.2, gongPain:2.15,
+    gongGoals:0.52, gongSolution:1.9,
+    gongObjection:1.97, gongNextSteps:3.5,
+    hasGong:true, initials:"KD", avatarColor:"#7c3aed"
+  },
+  {
+    id:"viodie_marie_douceur", name:"Viodie Marie Douceur", manager:"Nicholas Davis",
+    director:"Mike Milero", location:"Miami",
+    startDate:"7/28/25", tenure:9.4,
+    ramp:1.0, q2Won:0,
+    gongOverall:2.06, gongCalls:33.0,
+    gongResearch:1.84, gongAgenda:0.0,
+    gongDiscovery:1.03, gongPain:1.8,
+    gongGoals:0.84, gongSolution:1.44,
+    gongObjection:1.34, gongNextSteps:3.7,
+    hasGong:true, initials:"VD", avatarColor:"#7c3aed"
+  },
+  {
+    id:"brandon_rothberg", name:"Brandon Rothberg", manager:"Danielle Papianni",
+    director:"Paige Hakim", location:"New York",
+    startDate:"1/1/25", tenure:16.3,
+    ramp:1.0, q2Won:12,
+    gongOverall:3.0, gongCalls:1.0,
+    gongResearch:4.0, gongAgenda:0.0,
+    gongDiscovery:2.0, gongPain:2.0,
+    gongGoals:1.0, gongSolution:4.0,
+    gongObjection:2.0, gongNextSteps:0.0,
+    hasGong:true, initials:"BR", avatarColor:"#db2777"
+  },
+  {
+    id:"christopher_agard", name:"Christopher Agard", manager:"Danielle Papianni",
+    director:"Paige Hakim", location:"New York",
+    startDate:"7/28/25", tenure:9.4,
+    ramp:1.0, q2Won:8,
+    gongOverall:3.0, gongCalls:11.0,
+    gongResearch:3.18, gongAgenda:0.27,
+    gongDiscovery:1.91, gongPain:2.55,
+    gongGoals:2.09, gongSolution:3.64,
+    gongObjection:3.36, gongNextSteps:3.73,
+    hasGong:true, initials:"CA", avatarColor:"#db2777"
+  },
+  {
+    id:"emmett_turner_jackson", name:"Emmett Turner-Jackson", manager:"Danielle Papianni",
+    director:"Paige Hakim", location:"Boston",
+    startDate:"12/1/25", tenure:5.3,
+    ramp:1.0, q2Won:1,
+    gongOverall:1.95, gongCalls:43.0,
+    gongResearch:2.14, gongAgenda:0.19,
+    gongDiscovery:0.79, gongPain:1.54,
+    gongGoals:0.4, gongSolution:1.07,
+    gongObjection:1.16, gongNextSteps:3.35,
+    hasGong:true, initials:"ET", avatarColor:"#db2777"
+  },
+  {
+    id:"gregory_spears", name:"Gregory Spears", manager:"Danielle Papianni",
+    director:"Paige Hakim", location:"New York",
+    startDate:"8/18/25", tenure:8.7,
+    ramp:1.0, q2Won:2,
+    gongOverall:2.88, gongCalls:8.0,
+    gongResearch:3.0, gongAgenda:0.14,
+    gongDiscovery:2.86, gongPain:2.86,
+    gongGoals:2.33, gongSolution:3.14,
+    gongObjection:2.86, gongNextSteps:2.71,
+    hasGong:true, initials:"GS", avatarColor:"#db2777"
+  },
+  {
+    id:"justin_caballero", name:"Justin Caballero", manager:"Danielle Papianni",
+    director:"Paige Hakim", location:"PHL/BOS",
+    startDate:"", tenure:null,
+    ramp:1.0, q2Won:4,
+    gongOverall:2.57, gongCalls:68.0,
+    gongResearch:2.48, gongAgenda:0.0,
+    gongDiscovery:1.6, gongPain:2.39,
+    gongGoals:1.62, gongSolution:2.19,
+    gongObjection:2.1, gongNextSteps:3.95,
+    hasGong:true, initials:"JC", avatarColor:"#db2777"
+  },
+  {
+    id:"luka_liska", name:"Luka Liska", manager:"Danielle Papianni",
+    director:"Paige Hakim", location:"New York",
+    startDate:"6/19/23", tenure:34.7,
+    ramp:1.0, q2Won:16,
+    gongOverall:null, gongCalls:null,
+    gongResearch:null, gongAgenda:null,
+    gongDiscovery:null, gongPain:null,
+    gongGoals:null, gongSolution:null,
+    gongObjection:null, gongNextSteps:null,
+    hasGong:true, initials:"LL", avatarColor:"#db2777"
+  },
+  {
+    id:"marissa_rinderman", name:"Marissa Rinderman", manager:"Danielle Papianni",
+    director:"Paige Hakim", location:"New York",
+    startDate:"9/8/25", tenure:8.0,
+    ramp:1.0, q2Won:0,
+    gongOverall:2.0, gongCalls:2.0,
+    gongResearch:4.5, gongAgenda:0.0,
+    gongDiscovery:1.0, gongPain:1.0,
+    gongGoals:1.0, gongSolution:0.0,
+    gongObjection:0.0, gongNextSteps:2.5,
+    hasGong:true, initials:"MR", avatarColor:"#db2777"
+  },
+  {
+    id:"peter_carroll", name:"Peter Carroll", manager:"Danielle Papianni",
+    director:"Paige Hakim", location:"Boston",
+    startDate:"10/20/25", tenure:6.7,
+    ramp:1.0, q2Won:0,
+    gongOverall:3.2, gongCalls:20.0,
+    gongResearch:3.4, gongAgenda:0.11,
+    gongDiscovery:2.28, gongPain:3.4,
+    gongGoals:1.76, gongSolution:3.22,
+    gongObjection:3.22, gongNextSteps:3.85,
+    hasGong:true, initials:"PC", avatarColor:"#db2777"
+  },
+  {
+    id:"robert_mailey", name:"Robert Mailey", manager:"Danielle Papianni",
+    director:"Paige Hakim", location:"Boston",
+    startDate:"12/1/25", tenure:5.3,
+    ramp:1.0, q2Won:0,
+    gongOverall:2.04, gongCalls:54.0,
+    gongResearch:2.0, gongAgenda:0.04,
+    gongDiscovery:0.96, gongPain:2.14,
+    gongGoals:0.69, gongSolution:1.3,
+    gongObjection:1.33, gongNextSteps:3.2,
+    hasGong:true, initials:"RM", avatarColor:"#db2777"
+  },
+  {
+    id:"benjamin_jeanty", name:"Benjamin Jeanty", manager:"John Whitaker",
+    director:"Paige Hakim", location:"New York",
+    startDate:"8/18/25", tenure:8.7,
+    ramp:1.0, q2Won:8,
+    gongOverall:2.47, gongCalls:34.0,
+    gongResearch:2.82, gongAgenda:0.06,
+    gongDiscovery:2.06, gongPain:2.79,
+    gongGoals:1.12, gongSolution:2.03,
+    gongObjection:1.82, gongNextSteps:3.18,
+    hasGong:true, initials:"BJ", avatarColor:"#ea580c"
+  },
+  {
+    id:"brandon_gesualdi", name:"Brandon Gesualdi", manager:"John Whitaker",
+    director:"Paige Hakim", location:"New York",
+    startDate:"10/6/25", tenure:7.1,
+    ramp:0.0, q2Won:0,
+    gongOverall:3.89, gongCalls:9.0,
+    gongResearch:4.89, gongAgenda:0.33,
+    gongDiscovery:2.44, gongPain:3.0,
+    gongGoals:2.11, gongSolution:4.33,
+    gongObjection:4.67, gongNextSteps:4.0,
+    hasGong:true, initials:"BG", avatarColor:"#ea580c"
+  },
+  {
+    id:"erin_caramanico", name:"Erin Caramanico", manager:"John Whitaker",
+    director:"Paige Hakim", location:"Philadelphia",
+    startDate:"11/16/25", tenure:5.8,
+    ramp:1.0, q2Won:1,
+    gongOverall:3.57, gongCalls:14.0,
+    gongResearch:2.92, gongAgenda:0.38,
+    gongDiscovery:3.0, gongPain:3.25,
+    gongGoals:2.38, gongSolution:3.77,
+    gongObjection:3.38, gongNextSteps:4.36,
+    hasGong:true, initials:"EC", avatarColor:"#ea580c"
+  },
+  {
+    id:"jared_burri", name:"Jared Burri", manager:"John Whitaker",
+    director:"Paige Hakim", location:"New York",
+    startDate:"4/7/25", tenure:13.1,
+    ramp:1.0, q2Won:5,
+    gongOverall:3.1, gongCalls:50.0,
+    gongResearch:3.75, gongAgenda:0.22,
+    gongDiscovery:2.37, gongPain:2.86,
+    gongGoals:1.73, gongSolution:2.86,
+    gongObjection:3.18, gongNextSteps:3.86,
+    hasGong:true, initials:"JB", avatarColor:"#ea580c"
+  },
+  {
+    id:"melissa_joubert", name:"Melissa Joubert", manager:"John Whitaker",
+    director:"Paige Hakim", location:"New York",
+    startDate:"10/6/25", tenure:7.1,
+    ramp:1.0, q2Won:2,
+    gongOverall:null, gongCalls:null,
+    gongResearch:null, gongAgenda:null,
+    gongDiscovery:null, gongPain:null,
+    gongGoals:null, gongSolution:null,
+    gongObjection:null, gongNextSteps:null,
+    hasGong:true, initials:"MJ", avatarColor:"#ea580c"
+  },
+  {
+    id:"scott_cannon", name:"Scott Cannon", manager:"John Whitaker",
+    director:"Paige Hakim", location:"New York",
+    startDate:"8/14/18", tenure:92.9,
+    ramp:1.0, q2Won:5,
+    gongOverall:3.15, gongCalls:20.0,
+    gongResearch:3.8, gongAgenda:0.1,
+    gongDiscovery:2.3, gongPain:2.6,
+    gongGoals:1.55, gongSolution:3.65,
+    gongObjection:3.3, gongNextSteps:4.35,
+    hasGong:true, initials:"SC", avatarColor:"#ea580c"
+  },
+  {
+    id:"sharroni_lewis_keith", name:"Sharroni Lewis-Keith", manager:"John Whitaker",
+    director:"Paige Hakim", location:"Philadelphia",
+    startDate:"12/1/25", tenure:5.3,
+    ramp:1.0, q2Won:2,
+    gongOverall:3.62, gongCalls:8.0,
+    gongResearch:3.38, gongAgenda:0.12,
+    gongDiscovery:3.5, gongPain:4.14,
+    gongGoals:3.25, gongSolution:4.25,
+    gongObjection:3.38, gongNextSteps:3.38,
+    hasGong:true, initials:"SL", avatarColor:"#ea580c"
+  },
+  {
+    id:"sindri_raguseo", name:"Sindri Raguseo", manager:"John Whitaker",
+    director:"Paige Hakim", location:"NY/NJ",
+    startDate:"", tenure:null,
+    ramp:1.0, q2Won:3,
+    gongOverall:1.9, gongCalls:10.0,
+    gongResearch:2.0, gongAgenda:0.0,
+    gongDiscovery:1.33, gongPain:1.62,
+    gongGoals:0.44, gongSolution:1.33,
+    gongObjection:1.22, gongNextSteps:4.33,
+    hasGong:true, initials:"SR", avatarColor:"#ea580c"
+  },
+  {
+    id:"zachary_steinfeld", name:"Zachary Steinfeld", manager:"John Whitaker",
+    director:"Paige Hakim", location:"Philadelphia",
+    startDate:"11/3/25", tenure:6.2,
+    ramp:1.0, q2Won:3,
+    gongOverall:2.5, gongCalls:2.0,
+    gongResearch:4.0, gongAgenda:0.0,
+    gongDiscovery:4.0, gongPain:1.5,
+    gongGoals:1.0, gongSolution:3.0,
+    gongObjection:3.0, gongNextSteps:3.5,
+    hasGong:true, initials:"ZS", avatarColor:"#ea580c"
+  },
+  {
+    id:"elliott_bogdan", name:"Elliott Bogdan", manager:"Kurt Pickerell",
+    director:"Paige Hakim", location:"Chicago",
+    startDate:"9/8/25", tenure:8.0,
+    ramp:1.0, q2Won:12,
+    gongOverall:3.75, gongCalls:8.0,
+    gongResearch:3.75, gongAgenda:0.5,
+    gongDiscovery:3.12, gongPain:4.29,
+    gongGoals:3.12, gongSolution:4.12,
+    gongObjection:3.88, gongNextSteps:3.5,
+    hasGong:true, initials:"EB", avatarColor:"#ca8a04"
+  },
+  {
+    id:"franz_luigi_de_guzman", name:"Franz Luigi De Guzman", manager:"Kurt Pickerell",
+    director:"Paige Hakim", location:"Chicago",
+    startDate:"", tenure:null,
+    ramp:1.0, q2Won:7,
+    gongOverall:3.47, gongCalls:15.0,
+    gongResearch:3.4, gongAgenda:0.0,
+    gongDiscovery:2.36, gongPain:3.29,
+    gongGoals:2.5, gongSolution:3.64,
+    gongObjection:3.57, gongNextSteps:4.93,
+    hasGong:true, initials:"FG", avatarColor:"#ca8a04"
+  },
+  {
+    id:"john_williams", name:"John Williams", manager:"Kurt Pickerell",
+    director:"Paige Hakim", location:"Chicago",
+    startDate:"9/8/25", tenure:8.0,
+    ramp:1.0, q2Won:1,
+    gongOverall:3.94, gongCalls:18.0,
+    gongResearch:4.0, gongAgenda:0.53,
+    gongDiscovery:3.06, gongPain:4.18,
+    gongGoals:2.61, gongSolution:4.17,
+    gongObjection:3.5, gongNextSteps:4.78,
+    hasGong:true, initials:"JW", avatarColor:"#ca8a04"
+  },
+  {
+    id:"kathryn_shelman", name:"Kathryn Shelman", manager:"Kurt Pickerell",
+    director:"Paige Hakim", location:"Chicago",
+    startDate:"8/4/25", tenure:9.2,
+    ramp:1.0, q2Won:7,
+    gongOverall:2.63, gongCalls:41.0,
+    gongResearch:3.56, gongAgenda:0.02,
+    gongDiscovery:1.73, gongPain:2.24,
+    gongGoals:1.44, gongSolution:2.17,
+    gongObjection:2.1, gongNextSteps:4.17,
+    hasGong:true, initials:"KS", avatarColor:"#ca8a04"
+  },
+  {
+    id:"miguel_amaro", name:"Miguel Amaro", manager:"Kurt Pickerell",
+    director:"Paige Hakim", location:"Chicago",
+    startDate:"7/7/25", tenure:10.1,
+    ramp:1.0, q2Won:4,
+    gongOverall:2.0, gongCalls:2.0,
+    gongResearch:3.0, gongAgenda:0.0,
+    gongDiscovery:0.5, gongPain:1.0,
+    gongGoals:1.0, gongSolution:2.0,
+    gongObjection:2.0, gongNextSteps:3.5,
+    hasGong:true, initials:"MA", avatarColor:"#ca8a04"
+  },
+  {
+    id:"shannon_fricke", name:"Shannon Fricke", manager:"Kurt Pickerell",
+    director:"Paige Hakim", location:"Chicago",
+    startDate:"1/5/26", tenure:4.1,
+    ramp:1.0, q2Won:11,
+    gongOverall:null, gongCalls:null,
+    gongResearch:null, gongAgenda:null,
+    gongDiscovery:null, gongPain:null,
+    gongGoals:null, gongSolution:null,
+    gongObjection:null, gongNextSteps:null,
+    hasGong:true, initials:"SF", avatarColor:"#ca8a04"
+  },
+  {
+    id:"shannon_heidloff", name:"Shannon Heidloff", manager:"Kurt Pickerell",
+    director:"Paige Hakim", location:"Chicago",
+    startDate:"7/1/25", tenure:10.3,
+    ramp:0.0, q2Won:0,
+    gongOverall:null, gongCalls:null,
+    gongResearch:null, gongAgenda:null,
+    gongDiscovery:null, gongPain:null,
+    gongGoals:null, gongSolution:null,
+    gongObjection:null, gongNextSteps:null,
+    hasGong:true, initials:"SH", avatarColor:"#ca8a04"
+  },
+  {
+    id:"mark_buckley", name:"Mark Buckley", manager:"Paige Hakim",
+    director:"Paige Hakim", location:"Boston",
+    startDate:"1/5/26", tenure:4.1,
+    ramp:1.0, q2Won:3,
+    gongOverall:2.67, gongCalls:3.0,
+    gongResearch:3.33, gongAgenda:0.33,
+    gongDiscovery:2.5, gongPain:3.5,
+    gongGoals:0.5, gongSolution:2.67,
+    gongObjection:2.67, gongNextSteps:3.67,
+    hasGong:true, initials:"MB", avatarColor:"#f43f5e"
+  },
+  {
+    id:"qendrim_shala", name:"Qendrim Shala", manager:"Paige Hakim",
+    director:"Paige Hakim", location:"New York",
+    startDate:"2/1/25", tenure:15.2,
+    ramp:0.5, q2Won:2,
+    gongOverall:2.0, gongCalls:6.0,
+    gongResearch:2.17, gongAgenda:0.0,
+    gongDiscovery:1.0, gongPain:1.83,
+    gongGoals:0.17, gongSolution:1.33,
+    gongObjection:1.0, gongNextSteps:3.67,
+    hasGong:true, initials:"QS", avatarColor:"#f43f5e"
+  },
+  {
+    id:"ruben_matatov", name:"Ruben Matatov", manager:"Paige Hakim",
+    director:"Paige Hakim", location:"New York",
+    startDate:"10/6/25", tenure:7.1,
+    ramp:1.0, q2Won:2,
+    gongOverall:2.04, gongCalls:111.0,
+    gongResearch:2.29, gongAgenda:0.03,
+    gongDiscovery:0.94, gongPain:1.84,
+    gongGoals:0.41, gongSolution:1.48,
+    gongObjection:1.52, gongNextSteps:3.19,
+    hasGong:true, initials:"RM", avatarColor:"#f43f5e"
+  },
+  {
+    id:"aisling_horgan", name:"Aisling Horgan", manager:"Dana Miller",
+    director:"Tina Thayer", location:"Los Angeles",
+    startDate:"7/1/25", tenure:10.3,
+    ramp:0.0, q2Won:0,
+    gongOverall:null, gongCalls:null,
+    gongResearch:null, gongAgenda:null,
+    gongDiscovery:null, gongPain:null,
+    gongGoals:null, gongSolution:null,
+    gongObjection:null, gongNextSteps:null,
+    hasGong:true, initials:"AH", avatarColor:"#a855f7"
+  },
+  {
+    id:"andrew_barrett", name:"Andrew Barrett", manager:"David Medina",
+    director:"Tina Thayer", location:"Seattle",
+    startDate:"9/8/25", tenure:8.0,
+    ramp:1.0, q2Won:0,
+    gongOverall:2.67, gongCalls:3.0,
+    gongResearch:2.0, gongAgenda:0.0,
+    gongDiscovery:1.33, gongPain:1.67,
+    gongGoals:1.33, gongSolution:3.0,
+    gongObjection:3.0, gongNextSteps:4.33,
+    hasGong:true, initials:"AB", avatarColor:"#059669"
+  },
+  {
+    id:"cameron_holmes", name:"Cameron Holmes", manager:"David Medina",
+    director:"Tina Thayer", location:"Seattle",
+    startDate:"10/20/25", tenure:6.7,
+    ramp:1.0, q2Won:0,
+    gongOverall:3.54, gongCalls:13.0,
+    gongResearch:3.77, gongAgenda:0.23,
+    gongDiscovery:3.15, gongPain:3.69,
+    gongGoals:2.0, gongSolution:3.38,
+    gongObjection:3.23, gongNextSteps:3.77,
+    hasGong:true, initials:"CH", avatarColor:"#059669"
+  },
+  {
+    id:"cody_goetze", name:"Cody Goetze", manager:"David Medina",
+    director:"Tina Thayer", location:"Los Angeles",
+    startDate:"10/20/25", tenure:6.7,
+    ramp:1.0, q2Won:1,
+    gongOverall:2.94, gongCalls:16.0,
+    gongResearch:2.8, gongAgenda:0.12,
+    gongDiscovery:2.0, gongPain:3.08,
+    gongGoals:2.27, gongSolution:3.33,
+    gongObjection:3.27, gongNextSteps:4.2,
+    hasGong:true, initials:"CG", avatarColor:"#059669"
+  },
+  {
+    id:"emily_sweet", name:"Emily Sweet", manager:"David Medina",
+    director:"Tina Thayer", location:"San Francisco",
+    startDate:"7/1/25", tenure:10.3,
+    ramp:0.0, q2Won:0,
+    gongOverall:3.14, gongCalls:7.0,
+    gongResearch:4.86, gongAgenda:0.14,
+    gongDiscovery:2.43, gongPain:2.14,
+    gongGoals:1.29, gongSolution:3.14,
+    gongObjection:3.71, gongNextSteps:4.86,
+    hasGong:true, initials:"ES", avatarColor:"#059669"
+  },
+  {
+    id:"luis_carrillo_navarro", name:"Luis Carrillo Navarro", manager:"David Medina",
+    director:"Tina Thayer", location:"Seattle",
+    startDate:"10/6/25", tenure:7.1,
+    ramp:1.0, q2Won:0,
+    gongOverall:2.14, gongCalls:7.0,
+    gongResearch:2.83, gongAgenda:0.17,
+    gongDiscovery:1.17, gongPain:1.83,
+    gongGoals:0.67, gongSolution:2.33,
+    gongObjection:2.67, gongNextSteps:3.14,
+    hasGong:true, initials:"LN", avatarColor:"#059669"
+  },
+  {
+    id:"michael_brook", name:"Michael Brook", manager:"David Medina",
+    director:"Tina Thayer", location:"Los Angeles",
+    startDate:"9/9/24", tenure:20.0,
+    ramp:1.0, q2Won:3,
+    gongOverall:3.58, gongCalls:19.0,
+    gongResearch:4.24, gongAgenda:0.0,
+    gongDiscovery:3.47, gongPain:3.88,
+    gongGoals:2.53, gongSolution:4.29,
+    gongObjection:4.29, gongNextSteps:3.67,
+    hasGong:true, initials:"MB", avatarColor:"#059669"
+  },
+  {
+    id:"quan_vu", name:"Quan Vu", manager:"David Medina",
+    director:"Tina Thayer", location:"Seattle",
+    startDate:"7/1/25", tenure:10.3,
+    ramp:0.0, q2Won:0,
+    gongOverall:null, gongCalls:null,
+    gongResearch:null, gongAgenda:null,
+    gongDiscovery:null, gongPain:null,
+    gongGoals:null, gongSolution:null,
+    gongObjection:null, gongNextSteps:null,
+    hasGong:true, initials:"QV", avatarColor:"#059669"
+  },
+  {
+    id:"ross_heuer", name:"Ross Heuer", manager:"David Medina",
+    director:"Tina Thayer", location:"San Francisco",
+    startDate:"9/8/25", tenure:8.0,
+    ramp:1.0, q2Won:14,
+    gongOverall:3.28, gongCalls:32.0,
+    gongResearch:3.69, gongAgenda:0.14,
+    gongDiscovery:2.52, gongPain:3.19,
+    gongGoals:1.62, gongSolution:3.55,
+    gongObjection:3.55, gongNextSteps:4.45,
+    hasGong:true, initials:"RH", avatarColor:"#059669"
+  },
+  {
+    id:"ryan_leung", name:"Ryan Leung", manager:"David Medina",
+    director:"Tina Thayer", location:"San Francisco",
+    startDate:"12/1/25", tenure:5.3,
+    ramp:1.0, q2Won:3,
+    gongOverall:3.25, gongCalls:4.0,
+    gongResearch:3.25, gongAgenda:0.0,
+    gongDiscovery:2.75, gongPain:3.0,
+    gongGoals:1.75, gongSolution:3.5,
+    gongObjection:3.25, gongNextSteps:2.5,
+    hasGong:true, initials:"RL", avatarColor:"#059669"
+  },
+  {
+    id:"taylor_scoma", name:"Taylor Scoma", manager:"David Medina",
+    director:"Tina Thayer", location:"Seattle",
+    startDate:"12/1/25", tenure:5.3,
+    ramp:1.0, q2Won:8,
+    gongOverall:3.8, gongCalls:5.0,
+    gongResearch:4.25, gongAgenda:0.0,
+    gongDiscovery:2.5, gongPain:3.5,
+    gongGoals:3.5, gongSolution:4.6,
+    gongObjection:4.4, gongNextSteps:4.25,
+    hasGong:true, initials:"TS", avatarColor:"#059669"
+  },
+  {
+    id:"casey_atamaniuk", name:"Casey Atamaniuk", manager:"David Palic",
+    director:"Tina Thayer", location:"Los Angeles",
+    startDate:"7/1/25", tenure:10.3,
+    ramp:1.0, q2Won:1,
+    gongOverall:2.0, gongCalls:1.0,
+    gongResearch:4.0, gongAgenda:0.0,
+    gongDiscovery:0.0, gongPain:null,
+    gongGoals:0.0, gongSolution:0.0,
+    gongObjection:4.0, gongNextSteps:1.0,
+    hasGong:true, initials:"CA", avatarColor:"#0891b2"
+  },
+  {
+    id:"dillan_agostinelli", name:"Dillan Agostinelli", manager:"David Palic",
+    director:"Tina Thayer", location:"Los Angeles",
+    startDate:"8/18/25", tenure:8.7,
+    ramp:1.0, q2Won:1,
+    gongOverall:3.88, gongCalls:17.0,
+    gongResearch:3.53, gongAgenda:0.24,
+    gongDiscovery:3.13, gongPain:3.8,
+    gongGoals:3.13, gongSolution:4.2,
+    gongObjection:3.87, gongNextSteps:4.59,
+    hasGong:true, initials:"DA", avatarColor:"#0891b2"
+  },
+  {
+    id:"henry_behar", name:"Henry Behar", manager:"David Palic",
+    director:"Tina Thayer", location:"Los Angeles",
+    startDate:"8/18/25", tenure:8.7,
+    ramp:1.0, q2Won:6,
+    gongOverall:2.03, gongCalls:69.0,
+    gongResearch:2.18, gongAgenda:0.04,
+    gongDiscovery:1.2, gongPain:1.9,
+    gongGoals:0.79, gongSolution:1.3,
+    gongObjection:1.21, gongNextSteps:3.24,
+    hasGong:true, initials:"HB", avatarColor:"#0891b2"
+  },
+  {
+    id:"ivory_melone", name:"Ivory Melone", manager:"David Palic",
+    director:"Tina Thayer", location:"San Diego",
+    startDate:"11/17/25", tenure:5.7,
+    ramp:1.0, q2Won:3,
+    gongOverall:1.94, gongCalls:66.0,
+    gongResearch:2.05, gongAgenda:0.02,
+    gongDiscovery:0.9, gongPain:1.88,
+    gongGoals:0.55, gongSolution:1.1,
+    gongObjection:1.0, gongNextSteps:3.67,
+    hasGong:true, initials:"IM", avatarColor:"#0891b2"
+  },
+  {
+    id:"jessica_henkel", name:"Jessica Henkel", manager:"David Palic",
+    director:"Tina Thayer", location:"Los Angeles",
+    startDate:"2/18/25", tenure:14.7,
+    ramp:1.0, q2Won:16,
+    gongOverall:3.41, gongCalls:29.0,
+    gongResearch:4.03, gongAgenda:0.0,
+    gongDiscovery:2.45, gongPain:3.1,
+    gongGoals:1.41, gongSolution:3.9,
+    gongObjection:3.59, gongNextSteps:4.24,
+    hasGong:true, initials:"JH", avatarColor:"#0891b2"
+  },
+  {
+    id:"kheder_hassoun", name:"Kheder Hassoun", manager:"David Palic",
+    director:"Tina Thayer", location:"Los Angeles",
+    startDate:"7/1/25", tenure:10.3,
+    ramp:1.0, q2Won:1,
+    gongOverall:2.47, gongCalls:17.0,
+    gongResearch:2.53, gongAgenda:0.24,
+    gongDiscovery:1.62, gongPain:2.2,
+    gongGoals:0.44, gongSolution:2.19,
+    gongObjection:2.19, gongNextSteps:3.59,
+    hasGong:true, initials:"KH", avatarColor:"#0891b2"
+  },
+  {
+    id:"sydney_comeaux", name:"Sydney Comeaux", manager:"David Palic",
+    director:"Tina Thayer", location:"Los Angeles",
+    startDate:"7/7/25", tenure:10.1,
+    ramp:1.0, q2Won:0,
+    gongOverall:3.0, gongCalls:5.0,
+    gongResearch:3.4, gongAgenda:0.0,
+    gongDiscovery:2.2, gongPain:3.0,
+    gongGoals:2.2, gongSolution:2.6,
+    gongObjection:2.8, gongNextSteps:3.6,
+    hasGong:true, initials:"SC", avatarColor:"#0891b2"
+  },
+  {
+    id:"amy_phung", name:"Amy Phung", manager:"Tina Thayer",
+    director:"Tina Thayer", location:"Phoenix",
+    startDate:"7/28/25", tenure:9.4,
+    ramp:1.0, q2Won:2,
+    gongOverall:2.38, gongCalls:40.0,
+    gongResearch:2.42, gongAgenda:0.13,
+    gongDiscovery:1.03, gongPain:1.84,
+    gongGoals:0.94, gongSolution:1.58,
+    gongObjection:1.33, gongNextSteps:4.03,
+    hasGong:true, initials:"AP", avatarColor:"#10b981"
+  },
+  {
+    id:"kevin_paz", name:"Kevin Paz", manager:"Tina Thayer",
+    director:"Tina Thayer", location:"Las Vegas",
+    startDate:"11/3/25", tenure:6.2,
+    ramp:1.0, q2Won:0,
+    gongOverall:null, gongCalls:null,
+    gongResearch:null, gongAgenda:null,
+    gongDiscovery:null, gongPain:null,
+    gongGoals:null, gongSolution:null,
+    gongObjection:null, gongNextSteps:null,
+    hasGong:true, initials:"KP", avatarColor:"#10b981"
+  },
+  {
+    id:"mike_dove", name:"Mike Dove", manager:"Tina Thayer",
+    director:"Tina Thayer", location:"Phoenix",
+    startDate:"7/28/25", tenure:9.4,
+    ramp:0.0, q2Won:0,
+    gongOverall:2.14, gongCalls:7.0,
+    gongResearch:2.33, gongAgenda:0.14,
+    gongDiscovery:1.33, gongPain:2.2,
+    gongGoals:1.0, gongSolution:2.5,
+    gongObjection:1.83, gongNextSteps:2.67,
+    hasGong:true, initials:"MD", avatarColor:"#10b981"
+  },
+  {
+    id:"nicole_cotton", name:"Nicole Cotton", manager:"Tina Thayer",
+    director:"Tina Thayer", location:"",
+    startDate:"", tenure:null,
+    ramp:1.0, q2Won:0,
+    gongOverall:1.91, gongCalls:23.0,
+    gongResearch:2.3, gongAgenda:0.0,
+    gongDiscovery:1.0, gongPain:1.73,
+    gongGoals:1.05, gongSolution:1.22,
+    gongObjection:1.09, gongNextSteps:2.57,
+    hasGong:true, initials:"NC", avatarColor:"#10b981"
+  },
+  {
+    id:"alden_diaz", name:"Alden Diaz", manager:"Tyler Florkowski",
+    director:"Tina Thayer", location:"Detroit",
+    startDate:"1/5/26", tenure:4.1,
+    ramp:1.0, q2Won:3,
+    gongOverall:3.29, gongCalls:21.0,
+    gongResearch:3.65, gongAgenda:0.45,
+    gongDiscovery:2.55, gongPain:3.25,
+    gongGoals:1.9, gongSolution:3.0,
+    gongObjection:2.95, gongNextSteps:4.0,
+    hasGong:true, initials:"AD", avatarColor:"#64748b"
+  },
+  {
+    id:"caelin_brooks", name:"Caelin Brooks", manager:"Tyler Florkowski",
+    director:"Tina Thayer", location:"Houston",
+    startDate:"9/8/25", tenure:8.0,
+    ramp:0.0, q2Won:0,
+    gongOverall:2.12, gongCalls:34.0,
+    gongResearch:2.12, gongAgenda:0.12,
+    gongDiscovery:1.03, gongPain:1.92,
+    gongGoals:0.5, gongSolution:1.57,
+    gongObjection:1.43, gongNextSteps:3.61,
+    hasGong:true, initials:"CB", avatarColor:"#64748b"
+  },
+  {
+    id:"chris_battaglia", name:"Chris Battaglia", manager:"Tyler Florkowski",
+    director:"Tina Thayer", location:"Dallas",
+    startDate:"7/1/25", tenure:10.3,
+    ramp:1.0, q2Won:3,
+    gongOverall:1.67, gongCalls:49.0,
+    gongResearch:2.16, gongAgenda:0.06,
+    gongDiscovery:0.53, gongPain:1.4,
+    gongGoals:0.28, gongSolution:0.48,
+    gongObjection:0.63, gongNextSteps:2.71,
+    hasGong:true, initials:"CB", avatarColor:"#64748b"
+  },
+  {
+    id:"christian_montoya", name:"Christian Montoya", manager:"Tyler Florkowski",
+    director:"Tina Thayer", location:"Austin",
+    startDate:"7/1/25", tenure:10.3,
+    ramp:1.0, q2Won:3,
+    gongOverall:3.8, gongCalls:5.0,
+    gongResearch:3.6, gongAgenda:0.0,
+    gongDiscovery:2.4, gongPain:4.0,
+    gongGoals:3.2, gongSolution:4.0,
+    gongObjection:4.0, gongNextSteps:3.6,
+    hasGong:true, initials:"CM", avatarColor:"#64748b"
+  },
+  {
+    id:"christian_ortega", name:"Christian Ortega", manager:"Tyler Florkowski",
+    director:"Tina Thayer", location:"Houston",
+    startDate:"7/1/25", tenure:10.3,
+    ramp:1.0, q2Won:10,
+    gongOverall:2.2, gongCalls:5.0,
+    gongResearch:2.6, gongAgenda:0.0,
+    gongDiscovery:0.8, gongPain:1.75,
+    gongGoals:1.0, gongSolution:1.2,
+    gongObjection:1.2, gongNextSteps:3.2,
+    hasGong:true, initials:"CO", avatarColor:"#64748b"
+  },
+  {
+    id:"cole_wallace", name:"Cole Wallace", manager:"Tyler Florkowski",
+    director:"Tina Thayer", location:"Dallas",
+    startDate:"9/9/24", tenure:20.0,
+    ramp:1.0, q2Won:1,
+    gongOverall:3.7, gongCalls:10.0,
+    gongResearch:2.7, gongAgenda:0.11,
+    gongDiscovery:3.33, gongPain:4.62,
+    gongGoals:3.56, gongSolution:3.89,
+    gongObjection:3.33, gongNextSteps:3.22,
+    hasGong:true, initials:"CW", avatarColor:"#64748b"
+  },
+  {
+    id:"danielle_sauer", name:"Danielle Sauer", manager:"Tyler Florkowski",
+    director:"Tina Thayer", location:"Denver",
+    startDate:"12/1/25", tenure:5.3,
+    ramp:1.0, q2Won:2,
+    gongOverall:1.9, gongCalls:39.0,
+    gongResearch:1.84, gongAgenda:0.05,
+    gongDiscovery:0.66, gongPain:1.55,
+    gongGoals:0.42, gongSolution:1.24,
+    gongObjection:1.29, gongNextSteps:3.71,
+    hasGong:true, initials:"DS", avatarColor:"#64748b"
+  },
+  {
+    id:"matt_skinner", name:"Matt Skinner", manager:"Tyler Florkowski",
+    director:"Tina Thayer", location:"Denver",
+    startDate:"12/1/25", tenure:5.3,
+    ramp:1.0, q2Won:2,
+    gongOverall:1.89, gongCalls:18.0,
+    gongResearch:1.76, gongAgenda:0.11,
+    gongDiscovery:0.83, gongPain:1.75,
+    gongGoals:0.22, gongSolution:1.0,
+    gongObjection:1.17, gongNextSteps:3.0,
+    hasGong:true, initials:"MS", avatarColor:"#64748b"
+  },
+  {
+    id:"melinda_shaw", name:"Melinda Shaw", manager:"Tyler Florkowski",
+    director:"Tina Thayer", location:"Denver",
+    startDate:"1/5/26", tenure:4.1,
+    ramp:1.0, q2Won:6,
+    gongOverall:3.59, gongCalls:22.0,
+    gongResearch:4.14, gongAgenda:0.09,
+    gongDiscovery:3.05, gongPain:3.45,
+    gongGoals:2.45, gongSolution:3.86,
+    gongObjection:3.76, gongNextSteps:3.86,
+    hasGong:true, initials:"MS", avatarColor:"#64748b"
+  },
+  {
+    id:"tarah_drouin", name:"Tarah Drouin", manager:"Tyler Florkowski",
+    director:"Tina Thayer", location:"Dallas",
+    startDate:"8/18/25", tenure:8.7,
+    ramp:1.0, q2Won:1,
+    gongOverall:3.33, gongCalls:6.0,
+    gongResearch:3.83, gongAgenda:0.5,
+    gongDiscovery:3.0, gongPain:2.83,
+    gongGoals:1.33, gongSolution:3.67,
+    gongObjection:3.5, gongNextSteps:3.83,
+    hasGong:true, initials:"TD", avatarColor:"#64748b"
+  }
+];
+
+// ── PASSWORD ───────────────────────────────────────────────────────────────
+async function sha256(msg) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+const HASH = '41dd3b413d67fd277d964bffb53f33585ffdccca01cfdf53fa4e3c566051b08c';
+async function checkPassword() {
+  const v = document.getElementById('pwInput').value;
+  const h = await sha256(v);
+  if (h === HASH) {
+    document.getElementById('pwError').style.display='none';
+    document.getElementById('pwGate').style.display='none';
+    document.getElementById('mainContent').style.display='';
+    sessionStorage.setItem('sr_auth','1');
+    init();
+  } else {
+    document.getElementById('pwError').style.display='block';
+  }
+}
+document.getElementById('pwInput').addEventListener('keydown', e=>{ if(e.key==='Enter') checkPassword(); });
+if (sessionStorage.getItem('sr_auth')==='1') {
+  document.getElementById('pwGate').style.display='none';
+  document.getElementById('mainContent').style.display='';
+}
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+let activeDir = 'all';
+let activeMgr = 'all';
+let activeSort = 'name';
+let searchTerm = '';
+
+// ── DIR COUNTS ─────────────────────────────────────────────────────────────
+const dirMap = { 'Mike Milero':[], 'Tina Thayer':[], 'Paige Hakim':[], other:[] };
+REPS.forEach(r => {
+  const d = r.director;
+  if (d === 'Mike Milero') dirMap['Mike Milero'].push(r);
+  else if (d === 'Tina Thayer') dirMap['Tina Thayer'].push(r);
+  else if (d === 'Paige Hakim') dirMap['Paige Hakim'].push(r);
+  else dirMap.other.push(r);
+});
+
+// Fill counts in tabs
+document.querySelectorAll('.dir-tab[data-dir]').forEach(btn => {
+  const d = btn.dataset.dir;
+  const span = btn.querySelector('.count');
+  if (d === 'all') span.textContent = REPS.length;
+  else if (dirMap[d]) span.textContent = dirMap[d].length;
+});
+
+// ── MANAGERS ───────────────────────────────────────────────────────────────
+function getMgrsForDir(dir) {
+  let pool = dir==='all' ? REPS : (dirMap[dir]||[]);
+  const mgrs = [...new Set(pool.map(r=>r.manager).filter(Boolean))].sort();
+  return mgrs;
+}
+
+function buildMgrPills(dir) {
+  const pills = document.getElementById('mgrPills');
+  const mgrs = getMgrsForDir(dir);
+  let html = `<button class="pill ${activeMgr==='all'?'active':''}" onclick="setMgr('all',this)">All</button>`;
+  mgrs.forEach(m => {
+    const first = m.split(' ')[0];
+    html += `<button class="pill ${activeMgr===m?'active':''}" onclick="setMgr(${JSON.stringify(m)},this)">${first}</button>`;
+  });
+  pills.innerHTML = html;
+}
+
+function setDir(dir, el) {
+  activeDir = dir; activeMgr = 'all';
+  document.querySelectorAll('.dir-tab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  buildMgrPills(dir);
+  renderGrid();
+}
+
+function setMgr(mgr, el) {
+  activeMgr = mgr;
+  document.querySelectorAll('#mgrPills .pill').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderGrid();
+}
+
+function sortReps(s) { activeSort=s; renderGrid(); }
+function searchReps(s) { searchTerm=s.toLowerCase(); renderGrid(); }
+
+// ── HELPERS ────────────────────────────────────────────────────────────────
+function gcolor(v) {
+  if (v===null) return 'muted';
+  if (v>=3.5) return 'ok';
+  if (v>=2.5) return 'warn';
+  return 'danger';
+}
+function wcolor(v) {
+  if (v===null||v===0) return 'danger';
+  if (v>=5) return 'ok';
+  if (v>=2) return 'warn';
+  return 'danger';
+}
+function gongCellStyle(v) {
+  if (v===null) return 'background:#f5f5f3;color:#9c9c96';
+  const pct = v/5;
+  if (pct>=0.7) return 'background:#e4f4e8;color:#1e5228';
+  if (pct>=0.5) return 'background:#faeeda;color:#854f0b';
+  return 'background:#fcebeb;color:#a32d2d';
+}
+function rampBadge(r) {
+  if (r>=1) return '<span class="badge badge-green">Fully ramped</span>';
+  if (r>=0.5) return '<span class="badge badge-amber">'+Math.round(r*100)+'% ramp</span>';
+  if (r>0) return '<span class="badge badge-red">'+Math.round(r*100)+'% ramp</span>';
+  return '<span class="badge badge-gray">Pre-ramp</span>';
+}
+function tenureBadge(t) {
+  if (!t) return '';
+  if (t<3) return '<span class="badge badge-red">'+t.toFixed(1)+'mo</span>';
+  if (t<6) return '<span class="badge badge-amber">'+t.toFixed(1)+'mo</span>';
+  return '<span class="badge badge-blue">'+t.toFixed(1)+'mo</span>';
+}
+
+// ── RENDER ─────────────────────────────────────────────────────────────────
+function visibleReps() {
+  let pool = REPS;
+  if (activeDir !== 'all') {
+    if (activeDir === 'other') pool = dirMap.other;
+    else pool = dirMap[activeDir] || [];
+  }
+  if (activeMgr !== 'all') pool = pool.filter(r=>r.manager===activeMgr);
+  if (searchTerm) pool = pool.filter(r=>
+    r.name.toLowerCase().includes(searchTerm)||
+    (r.location||'').toLowerCase().includes(searchTerm)||
+    (r.manager||'').toLowerCase().includes(searchTerm)
+  );
+  pool = [...pool];
+  if (activeSort==='wins') pool.sort((a,b)=>(b.q2Won||0)-(a.q2Won||0));
+  else if (activeSort==='gong') pool.sort((a,b)=>(b.gongOverall||0)-(a.gongOverall||0));
+  else if (activeSort==='tenure') pool.sort((a,b)=>(b.tenure||0)-(a.tenure||0));
+  else if (activeSort==='ramp') pool.sort((a,b)=>(a.ramp||0)-(b.ramp||0));
+  else pool.sort((a,b)=>a.name.localeCompare(b.name));
+  return pool;
+}
+
+function renderGrid() {
+  const grid = document.getElementById('repGrid');
+  const noRes = document.getElementById('noResults');
+  const pool = visibleReps();
+  if (!pool.length) { grid.innerHTML=''; noRes.classList.add('visible'); return; }
+  noRes.classList.remove('visible');
+
+  // Elite benchmarks for bars
+  const ELITE_GONG = 3.8, ELITE_WINS = 10;
+
+  grid.innerHTML = pool.map(r => {
+    const gStr = r.gongOverall!==null ? r.gongOverall.toFixed(1) : '–';
+    const gClass = r.gongOverall!==null ? gcolor(r.gongOverall) : 'muted';
+    const wClass = wcolor(r.q2Won);
+    const winStr = r.q2Won!==null ? r.q2Won.toString() : '–';
+    const gBar = r.gongOverall!==null ? Math.min(100, r.gongOverall/5*100) : 0;
+    const wBar = Math.min(100, (r.q2Won||0)/ELITE_WINS*100);
+    const mgrFirst = (r.manager||'').split(' ')[0];
+    const locStr = r.location ? `📍 ${r.location}` : '';
+    const calls = r.gongCalls!==null ? `(${r.gongCalls} calls)` : '';
+    return `<div class="rep-card" data-id="${r.id}" onclick="openModal('${r.id}')">
+      <div class="rep-accent" style="background:${r.avatarColor}"></div>
+      <div class="rep-body">
+        <div class="rep-top">
+          <div class="rep-avatar" style="background:${r.avatarColor}">${r.initials}</div>
+          <div>
+            <div class="rep-name">${r.name}</div>
+            <div class="rep-mgr">${mgrFirst}</div>
+            <div class="rep-loc">${locStr}</div>
+          </div>
+        </div>
+        <div class="rep-badges">
+          ${rampBadge(r.ramp)}
+          ${tenureBadge(r.tenure)}
+        </div>
+        <div class="rep-metrics">
+          <div class="metric-row">
+            <span class="metric-label">Q2 wins</span>
+            <div class="mini-bar-wrap"><div class="mini-bar" style="width:${wBar}%;background:${r.q2Won>0?'#2d7a3a':'#e24b4a'}"></div></div>
+            <span class="metric-val ${wClass}">${winStr}</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Gong ${calls}</span>
+            <div class="mini-bar-wrap"><div class="mini-bar" style="width:${gBar}%;background:${r.gongOverall>=3.5?'#2d7a3a':r.gongOverall>=2.5?'#ba7517':'#e24b4a'}"></div></div>
+            <span class="metric-val ${gClass}">${gStr}</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── MODAL ──────────────────────────────────────────────────────────────────
+function openModal(id) {
+  const r = REPS.find(x=>x.id===id);
+  if (!r) return;
+  const gongSubs = [
+    ['Research', r.gongResearch], ['Agenda', r.gongAgenda],
+    ['Discovery', r.gongDiscovery], ['Pain', r.gongPain],
+    ['Goals', r.gongGoals], ['Solution', r.gongSolution],
+    ['Objection', r.gongObjection], ['Next Steps', r.gongNextSteps]
+  ];
+  const gongSection = r.hasGong ? `
+    <div class="gong-grid">
+      ${gongSubs.map(([label,v])=>`
+        <div class="gong-cell" style="${gongCellStyle(v)}">
+          <div class="gc-label">${label}</div>
+          <div class="gc-val">${v!==null?v.toFixed(1):'–'}</div>
+        </div>`).join('')}
+    </div>
+    <div class="gong-scale">Score out of 5 · Green ≥ 3.5 · Amber ≥ 2.5 · Red &lt; 2.5</div>
+  ` : `<div class="no-gong">No Gong data available for this rep in the 90-day window</div>`;
+
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-head">
+      <div class="modal-avatar" style="background:${r.avatarColor}">${r.initials}</div>
+      <div>
+        <div class="modal-name">${r.name}</div>
+        <div class="modal-sub">${r.manager || ''}${r.director ? ' · ' + r.director + ' (director)' : ''}</div>
+        <div class="modal-sub">${r.location || ''}${r.startDate ? ' · Started ' + r.startDate : ''}</div>
+      </div>
+      <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">Performance · Q2 2026</div>
+      <div class="modal-metrics">
+        <div class="modal-metric">
+          <div class="ml">Q2 Wins</div>
+          <div class="mv ${wcolor(r.q2Won)}">${r.q2Won||0}</div>
+          <div class="mb">Net new + expansion</div>
+        </div>
+        <div class="modal-metric">
+          <div class="ml">Gong Overall</div>
+          <div class="mv ${r.gongOverall!==null?gcolor(r.gongOverall):'muted'}">${r.gongOverall!==null?r.gongOverall.toFixed(1):'–'}</div>
+          <div class="mb">${r.gongCalls!==null?r.gongCalls+' calls scored':'No data'} · out of 5</div>
+        </div>
+        <div class="modal-metric">
+          <div class="ml">Tenure</div>
+          <div class="mv">${r.tenure!==null?r.tenure.toFixed(1)+'mo':'–'}</div>
+          <div class="mb">Ramp: ${r.ramp!==null?Math.round(r.ramp*100)+'%':'–'}</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">Gong Sub-Scores · Feb 10 – May 11, 2026
+        <a href="https://docs.google.com/spreadsheets/d/1km98s5pAdi5cco56l1lNhIiWi_YTrioXw0UXoE2uoHA/edit#gid=557561918"
+           target="_blank" style="font-size:10px;color:var(--blue);text-decoration:none;margin-left:6px">↗ source</a>
+      </div>
+      ${gongSection}
+    </div>
+  `;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal(e) {
+  if (e.target===document.getElementById('modalOverlay'))
+    document.getElementById('modalOverlay').classList.remove('open');
+}
+document.addEventListener('keydown', e => {
+  if (e.key==='Escape') document.getElementById('modalOverlay').classList.remove('open');
+});
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+function init() {
+  buildMgrPills('all');
+  renderGrid();
+}
+if (sessionStorage.getItem('sr_auth')==='1') init();
+</script>
+</body>
+</html>
