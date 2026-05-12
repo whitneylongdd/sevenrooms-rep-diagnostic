@@ -351,6 +351,20 @@ const REPS = [
 {id:"aisling_horgan",name:"Aisling Horgan",manager:"Dana Miller",director:"Tina Thayer",region:"",ae_am:"AE",rep_level:"",location:"Los Angeles",startDate:"7/1/25",tenure:10.3,cohort:"",ramp:0,cw2026:0,cwNN:0,cwExp:0,mrr2026:0,sqo2026:0,ace:0,jack:0,king:0,janCW:0,febCW:0,marCW:0,aprCW:0,mayCW:0,gongOverall:null,gongCalls:null,gongResearch:null,gongAgenda:null,gongDiscovery:null,gongPain:null,gongGoals:null,gongSolution:null,gongObjection:null,gongNextSteps:null,hasGong:true,winRate:null,winTier:null,winsTotal:null,lossesTotal:null}
 ];
 
+// ── CVR FROM 2026 SPREADSHEET ───────────────────────────────────────────
+// Conversion Rate = cw2026 / sqo2026. Tiers: Elite>=45, Solid>=30, At Risk>=20, Critical<20
+function cvrTier(cvr){
+  if(cvr==null)return null;
+  if(cvr>=45)return'Elite';
+  if(cvr>=30)return'Solid';
+  if(cvr>=20)return'At Risk';
+  return'Critical';
+}
+REPS.forEach(r=>{
+  r.cvr = r.sqo2026>0 ? parseFloat((r.cw2026/r.sqo2026*100).toFixed(1)) : null;
+  r.cvrTier = cvrTier(r.cvr);
+});
+
 // ── AUTH ──────────────────────────────────────────────────────────────
 async function sha256(msg){
   const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(msg));
@@ -470,8 +484,8 @@ function renderSummary(reps){
   const totalCW=reps.reduce((s,r)=>s+repQCW(r),0);
   const totalNN=filters.quarter==='All'?reps.reduce((s,r)=>s+r.cwNN,0):null;
   const totalMRR=reps.reduce((s,r)=>s+repQMRR(r),0);
-  const wrReps=reps.filter(r=>r.winRate!=null);
-  const avgWR=wrReps.length?wrReps.reduce((s,r)=>s+r.winRate,0)/wrReps.length:null;
+  const wrReps=reps.filter(r=>r.cvr!=null);
+  const avgWR=wrReps.length?wrReps.reduce((s,r)=>s+r.cvr,0)/wrReps.length:null;
   const gReps=reps.filter(r=>r.gongOverall!=null);
   const avgGong=gReps.length?gReps.reduce((s,r)=>s+r.gongOverall,0)/gReps.length:null;
   const activeReps=reps.filter(r=>repQCW(r)>0).length;
@@ -481,9 +495,9 @@ function renderSummary(reps){
   document.getElementById('summaryRow').innerHTML=`
     <div class="sum-card blue"><div class="lbl">${cwLabel}</div><div class="val">${totalCW}</div><div class="sub">${totalNN!=null?totalNN+' net new':'net new N/A by qtr'}</div></div>
     <div class="sum-card green"><div class="lbl">${mrrLabel}</div><div class="val">$${(totalMRR/1000).toFixed(0)}K</div><div class="sub">YTD ${qLabel}</div></div>
-    <div class="sum-card ${avgWR!=null&&avgWR<30?'red':avgWR!=null&&avgWR<45?'amber':'green'}">
-      <div class="lbl">Avg Win Rate</div><div class="val">${avgWR!=null?avgWR.toFixed(0)+'%':'—'}</div>
-      <div class="sub">${wrReps.length} reps tracked</div>
+    <div class="sum-card ${avgWR!=null&&avgWR<20?'red':avgWR!=null&&avgWR<30?'amber':'green'}">
+      <div class="lbl">Avg CVR</div><div class="val">${avgWR!=null?avgWR.toFixed(0)+'%':'—'}</div>
+      <div class="sub">${wrReps.length} reps w/ SQOs</div>
     </div>
     <div class="sum-card purple"><div class="lbl">Avg Gong</div><div class="val">${avgGong!=null?avgGong.toFixed(1):'—'}</div><div class="sub">${gReps.length} reps scored</div></div>
     <div class="sum-card"><div class="lbl">Active Reps</div><div class="val">${activeReps}</div><div class="sub">with 2026 CW</div></div>
@@ -571,8 +585,8 @@ function repCardHTML(r){
   const color=avatarColor(r.name);
   const ini=initials(r.name);
   const qCW=repQCW(r);
-  const tierC=r.winTier?tierClass(r.winTier):'nodata';
-  const tierLabel=r.winTier||'No win rate';
+  const tierC=r.cvrTier?tierClass(r.cvrTier):'nodata';
+  const tierLabel=r.cvr!=null?r.cvr.toFixed(1)+'% CVR':'No CVR';
   const gongLabel=r.gongOverall!=null?r.gongOverall.toFixed(1)+' Gong':'No Gong';
   const gongC=r.gongOverall!=null?'gong':'nodata';
   const isRamping=r.ramp<1;
@@ -617,14 +631,14 @@ function openModal(id){
   if(!r)return;
   document.getElementById('mName').textContent=r.name;
   const qCW=repQCW(r);
-  const tierC=r.winTier?tierClass(r.winTier):'nodata';
+  const tierC=r.cvrTier?tierClass(r.cvrTier):'nodata';
   document.getElementById('mMeta').innerHTML=[
     r.manager?`<span>📋 ${r.manager}</span>`:'',
     r.region&&!['','-','--'].includes(r.region)?`<span>📍 ${r.region}</span>`:'',
     r.location?`<span>🏙 ${r.location}</span>`:'',
     r.startDate?`<span>📅 Start: ${r.startDate}</span>`:'',
     r.tenure!=null?`<span>⏱ ${r.tenure.toFixed(0)} mo tenure</span>`:'',
-    `<span class="chip ${tierC}" style="font-size:11px">${r.winTier||'No win rate data'}</span>`,
+    `<span class="chip ${tierC}" style="font-size:11px">${r.cvrTier||'No CVR data'}</span>`,
     r.ramp<1?'<span class="chip ramp" style="font-size:11px">Ramping</span>':'',
   ].filter(Boolean).join('');
 
@@ -711,10 +725,10 @@ function openModal(id){
       </div>
       <div class="ms-grid">
         <div class="ms-card"><div class="mv">${r.sqo2026||'—'}</div><div class="ml">SQOs 2026</div></div>
-        <div class="ms-card"><div class="mv">${r.winsTotal!=null?r.winsTotal:'—'}</div><div class="ml">Wins (tracked)</div></div>
-        <div class="ms-card"><div class="mv">${r.lossesTotal!=null?r.lossesTotal:'—'}</div><div class="ml">Losses (tracked)</div></div>
-        <div class="ms-card"><div class="mv ${r.winTier?tierClass(r.winTier)+' chip':''}">
-          ${r.winRate!=null?r.winRate.toFixed(1)+'%':'—'}</div><div class="ml">Win Rate</div></div>
+        <div class="ms-card"><div class="mv">${r.cw2026}</div><div class="ml">CW 2026</div></div>
+        <div class="ms-card"><div class="mv">${r.sqo2026||'—'}</div><div class="ml">SQOs 2026</div></div>
+        <div class="ms-card"><div class="mv ${r.cvrTier?tierClass(r.cvrTier)+' chip':''}">
+          ${r.cvr!=null?r.cvr.toFixed(1)+'%':'—'}</div><div class="ml">CVR (CW/SQO)</div></div>
       </div>
       <div class="fc-row">
         <div class="fc-item"><div class="fv" style="color:var(--teal)">${r.ace}</div><div class="fl">Ace CW</div></div>
