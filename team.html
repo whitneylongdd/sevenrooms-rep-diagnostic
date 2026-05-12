@@ -21,16 +21,7 @@
 body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:13px;line-height:1.5}
 
 /* PW GATE */
-#pwGate{position:fixed;inset:0;background:#1a1a18;display:flex;align-items:center;justify-content:center;z-index:1000;flex-direction:column;gap:16px}
-#pwGate .pw-brand{color:#fff;font-size:16px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
-#pwGate .pw-brand .dot{width:8px;height:8px;border-radius:50%;background:#e24b4a;display:inline-block}
-#pwGate input{width:280px;padding:10px 14px;border-radius:var(--radius);border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.07);color:#fff;font-size:14px;outline:none;text-align:center}
-#pwGate input:focus{border-color:rgba(255,255,255,.4)}
-#pwGate input::placeholder{color:rgba(255,255,255,.3)}
-#pwGate button{width:280px;padding:10px;border-radius:var(--radius);border:none;background:#e24b4a;color:#fff;font-size:14px;font-weight:700;cursor:pointer}
-#pwGate button:hover{background:#c93c3b}
-#pwError{font-size:12px;color:#f87171;display:none}
-#mainContent{display:none}
+
 
 /* LAYOUT */
 .page{max-width:1400px;margin:0 auto;padding:20px}
@@ -185,14 +176,6 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 </style>
 </head>
 <body>
-
-<div id="pwGate">
-  <div class="pw-brand"><span class="dot"></span>SevenRooms NAM SMB</div>
-  <input type="password" id="pwInput" placeholder="Enter password" autofocus
-         onkeydown="if(event.key==='Enter')checkPw()">
-  <button onclick="checkPw()">Unlock Dashboard</button>
-  <div id="pwError">Incorrect password — try again</div>
-</div>
 
 <div id="mainContent">
 <div class="page">
@@ -476,7 +459,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 </div><!-- /tab-about -->
 
 </div><!-- /page -->
-</div><!-- /mainContent -->
+
 
 <!-- MODAL -->
 <div id="modalOverlay" onclick="if(event.target===this)closeModal()">
@@ -608,23 +591,7 @@ REPS.forEach(r=>{
 });
 
 // ── AUTH ──────────────────────────────────────────────────────────────
-async function sha256(msg){
-  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(msg));
-  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-}
-const HASH='4430cebe7574390987b06adaf69f9ca99f8777d22a122a528850f357316b0e86';
-async function checkPw(){
-  const pw=document.getElementById('pwInput').value;
-  const h=await sha256(pw);
-  if(h===HASH){
-    document.getElementById('pwGate').style.display='none';
-    document.getElementById('mainContent').style.display='block';
-    init();
-  } else {
-    document.getElementById('pwError').style.display='block';
-    document.getElementById('pwInput').value='';
-  }
-}
+
 
 // ── HELPERS ──────────────────────────────────────────────────────────
 function v(n,dec=1){return n==null?'—':(typeof n==='number'?n.toFixed(dec):n)}
@@ -1027,6 +994,7 @@ function init(){
   initFilters();
   render();
 }
+init();
 </script>
 </body>
 </html>
