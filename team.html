@@ -827,7 +827,7 @@ function setManagerFilter(val){
 
 function initFilters(){
   const validReps=activeREPS.filter(r=>r.manager&&!['#REF!','-',''].includes(r.manager)&&!r.name.includes('Deactivated'));
-  const regions=[...new Set(validReps.map(r=>r.region).filter(r=>r&&!['','-','--','EMEA','APAC','#REF!'].includes(r)))].sort();
+  const regions=[...new Set(validReps.map(r=>r.region).filter(r=>r&&!['','-','--','#REF!','#N/A'].includes(r)))].sort();
   const mgrs=[...new Set(validReps.map(r=>r.manager).filter(Boolean))].sort();
 
   // Region pills
