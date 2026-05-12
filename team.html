@@ -351,7 +351,7 @@ async function sha256(msg){
   const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(msg));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
-const HASH='41dd3b413d67fd277d964bffb53f33585ffdccca01cfdf53fa4e3c566051b08c';
+const HASH='4430cebe7574390987b06adaf69f9ca99f8777d22a122a528850f357316b0e86';
 async function checkPw(){
   const pw=document.getElementById('pwInput').value;
   const h=await sha256(pw);
