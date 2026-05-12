@@ -507,6 +507,14 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   <input class="search-input" type="text" placeholder="🔍 Search rep or city…" oninput="searchReps(this.value)">
 </div>
 
+<div style="display:flex;align-items:center;gap:16px;margin-bottom:12px;font-size:11px;color:var(--text2);flex-wrap:wrap;">
+  <span style="font-weight:600;">Circle color = Win Rate Tier:</span>
+  <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;border-radius:50%;background:#16a34a;display:inline-block;"></span> Elite (&gt;45% WR)</span>
+  <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;border-radius:50%;background:#2563eb;display:inline-block;"></span> Solid (30–45%)</span>
+  <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;border-radius:50%;background:#ea580c;display:inline-block;"></span> At Risk (&lt;30%)</span>
+  <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;border-radius:50%;background:#dc2626;display:inline-block;"></span> Critical (&lt;20%)</span>
+  <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;border-radius:50%;background:#6b7280;display:inline-block;"></span> &lt;5 closed opps</span>
+</div>
 <div class="rep-grid" id="repGrid"></div>
 <div class="no-results" id="noResults">No reps match the current filters.</div>
 </div>
@@ -554,16 +562,15 @@ function showTab(id, el) {
   el.classList.add('active');
 }
 
-const PALETTE = ['#2563eb','#7c3aed','#db2777','#dc2626','#d97706','#059669','#0891b2','#65a30d','#9333ea','#e11d48','#0d9488','#b45309','#4f46e5','#be185d','#15803d','#1d4ed8'];
+// Avatar circle color = win rate tier (so you can read the room at a glance)
+const TIER_COLOR = {'Elite':'#16a34a','Solid':'#2563eb','At Risk':'#ea580c','Critical':'#dc2626'};
 function getInitials(name) {
   const parts = name.trim().split(/\s+/);
   if (parts.length >= 2) return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
   return parts[0].slice(0,2).toUpperCase();
 }
-function getColor(name) {
-  let hash = 0;
-  for (let i=0; i<name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) & 0xffffffff;
-  return PALETTE[Math.abs(hash) % PALETTE.length];
+function getColor(winTier) {
+  return TIER_COLOR[winTier] || '#6b7280';
 }
 
 let activeDir='all', activeMgr='all', activeSort='name', searchTerm='', activeTier='all';
@@ -646,7 +653,7 @@ function renderGrid() {
     const wrCol=r.winRate>=45?'#2d7a3a':r.winRate>=30?'#ba7517':'#e24b4a';
     const calls=r.gongCalls!==null?`(${r.gongCalls})`:'';
     const loc=r.location?`📍 ${r.location}`:'';
-    const ini=getInitials(r.name); const col=getColor(r.name);
+    const ini=getInitials(r.name); const col=getColor(r.winTier);
     return `<div class="rep-card" onclick="openModal('${r.id}')">
       <div class="rep-accent" style="background:${col}"></div>
       <div class="rep-body">
@@ -679,7 +686,7 @@ function renderGrid() {
 
 function openModal(id) {
   const r=REPS.find(x=>x.id===id); if(!r) return;
-  const ini=getInitials(r.name); const col=getColor(r.name);
+  const ini=getInitials(r.name); const col=getColor(r.winTier);
   const subs=[['Research',r.gongResearch],['Agenda',r.gongAgenda],['Discovery',r.gongDiscovery],
     ['Pain',r.gongPain],['Goals',r.gongGoals],['Solution',r.gongSolution],
     ['Objection',r.gongObjection],['Next Steps',r.gongNextSteps]];
