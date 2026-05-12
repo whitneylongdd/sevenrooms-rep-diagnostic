@@ -1,85 +1,74 @@
 """
 Sevenrooms Pre-Sales Dash — Data Refresh Script
 ================================================
-Run this whenever you want to update the embedded rep data in team.html.
+Run this to update embedded rep data in team.html.
 
-Reads from two Google Sheet tabs:
+Sources:
   - "Raw Data - Opps CW"      (Sheet: 1RGwcqbWrYk1WUVphvPJ7EnDw4TxBLpV1lwoa-EqbHbU)
   - "Raw Data - Opps Created" (same sheet)
-  - "2025 - YTD" ramp tab     (Sheet: 1N5_gpIXPsQVrHB529OhlIqqmSdTQif9-mDcKvYrNbvs, col V)
+  - "2025 - YTD" ramp tab     (Sheet: 1N5_gpIXPsQVrHB529OhlIqqmSdTQif9-mDcKvYrNbvs)
 
-What each field means:
-  cw2026   = # deals closed in 2026 (all types), from Close Date col
-  cw26sqo  = # 2026 closes whose SQO was also in 2026 (full-year cohort)
-  cwT90    = # 2026 closes whose SQO was in the T90 window (numerator for T90 CVR)
-  cwNN     = # Net New closes in 2026
-  cwExp    = # Expansion closes in 2026
-  mrr2026  = sum of MRR Final for 2026 closes
-  sqo2026  = # SQOs created in 2026 YTD (shown as "SQOs" in sort)
-  sqoT90   = # SQOs created in the T90 window (denominator for T90 CVR)
-  ace/jack/king = facecard counts for 2026 closes
-  janCW..mayCW  = monthly close counts by Close Date
+T90 CVR — matches spreadsheet formula on 'rep productivity'!row 27 exactly:
+  Denominator = COUNTUNIQUEIFS(OppID, rep=X, SQO_date >= EOMONTH-90, SQO_date <= EOMONTH)
+  Numerator   = same filters + Won? = "1"
+  Both come from Raw Data - Opps Created only (col B=OppID, K=SQO date, L=rep, AE=Won?)
+  This guarantees numerator is always a strict subset of denominator (no >100% possible).
 
-T90 CVR definition (Brittany Brodlie):
-  Denominator = SQOs created in the 90-day window ending at EOM
-  Numerator   = CW deals that came FROM those same SQOs (cohort must match)
-  Example: April → Feb 1–Apr 30. Current (May) → Mar 1–May 31.
-  T90_MONTHS below = months in the current T90 window. Update each month.
-
-Usage (from repo root, requires gws CLI on PATH):
-  python3 scripts/refresh_data.py
-
-It will patch team.html in place. Commit the result.
+EOMONTH is computed dynamically as the last day of the current month.
+To run: python3 scripts/refresh_data.py  (from repo root, requires gws on PATH)
 """
 
 import sys, json, re, subprocess, os
 from collections import defaultdict
+from datetime import datetime, date
+import calendar
 
 CW_SHEET_ID   = '1RGwcqbWrYk1WUVphvPJ7EnDw4TxBLpV1lwoa-EqbHbU'
 RAMP_SHEET_ID = '1N5_gpIXPsQVrHB529OhlIqqmSdTQif9-mDcKvYrNbvs'
 HTML_PATH     = os.path.join(os.path.dirname(__file__), '..', 'team.html')
 
-# ── Update these sets as new months open/close ────────────────
-MONTHS_2026 = {'1', '2', '3', '4', '5'}   # Jan=1 … May=5
+# T90 window: EOMONTH of current month, minus 90 days
+today = date.today()
+eom = date(today.year, today.month, calendar.monthrange(today.year, today.month)[1])
+t90_start = eom - __import__('datetime').timedelta(days=90)
+print(f"T90 window: {t90_start} → {eom}  (EOMONTH={eom}, EOMONTH-90={t90_start})")
+
+MONTHS_2026 = {'1','2','3','4','5'}
 MO_KEY = {'1':'jan','2':'feb','3':'mar','4':'apr','5':'may'}
-
-# T90 window: SQO months in the ~90 days ending at current EOM
-# May 2026 EOM = May 31 → 90 days back = ~Mar 1 → T90 months = Mar, Apr, May
-# Update this each month: Jun→ {4,5,6}, Jul→ {5,6,7}, etc.
-T90_MONTHS = {'3', '4', '5'}   # Mar, Apr, May 2026
-
-VALID_SQO_2026 = {f'{m}/1/2026' for m in MONTHS_2026}
-VALID_SQO_T90  = {f'{m}/1/2026' for m in T90_MONTHS}
 
 def fetch_sheet(sheet_id, range_name):
     result = subprocess.run(
-        ['gws', 'sheets', 'spreadsheets', 'values', 'get',
+        ['gws','sheets','spreadsheets','values','get',
          '--params', json.dumps({'spreadsheetId': sheet_id, 'range': range_name})],
-        capture_output=True, text=True
-    )
+        capture_output=True, text=True)
     out = result.stdout.strip()
     if os.path.exists(out):
-        with open(out) as f:
-            return json.load(f)
+        with open(out) as f: return json.load(f)
     return json.loads(out)
 
-# ── Pull CW data ──────────────────────────────────────────────
+def parse_date(s):
+    """Parse M/D/YYYY date string, return date or None."""
+    try:
+        return datetime.strptime(s.strip(), '%m/%d/%Y').date()
+    except:
+        return None
+
+# ── Pull CW data (for cw2026, cwNN, cwExp, mrr, facecard, monthly) ───────────
 print("Pulling Raw Data - Opps CW...")
 cw_rows = fetch_sheet(CW_SHEET_ID, 'Raw Data - Opps CW').get('values', [])
 print(f"  {len(cw_rows)-1} rows")
 
 rep = defaultdict(lambda: {
-    'cw2026':0,'cw26sqo':0,'cwT90':0,'cwNN':0,'cwExp':0,
-    'mrr2026':0.0,'ace':0,'jack':0,'king':0,
+    'cw2026':0,'cwNN':0,'cwExp':0,'mrr2026':0.0,
+    'ace':0,'jack':0,'king':0,
     'jan':0,'feb':0,'mar':0,'apr':0,'may':0
 })
 
 for row in cw_rows[1:]:
     if len(row) < 16: continue
-    close_date = row[5].strip()   # col 5:  Close Date M/D/YYYY
-    rep_name   = row[15].strip()  # col 15: Sales Rep Name
+    close_date = row[5].strip()
+    rep_name   = row[15].strip()
     opp_type   = row[13].strip() if len(row) > 13 else ''
-    sqo_mo_raw = row[34].strip() if len(row) > 34 else ''
     facecard   = row[42].strip() if len(row) > 42 else ''
     mrr_raw    = row[46].strip() if len(row) > 46 else ''
 
@@ -92,15 +81,6 @@ for row in cw_rows[1:]:
     d = rep[rep_name]
     d['cw2026'] += 1
     d[MO_KEY[mo]] += 1
-
-    # Full-year cohort CVR numerator
-    sqo_parts = sqo_mo_raw.split('/')
-    if len(sqo_parts) == 3 and sqo_parts[2] == '2026':
-        d['cw26sqo'] += 1
-        # T90 CVR numerator: CW whose SQO is in the T90 window
-        sqo_month_num = sqo_parts[0]
-        if sqo_month_num in T90_MONTHS:
-            d['cwT90'] += 1
 
     ot = opp_type.lower()
     if 'net new' in ot: d['cwNN'] += 1
@@ -115,50 +95,62 @@ for row in cw_rows[1:]:
     try: d['mrr2026'] += float(mrr_clean)
     except: pass
 
-print(f"  Reps with CW: {len(rep)}")
-print(f"  Total cw2026:  {sum(v['cw2026']  for v in rep.values()):,}")
-print(f"  Total cwT90:   {sum(v['cwT90']   for v in rep.values()):,}")
+print(f"  Reps with CW: {len(rep)},  total cw2026: {sum(v['cw2026'] for v in rep.values()):,}")
 
-# ── Pull SQO data ─────────────────────────────────────────────
+# ── Pull Opps Created (for sqo2026, sqoT90, cwT90 — all from same tab) ───────
+# Col B (idx 1)  = Opportunity ID
+# Col K (idx 10) = SQO Date (M/D/YYYY exact date)
+# Col L (idx 11) = Sales Rep Name
+# Col X (idx 23) = Month of Opp SQO (M/1/YYYY — used for sqo2026 YTD count)
+# Col AE (idx 30) = Won? ("1" = closed-won)
 print("Pulling Raw Data - Opps Created...")
 sqo_rows = fetch_sheet(CW_SHEET_ID, 'Raw Data - Opps Created').get('values', [])
 print(f"  {len(sqo_rows)-1} rows")
 
-rep_sqo    = defaultdict(int)   # full-year 2026
-rep_sqoT90 = defaultdict(int)   # T90 window
+rep_sqo    = defaultdict(int)          # sqo2026: YTD SQO count
+rep_sqoT90 = defaultdict(set)          # unique opp IDs in T90 window (denominator)
+rep_cwT90  = defaultdict(set)          # unique won opp IDs in T90 window (numerator)
+
+VALID_SQO_MONTHS = {f'{m}/1/2026' for m in MONTHS_2026}
 
 for row in sqo_rows[1:]:
     if len(row) < 24: continue
-    rep_name = row[11].strip()   # col 11: Sales Rep Name
-    sqo_mo   = row[23].strip()   # col 23: Month of Opp SQO
-    if not rep_name: continue
-    if sqo_mo in VALID_SQO_2026:
+    opp_id   = row[1].strip()  if len(row) > 1  else ''
+    sqo_date = row[10].strip() if len(row) > 10 else ''
+    rep_name = row[11].strip() if len(row) > 11 else ''
+    sqo_mo   = row[23].strip() if len(row) > 23 else ''
+    won      = row[30].strip() if len(row) > 30 else '0'
+
+    if not rep_name or not opp_id: continue
+
+    # sqo2026: YTD count by month bucket (same as before)
+    if sqo_mo in VALID_SQO_MONTHS:
         rep_sqo[rep_name] += 1
-    if sqo_mo in VALID_SQO_T90:
-        rep_sqoT90[rep_name] += 1
 
-print(f"  Reps with SQOs: {len(rep_sqo)}")
-print(f"  Total sqo2026: {sum(rep_sqo.values()):,}")
-print(f"  Total sqoT90:  {sum(rep_sqoT90.values()):,}")
+    # T90 CVR: use exact SQO date vs. T90 window (matches spreadsheet EOMONTH logic)
+    d = parse_date(sqo_date)
+    if d and t90_start <= d <= eom:
+        rep_sqoT90[rep_name].add(opp_id)        # denominator
+        if won == '1':
+            rep_cwT90[rep_name].add(opp_id)     # numerator (always subset of denom)
 
-# ── Pull Ramp data ────────────────────────────────────────────
-print("Pulling 2025-YTD ramp tab (col V)...")
+print(f"  Total sqo2026:  {sum(rep_sqo.values()):,}")
+print(f"  Total sqoT90:   {sum(len(v) for v in rep_sqoT90.values()):,}")
+print(f"  Total cwT90:    {sum(len(v) for v in rep_cwT90.values()):,}")
+
+# ── Pull Ramp data ────────────────────────────────────────────────────────────
+print("Pulling 2025-YTD ramp tab...")
 ramp_rows = fetch_sheet(RAMP_SHEET_ID, '2025 - YTD').get('values', [])
-print(f"  {len(ramp_rows)-1} rows")
-
 rep_ramp = {}
 for row in ramp_rows[1:]:
     if len(row) < 22: continue
-    name = row[0].strip()
-    val  = row[21].strip()
+    name = row[0].strip(); val = row[21].strip()
     if not name or not val: continue
-    try:
-        rep_ramp[name] = float(val)
+    try: rep_ramp[name] = float(val)
     except: pass
-
 print(f"  Reps with ramp: {len(rep_ramp)}")
 
-# ── Patch HTML ────────────────────────────────────────────────
+# ── Patch HTML ────────────────────────────────────────────────────────────────
 print(f"Patching {HTML_PATH}...")
 with open(HTML_PATH, 'r') as f:
     html = f.read()
@@ -169,19 +161,15 @@ def patch_rep(m):
     if not name_match: return entry
     name = name_match.group(1)
 
-    cw     = rep.get(name, {})
-    sqo    = rep_sqo.get(name, 0)
-    sqoT90 = rep_sqoT90.get(name, 0)
-
+    cw = rep.get(name, {})
     fields = {
         'cw2026':  cw.get('cw2026', 0),
-        'cw26sqo': cw.get('cw26sqo', 0),
-        'cwT90':   cw.get('cwT90', 0),
         'cwNN':    cw.get('cwNN', 0),
         'cwExp':   cw.get('cwExp', 0),
         'mrr2026': int(round(cw.get('mrr2026', 0))),
-        'sqo2026': sqo,
-        'sqoT90':  sqoT90,
+        'sqo2026': rep_sqo.get(name, 0),
+        'sqoT90':  len(rep_sqoT90.get(name, set())),
+        'cwT90':   len(rep_cwT90.get(name, set())),
         'ace':     cw.get('ace', 0),
         'jack':    cw.get('jack', 0),
         'king':    cw.get('king', 0),
@@ -192,7 +180,7 @@ def patch_rep(m):
         'mayCW':   cw.get('may', 0),
     }
     for field, val in fields.items():
-        entry = re.sub(rf'{field}:\d+', f'{field}:{val}', entry)
+        entry = re.sub(rf'\b{field}:\d+', f'{field}:{val}', entry)
 
     ramp_val = rep_ramp.get(name)
     if ramp_val is not None:
@@ -200,10 +188,25 @@ def patch_rep(m):
 
     return entry
 
-html = re.sub(r'\{id:"[^"]+",name:"[^"]+",.*?(?:sqoT90:\d+)\}', patch_rep, html, flags=re.DOTALL)
+count = [0]
+def counted_patch(m):
+    count[0] += 1
+    return patch_rep(m)
+
+html = re.sub(r'\{id:"[^"]+",name:"[^"]+"[^{}]*\}', counted_patch, html)
+print(f"  Patched {count[0]} rep objects")
 
 with open(HTML_PATH, 'w') as f:
     f.write(html)
 
-print("Done. Review: git diff team.html")
-print("Then: git add team.html scripts/refresh_data.py && git commit -m 'Data refresh YYYY-MM-DD'")
+# Remove the Math.min(100,...) cap since numerator is now always ≤ denominator
+print("Done. Removing 100% cap from CVR formula (no longer needed)...")
+with open(HTML_PATH, 'r') as f:
+    html = f.read()
+old = 'r.cvr=r.sqoT90>0?Math.min(100,parseFloat((r.cwT90/r.sqoT90*100).toFixed(1))):null;'
+new = 'r.cvr=r.sqoT90>0?parseFloat((r.cwT90/r.sqoT90*100).toFixed(1)):null;'
+html = html.replace(old, new)
+with open(HTML_PATH, 'w') as f:
+    f.write(html)
+
+print("Done. Commit: git add team.html scripts/refresh_data.py && git commit -m 'Data refresh YYYY-MM-DD'")
