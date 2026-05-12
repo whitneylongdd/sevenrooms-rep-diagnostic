@@ -34,6 +34,21 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 
 /* LAYOUT */
 .page{max-width:1400px;margin:0 auto;padding:20px}
+.tab-nav{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:20px}
+.tab-btn{padding:8px 20px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:#1a1a18;border-bottom-color:#1a1a18}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+.about-section{margin-bottom:32px}
+.about-section h2{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.about-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.about-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
+.about-card .term{font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px}
+.about-card .formula{font-size:11px;font-family:monospace;background:#f4f4f2;padding:3px 6px;border-radius:4px;margin-bottom:6px;display:inline-block;color:#333}
+.about-card .def{font-size:12px;color:var(--text2);line-height:1.5}
+.about-card .source{font-size:10px;color:var(--text3);margin-top:6px;font-style:italic}
+.about-note{background:#fffbf0;border:1px solid #e8d88a;border-radius:var(--radius);padding:12px 16px;font-size:12px;color:#5a4a00;line-height:1.6;margin-bottom:16px}
 .page-header{margin-bottom:16px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px}
 .page-title{font-size:20px;font-weight:800;margin-bottom:3px}
 .page-sub{font-size:12px;color:var(--text2)}
@@ -182,6 +197,12 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <div id="mainContent">
 <div class="page">
 
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('dashboard')">Dashboard</button>
+  <button class="tab-btn" onclick="switchTab('about')">About</button>
+</div>
+
+<div id="tab-dashboard" class="tab-pane active">
 <div class="page-header">
   <div>
     <div class="page-title">SevenRooms NAM SMB · Team Diagnostic</div>
@@ -232,6 +253,227 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 </div>
 <div class="rep-grid" id="repGrid"></div>
 <div class="no-results" id="noResults" style="display:none">No reps match the current filters.</div>
+
+</div><!-- /tab-dashboard -->
+
+<!-- ABOUT TAB -->
+<div id="tab-about" class="tab-pane">
+<div class="about-section">
+  <div class="about-note">
+    All metrics are calculated from two sources: the <strong>2026 Rep Productivity Tracker</strong> Google Sheet (deal-level data) and the <strong>Gong Scorecard</strong> (call quality scores). The dashboard covers NAM AE and AM reps with activity in 2026 (Jan 1 – May 12). Filters apply to the Dashboard tab only.
+  </div>
+</div>
+
+<div class="about-section">
+  <h2>📦 Data Sources</h2>
+  <div class="about-grid">
+    <div class="about-card">
+      <div class="term">Raw Data – Opps CW</div>
+      <div class="def">Deal-level closed-won opportunity data from the 2026 Rep Productivity Tracker. ~11,900 rows. Used for CW counts, MRR, facecard segmentation, and monthly trends. Filtered to NAM geo, AE/AM roles, Jan–May 2026.</div>
+      <div class="source">Source: 2026 Rep Productivity Tracker → "Raw Data - Opps CW" tab</div>
+    </div>
+    <div class="about-card">
+      <div class="term">Raw Data – Opps Created</div>
+      <div class="def">Deal-level SQO (Sales Qualified Opportunity) creation data. ~26,400 rows. Used solely to calculate SQO counts per rep per month. Filtered to NAM geo, Jan–May 2026.</div>
+      <div class="source">Source: 2026 Rep Productivity Tracker → "Raw Data - Opps Created" tab</div>
+    </div>
+    <div class="about-card">
+      <div class="term">Gong Scorecard</div>
+      <div class="def">Call quality scores for reps with scored Gong calls. Covers Feb 10 – May 11 2026. Includes an overall score and 8 sub-dimension scores on a 1–5 scale (Agenda is 0–1). Not all reps have Gong data.</div>
+      <div class="source">Source: Gong Scorecard export (previously shared)</div>
+    </div>
+  </div>
+</div>
+
+<div class="about-section">
+  <h2>📊 Summary Bar Metrics</h2>
+  <div class="about-grid">
+    <div class="about-card">
+      <div class="term">Total CW 2026</div>
+      <div class="formula">SUM(cw2026) across filtered reps</div>
+      <div class="def">Total closed-won deal count for all filtered reps in 2026 YTD. Updates when Q1/Q2 filter is applied — Q1 uses Jan+Feb+Mar only, Q2 uses Apr+May only.</div>
+      <div class="source">Source: Raw Data – Opps CW · Column: Opp CW Month</div>
+    </div>
+    <div class="about-card">
+      <div class="term">Won MRR 2026</div>
+      <div class="formula">SUM(mrr_final) across filtered reps</div>
+      <div class="def">Total monthly recurring revenue from closed-won deals. When a quarter filter is active, MRR is estimated proportionally: (quarter CW / total CW) × total MRR per rep.</div>
+      <div class="source">Source: Raw Data – Opps CW · Column: MRR Final</div>
+    </div>
+    <div class="about-card">
+      <div class="term">Avg CVR</div>
+      <div class="formula">AVG(cw2026 / sqo2026) across reps with SQOs</div>
+      <div class="def">Average Conversion Rate across all filtered reps who have at least one SQO in 2026. Reps with zero SQOs are excluded from this average. Color-coded: green ≥30%, amber 20–29%, red &lt;20%.</div>
+      <div class="source">Source: Opps CW + Opps Created tabs</div>
+    </div>
+    <div class="about-card">
+      <div class="term">Avg Gong</div>
+      <div class="formula">AVG(gong_overall) across reps with scored calls</div>
+      <div class="def">Average overall Gong call quality score (1–5 scale) across reps who have at least one scored call in the Gong data. Reps without Gong data are excluded.</div>
+      <div class="source">Source: Gong Scorecard export</div>
+    </div>
+    <div class="about-card">
+      <div class="term">Active Reps</div>
+      <div class="formula">COUNT(reps where CW &gt; 0)</div>
+      <div class="def">Number of reps in the filtered view with at least one closed-won deal in the selected period. Updates with quarter filter.</div>
+      <div class="source">Source: Raw Data – Opps CW</div>
+    </div>
+    <div class="about-card">
+      <div class="term">Jack Mix %</div>
+      <div class="formula">SUM(jack_cw) / SUM(total_cw)</div>
+      <div class="def">Percentage of all closed-won deals that are Jack-segment customers. Jack = mid-market restaurant accounts. High Jack mix can indicate reps are avoiding harder Ace/King deals.</div>
+      <div class="source">Source: Raw Data – Opps CW · Column: Facecard Final</div>
+    </div>
+  </div>
+</div>
+
+<div class="about-section">
+  <h2>🃏 Facecard Segmentation</h2>
+  <div class="about-note">Facecard is SevenRooms' internal account segmentation. Every closed-won deal is tagged with a facecard based on the customer profile.</div>
+  <div class="about-grid">
+    <div class="about-card">
+      <div class="term">Ace</div>
+      <div class="def">Enterprise / high-value accounts. Typically larger groups, multi-location operators, or flagship brands. Highest ACV potential. Longer sales cycles.</div>
+      <div class="source">Source: Column "Facecard Final" = "Ace"</div>
+    </div>
+    <div class="about-card">
+      <div class="term">Jack</div>
+      <div class="def">Mid-market accounts. The majority of deal volume. Represents the core of NAM SMB motion. High-volume, moderate ACV.</div>
+      <div class="source">Source: Column "Facecard Final" = "Jack"</div>
+    </div>
+    <div class="about-card">
+      <div class="term">King</div>
+      <div class="def">Upmarket SMB or boutique high-value accounts. Higher ACV than Jack, lower than Ace. Strategic segment for expansion-led growth.</div>
+      <div class="source">Source: Column "Facecard Final" = "King"</div>
+    </div>
+  </div>
+</div>
+
+<div class="about-section">
+  <h2>👤 Rep Card Metrics</h2>
+  <div class="about-grid">
+    <div class="about-card">
+      <div class="term">CW (Closed Won)</div>
+      <div class="formula">COUNT(deals where Opp CW Month in period)</div>
+      <div class="def">Total closed-won deals for the rep in the selected period. Q1 = Jan–Mar, Q2 = Apr–May, Full Year = Jan–May.</div>
+      <div class="source">Source: Raw Data – Opps CW</div>
+    </div>
+    <div class="about-card">
+      <div class="term">Net New</div>
+      <div class="formula">COUNT(deals where type = New)</div>
+      <div class="def">Closed-won deals that are new logo or new subscription, excluding expansion/upsell. Only shown for Full Year view — not broken out by quarter in current data.</div>
+      <div class="source">Source: Column "Subscription Item Opp Type Detail Category"</div>
+    </div>
+    <div class="about-card">
+      <div class="term">SQOs</div>
+      <div class="formula">COUNT(opps created in period)</div>
+      <div class="def">Sales Qualified Opportunities created by the rep in 2026 YTD. Used as the denominator in CVR. Note: SQOs created in one period may close in a future period, so CVR is a pipeline efficiency signal, not a strict rate.</div>
+      <div class="source">Source: Raw Data – Opps Created · Column: Month of Opp SQO</div>
+    </div>
+    <div class="about-card">
+      <div class="term">MRR</div>
+      <div class="formula">SUM(MRR Final) for closed-won deals</div>
+      <div class="def">Monthly recurring revenue from closed-won deals in the period. When a quarter is selected, MRR is estimated proportionally based on that quarter's share of total CW deals.</div>
+      <div class="source">Source: Raw Data – Opps CW · Column: MRR Final</div>
+    </div>
+    <div class="about-card">
+      <div class="term">CVR (Conversion Rate)</div>
+      <div class="formula">cw2026 / sqo2026 × 100</div>
+      <div class="def">Percentage of SQOs that converted to closed-won. Tiers: Elite ≥45%, Solid 30–44%, At Risk 20–29%, Critical &lt;20%. Reps with 0 SQOs show no CVR. CVR &gt;100% is possible if prior-year SQOs close in 2026.</div>
+      <div class="source">Source: Opps CW + Opps Created, 2026 YTD</div>
+    </div>
+    <div class="about-card">
+      <div class="term">Ramp Status</div>
+      <div class="formula">Ramp at time of opp closed won &lt; 1 → Ramping</div>
+      <div class="def">Whether the rep was fully ramped during 2026. A "Ramping" chip appears if the rep's ramp factor was below 1.0 for their closed deals. Ramp factor comes from the spreadsheet and reflects time-in-seat productivity expectations.</div>
+      <div class="source">Source: Column "Ramp at time of opp closed won"</div>
+    </div>
+  </div>
+</div>
+
+<div class="about-section">
+  <h2>🎙 Gong Scorecard Dimensions</h2>
+  <div class="about-note">Gong scores are averages across all scored calls for each rep during Feb 10 – May 11, 2026. All dimensions are 1–5 scale except Agenda (0–1). The scoring rubric below reflects the criteria used by Gong reviewers.</div>
+  <div class="about-grid">
+    <div class="about-card">
+      <div class="term">Overall Gong Score</div>
+      <div class="formula">AVG of all scored sub-dimensions</div>
+      <div class="def">Composite call quality score. Threshold for "good": ≥3.5. Color coding: green ≥80% of max, blue 60–79%, amber 40–59%, red &lt;40%.</div>
+    </div>
+    <div class="about-card">
+      <div class="term">Research</div>
+      <div class="formula">1–5 scale</div>
+      <div class="def">Did the rep demonstrate pre-call research? Scored on evidence of account knowledge, personalization, and relevance of opening.</div>
+    </div>
+    <div class="about-card">
+      <div class="term">Agenda</div>
+      <div class="formula">0–1 scale (Yes/No)</div>
+      <div class="def">Did the rep set a clear agenda at the start of the call? Binary score — either present (1) or absent (0). Average across calls gives a rate.</div>
+    </div>
+    <div class="about-card">
+      <div class="term">Discovery</div>
+      <div class="formula">1–5 scale</div>
+      <div class="def">Quality of discovery questions asked. Evaluates depth of questioning, whether the rep uncovered needs, and how well they listened vs. pitched.</div>
+    </div>
+    <div class="about-card">
+      <div class="term">Pain</div>
+      <div class="formula">1–5 scale</div>
+      <div class="def">Did the rep identify and quantify the prospect's pain points? Measures ability to surface business problems and tie them to impact.</div>
+    </div>
+    <div class="about-card">
+      <div class="term">Goals</div>
+      <div class="formula">1–5 scale</div>
+      <div class="def">Did the rep connect the solution to the prospect's stated business goals? Evaluates strategic alignment and value framing.</div>
+    </div>
+    <div class="about-card">
+      <div class="term">Solution</div>
+      <div class="formula">1–5 scale</div>
+      <div class="def">Quality of solution presentation. Scored on relevance, clarity, and whether the demo/pitch was tailored to the discovered needs.</div>
+    </div>
+    <div class="about-card">
+      <div class="term">Objection Handling</div>
+      <div class="formula">1–5 scale</div>
+      <div class="def">How effectively did the rep handle objections? Evaluates acknowledgment, reframing, and resolution of prospect concerns.</div>
+    </div>
+    <div class="about-card">
+      <div class="term">Next Steps</div>
+      <div class="formula">1–5 scale</div>
+      <div class="def">Did the rep secure clear, committed next steps by end of call? Evaluates specificity (date, attendees, action) and mutual commitment.</div>
+    </div>
+  </div>
+</div>
+
+<div class="about-section">
+  <h2>⚠️ Known Limitations</h2>
+  <div class="about-grid">
+    <div class="about-card">
+      <div class="term">CVR &gt; 100%</div>
+      <div class="def">Some reps show conversion rates above 100%. This happens when deals close from SQOs created before 2026. CVR is a pipeline efficiency signal, not a strict closed/created rate.</div>
+    </div>
+    <div class="about-card">
+      <div class="term">May Data is Partial</div>
+      <div class="def">May 2026 data runs through May 12 only. May CW and MRR figures will be lower than a full month. The trend note calls this out explicitly.</div>
+    </div>
+    <div class="about-card">
+      <div class="term">Quarter MRR is Estimated</div>
+      <div class="def">When Q1 or Q2 is selected, per-rep MRR is estimated as (quarter CW / total CW) × total MRR. This assumes uniform MRR per deal, which may not be exact.</div>
+    </div>
+    <div class="about-card">
+      <div class="term">Gong Coverage is Partial</div>
+      <div class="def">Not all reps have Gong scores. Reps hired recently, those who don't use Gong, or those with fewer than a threshold of scored calls may show "No Gong" on their card.</div>
+    </div>
+    <div class="about-card">
+      <div class="term">SQO Timing Mismatch</div>
+      <div class="def">SQOs are counted by creation date; CW by close date. A rep with high SQOs in Jan may not see those close until Mar/Apr. CVR should be interpreted as a lagging signal.</div>
+    </div>
+    <div class="about-card">
+      <div class="term">Region Gaps</div>
+      <div class="def">Some reps show "–" for region. These are typically AMs or reps not yet assigned to a region in the tracker. They appear when "All" is selected but are excluded from region filters.</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /tab-about -->
 
 </div><!-- /page -->
 </div><!-- /mainContent -->
@@ -774,6 +1016,11 @@ function render(){
     document.getElementById('repGrid').innerHTML=sorted.map(repCardHTML).join('');
     document.getElementById('noResults').style.display='none';
   }
+}
+
+function switchTab(tab){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.textContent.toLowerCase()===tab||(tab==='dashboard'&&b.textContent==='Dashboard')||(tab==='about'&&b.textContent==='About')));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.toggle('active',p.id==='tab-'+tab));
 }
 
 function init(){
