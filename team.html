@@ -70,6 +70,8 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .pill{padding:4px 10px;border-radius:999px;border:1px solid var(--border-strong);background:var(--surface);font-size:11px;cursor:pointer;color:var(--text2);font-weight:500;white-space:nowrap;user-select:none}
 .pill:hover{background:#f0f0ee}
 .pill.active{background:#1a1a18;color:#fff;border-color:#1a1a18}
+.mgr-select{height:26px;padding:0 24px 0 8px;border:1px solid var(--border-strong);border-radius:6px;background:var(--surface);font-size:11px;font-weight:500;color:var(--text2);cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;min-width:130px}
+.mgr-select:focus{outline:none;border-color:#888}
 .filter-divider{width:1px;height:20px;background:var(--border);flex-shrink:0}
 .search-wrap{margin-left:auto}
 .search-wrap input{padding:5px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-strong);background:var(--surface);font-size:12px;width:160px;color:var(--text)}
@@ -208,10 +210,13 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   <div class="pill-group" id="regionPills"></div>
   <div class="filter-divider"></div>
   <span class="filter-label">Manager</span>
-  <div class="pill-group" id="mgrPills"></div>
+  <select class="mgr-select" id="mgrSelect" onchange="setManagerFilter(this.value)"></select>
   <div class="filter-divider"></div>
   <span class="filter-label">Facecard</span>
   <div class="pill-group" id="fcPills"></div>
+  <div class="filter-divider"></div>
+  <span class="filter-label">Quarter</span>
+  <div class="pill-group" id="qtrPills"></div>
   <div class="filter-divider"></div>
   <span class="filter-label">Ramp</span>
   <div class="pill-group" id="rampPills"></div>
@@ -411,8 +416,30 @@ function initials(name){
   return name[0].toUpperCase();
 }
 
+// ── QUARTER HELPERS ──────────────────────────────────────────────────
+function repQCW(r){
+  if(filters.quarter==='Q1')return r.janCW+r.febCW+r.marCW;
+  if(filters.quarter==='Q2')return r.aprCW+r.mayCW;
+  return r.cw2026;
+}
+function repQMRR(r){
+  if(filters.quarter==='All'||r.cw2026===0)return r.mrr2026;
+  const qCW=repQCW(r);
+  return Math.round(r.mrr2026*(qCW/r.cw2026));
+}
+function qMonths(){
+  if(filters.quarter==='Q1')return['jan','feb','mar'];
+  if(filters.quarter==='Q2')return['apr','may'];
+  return['jan','feb','mar','apr','may'];
+}
+function qMonthLabels(){
+  if(filters.quarter==='Q1')return['Jan','Feb','Mar'];
+  if(filters.quarter==='Q2')return['Apr','May'];
+  return['Jan','Feb','Mar','Apr','May'];
+}
+
 // ── FILTER STATE ─────────────────────────────────────────────────────
-let filters={region:'All',manager:'All',facecard:'All',ramp:'All'};
+let filters={region:'All',manager:'All',facecard:'All',ramp:'All',quarter:'All'};
 
 // ── FILTERED REPS ─────────────────────────────────────────────────────
 function filteredReps(){
@@ -422,6 +449,8 @@ function filteredReps(){
     if(r.name.includes('Deactivated'))return false;
     if(filters.region!=='All'&&r.region!==filters.region)return false;
     if(filters.manager!=='All'&&r.manager!==filters.manager)return false;
+    if(filters.quarter==='Q1'&&(r.janCW+r.febCW+r.marCW)===0)return false;
+    if(filters.quarter==='Q2'&&(r.aprCW+r.mayCW)===0)return false;
     if(filters.facecard!=='All'){
       if(filters.facecard==='Ace'&&r.ace===0)return false;
       if(filters.facecard==='Jack'&&r.jack===0)return false;
@@ -438,17 +467,20 @@ function filteredReps(){
 
 // ── SUMMARY ──────────────────────────────────────────────────────────
 function renderSummary(reps){
-  const totalCW=reps.reduce((s,r)=>s+r.cw2026,0);
-  const totalNN=reps.reduce((s,r)=>s+r.cwNN,0);
-  const totalMRR=reps.reduce((s,r)=>s+r.mrr2026,0);
+  const totalCW=reps.reduce((s,r)=>s+repQCW(r),0);
+  const totalNN=filters.quarter==='All'?reps.reduce((s,r)=>s+r.cwNN,0):null;
+  const totalMRR=reps.reduce((s,r)=>s+repQMRR(r),0);
   const wrReps=reps.filter(r=>r.winRate!=null);
   const avgWR=wrReps.length?wrReps.reduce((s,r)=>s+r.winRate,0)/wrReps.length:null;
   const gReps=reps.filter(r=>r.gongOverall!=null);
   const avgGong=gReps.length?gReps.reduce((s,r)=>s+r.gongOverall,0)/gReps.length:null;
-  const activeReps=reps.filter(r=>r.cw2026>0).length;
+  const activeReps=reps.filter(r=>repQCW(r)>0).length;
+  const qLabel=filters.quarter==='All'?'Jan–May':filters.quarter==='Q1'?'Jan–Mar':'Apr–May';
+  const cwLabel=filters.quarter==='All'?'Total CW 2026':`CW ${filters.quarter} 2026`;
+  const mrrLabel=filters.quarter==='All'?'Won MRR 2026':`MRR ${filters.quarter} 2026`;
   document.getElementById('summaryRow').innerHTML=`
-    <div class="sum-card blue"><div class="lbl">Total CW 2026</div><div class="val">${totalCW}</div><div class="sub">${totalNN} net new</div></div>
-    <div class="sum-card green"><div class="lbl">Won MRR 2026</div><div class="val">$${(totalMRR/1000).toFixed(0)}K</div><div class="sub">YTD Jan–May</div></div>
+    <div class="sum-card blue"><div class="lbl">${cwLabel}</div><div class="val">${totalCW}</div><div class="sub">${totalNN!=null?totalNN+' net new':'net new N/A by qtr'}</div></div>
+    <div class="sum-card green"><div class="lbl">${mrrLabel}</div><div class="val">$${(totalMRR/1000).toFixed(0)}K</div><div class="sub">YTD ${qLabel}</div></div>
     <div class="sum-card ${avgWR!=null&&avgWR<30?'red':avgWR!=null&&avgWR<45?'amber':'green'}">
       <div class="lbl">Avg Win Rate</div><div class="val">${avgWR!=null?avgWR.toFixed(0)+'%':'—'}</div>
       <div class="sub">${wrReps.length} reps tracked</div>
@@ -464,19 +496,24 @@ function renderSummary(reps){
 
 // ── TREND BARS ────────────────────────────────────────────────────────
 function renderTrend(reps){
-  const vals=MONTHS.map(m=>reps.reduce((s,r)=>s+(r[m+'CW']||0),0));
+  const months=qMonths();
+  const labels=qMonthLabels();
+  const allMonths=['jan','feb','mar','apr','may'];
+  const vals=months.map(m=>reps.reduce((s,r)=>s+(r[m+'CW']||0),0));
   const mx=Math.max(...vals,1);
   const bars=vals.map((v,i)=>{
     const h=Math.max(Math.round(v/mx*100),4);
-    const isMar=(i===2),isMay=(i===4);
+    const fullIdx=allMonths.indexOf(months[i]);
+    const isMar=(fullIdx===2),isMay=(fullIdx===4);
     return `<div class="trend-bar-wrap">
       <div class="trend-bar-val">${v}</div>
-      <div class="trend-bar ${isMar?'highlight':''}" style="height:${h}px" title="${MONTH_LABELS[i]}: ${v} CW"></div>
-      <div class="trend-bar-lbl">${MONTH_LABELS[i]}</div>
+      <div class="trend-bar ${isMar?'highlight':''}" style="height:${h}px" title="${labels[i]}: ${v} CW"></div>
+      <div class="trend-bar-lbl">${labels[i]}</div>
     </div>`;
   }).join('');
   document.getElementById('trendBars').innerHTML=bars;
-  document.getElementById('trendNote').textContent='March spike reflects Q1 end-of-quarter ELQ pull-forward. May is partial (data through May 12).';
+  const note=filters.quarter!=='Q2'?'March spike reflects Q1 end-of-quarter ELQ pull-forward. ':'';
+  document.getElementById('trendNote').textContent=note+'May is partial (data through May 12).';
 }
 
 // ── FILTER PILLS ─────────────────────────────────────────────────────
@@ -488,7 +525,10 @@ function makePills(containerId, values, filterKey){
 
 function setFilter(key,val){
   filters[key]=val;
-  document.querySelectorAll(`#${key==='region'?'region':'mgr'}Pills .pill`).forEach(p=>p.classList.remove('active'));
+  render();
+}
+function setManagerFilter(val){
+  filters.manager=val;
   render();
 }
 
@@ -500,10 +540,13 @@ function initFilters(){
   // Region pills
   const rEl=document.getElementById('regionPills');
   rEl.innerHTML=['All',...regions].map(v=>`<div class="pill ${v==='All'?'active':''}" onclick="setFilter('region','${v}');updatePills('regionPills','region','${v}')">${v}</div>`).join('');
-  // Manager pills
-  const mEl=document.getElementById('mgrPills');
-  mEl.innerHTML=['All',...mgrs].map(v=>`<div class="pill ${v==='All'?'active':''}" onclick="setFilter('manager','${v.replace(/'/g,"\\'")}');updatePills('mgrPills','manager','${v.replace(/'/g,"\\'")}')">` +
-    `${v==='All'?'All':v.split(' ')[0]}</div>`).join('');
+  // Manager dropdown
+  const mEl=document.getElementById('mgrSelect');
+  mEl.innerHTML=['All',...mgrs].map(v=>`<option value="${v}">${v==='All'?'All managers':v}</option>`).join('');
+  mEl.value='All';
+  // Quarter pills
+  const qEl=document.getElementById('qtrPills');
+  qEl.innerHTML=['All','Q1','Q2'].map(v=>`<div class="pill ${v==='All'?'active':''}" onclick="setFilter('quarter','${v}');updatePills('qtrPills','quarter','${v}')">${v==='All'?'Full Year':v==='Q1'?'Q1 (Jan–Mar)':'Q2 (Apr–May)'}</div>`).join('');
   // Facecard pills
   const fEl=document.getElementById('fcPills');
   fEl.innerHTML=['All','Ace','Jack','King'].map(v=>`<div class="pill ${v==='All'?'active':''}" onclick="setFilter('facecard','${v}');updatePills('fcPills','facecard','${v}')">${v}</div>`).join('');
@@ -515,7 +558,10 @@ function initFilters(){
 function updatePills(containerId, filterKey, val){
   filters[filterKey]=val;
   document.querySelectorAll(`#${containerId} .pill`).forEach(p=>{
-    p.classList.toggle('active', p.textContent===val||(val==='All'&&p.textContent==='All'));
+    p.classList.toggle('active', p.textContent===val||(val==='All'&&p.textContent==='All')
+      ||(containerId==='qtrPills'&&val==='All'&&p.textContent==='Full Year')
+      ||(containerId==='qtrPills'&&val==='Q1'&&p.textContent==='Q1 (Jan–Mar)')
+      ||(containerId==='qtrPills'&&val==='Q2'&&p.textContent==='Q2 (Apr–May)'));
   });
   render();
 }
@@ -524,6 +570,7 @@ function updatePills(containerId, filterKey, val){
 function repCardHTML(r){
   const color=avatarColor(r.name);
   const ini=initials(r.name);
+  const qCW=repQCW(r);
   const tierC=r.winTier?tierClass(r.winTier):'nodata';
   const tierLabel=r.winTier||'No win rate';
   const gongLabel=r.gongOverall!=null?r.gongOverall.toFixed(1)+' Gong':'No Gong';
@@ -546,10 +593,10 @@ function repCardHTML(r){
       </div>
     </div>
     <div class="rep-stats">
-      <div class="rep-stat"><div class="sv">${r.cw2026}</div><div class="sl">CW '26</div></div>
-      <div class="rep-stat"><div class="sv">${r.cwNN}</div><div class="sl">Net New</div></div>
+      <div class="rep-stat"><div class="sv">${qCW}</div><div class="sl">${filters.quarter==='All'?'CW \'26':filters.quarter+' CW'}</div></div>
+      <div class="rep-stat"><div class="sv">${filters.quarter==='All'?r.cwNN:'—'}</div><div class="sl">Net New</div></div>
       <div class="rep-stat"><div class="sv">${r.sqo2026||'—'}</div><div class="sl">SQOs</div></div>
-      <div class="rep-stat"><div class="sv">${r.mrr2026>0?'$'+(r.mrr2026/1000).toFixed(0)+'K':'—'}</div><div class="sl">MRR</div></div>
+      <div class="rep-stat"><div class="sv">${repQMRR(r)>0?'$'+(repQMRR(r)/1000).toFixed(0)+'K':'—'}</div><div class="sl">MRR</div></div>
     </div>
     <div class="rep-chips">
       <span class="chip ${tierC}">${tierLabel}</span>
@@ -569,6 +616,7 @@ function openModal(id){
   const r=REP_MAP[id];
   if(!r)return;
   document.getElementById('mName').textContent=r.name;
+  const qCW=repQCW(r);
   const tierC=r.winTier?tierClass(r.winTier):'nodata';
   document.getElementById('mMeta').innerHTML=[
     r.manager?`<span>📋 ${r.manager}</span>`:'',
