@@ -227,4 +227,13 @@ html = html.replace(old, new)
 with open(HTML_PATH, 'w') as f:
     f.write(html)
 
+# Write last-updated timestamp into the dash
+from datetime import datetime, timezone
+ts = datetime.now(timezone.utc).strftime('%-m/%-d/%Y at %-I:%M %p UTC')
+with open(HTML_PATH) as f:
+    html = f.read()
+html = re.sub(r'Last updated: [^<"]+', f'Last updated: {ts}', html)
+with open(HTML_PATH, 'w') as f:
+    f.write(html)
+print(f"Timestamp written: {ts}")
 print("Done. Commit: git add team.html scripts/refresh_data.py && git commit -m 'Data refresh YYYY-MM-DD'")

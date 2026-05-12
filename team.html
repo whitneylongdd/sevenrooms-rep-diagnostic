@@ -42,6 +42,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .about-note{background:#fffbf0;border:1px solid #e8d88a;border-radius:var(--radius);padding:12px 16px;font-size:12px;color:#5a4a00;line-height:1.6;margin-bottom:16px}
 .page-header{margin-bottom:24px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px}
 .page-title{font-size:20px;font-weight:800;margin-bottom:3px}
+.page-updated{font-size:11px;color:var(--text3);margin-top:4px}
 .page-sub{font-size:12px;color:var(--text2)}
 .source-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .chip-src{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;background:var(--blue-bg);color:var(--blue-text);font-size:11px;font-weight:500;border:1px solid rgba(24,95,165,.2)}
@@ -187,9 +188,29 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     .seg-btn{padding:10px 24px;border-radius:24px;border:2px solid var(--border);background:var(--bg);color:var(--text2);font-size:14px;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.01em}
     .seg-btn.active{background:#185fa5;border-color:#185fa5;color:#fff;box-shadow:0 2px 8px rgba(24,95,165,.25)}
     .seg-btn:hover:not(.active){border-color:#185fa5;color:#185fa5;background:var(--blue-bg)}
+
+/* PASSWORD GATE */
+#pwGate{position:fixed;inset:0;background:#f9f8f6;display:flex;align-items:center;justify-content:center;z-index:9999}
+#pwBox{background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:14px;padding:36px 40px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.08);max-width:340px;width:90%}
+#pwBox h2{font-size:18px;font-weight:800;margin-bottom:6px}
+#pwBox p{font-size:13px;color:#5c5c58;margin-bottom:20px}
+#pwInput{width:100%;padding:10px 14px;border:1.5px solid rgba(0,0,0,.15);border-radius:8px;font-size:14px;margin-bottom:12px;outline:none}
+#pwInput:focus{border-color:#185fa5}
+#pwBtn{width:100%;padding:10px;background:#185fa5;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer}
+#pwBtn:hover{background:#0f3d6e}
+#pwErr{color:#e24b4a;font-size:12px;margin-top:8px;display:none}
   </style>
 </head>
 <body>
+<div id="pwGate">
+  <div id="pwBox">
+    <h2>🔒 SevenRooms Pre-Sales Dash</h2>
+    <p>Enter the password to access the dashboard.</p>
+    <input id="pwInput" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')checkPw()">
+    <button id="pwBtn" onclick="checkPw()">Enter</button>
+    <div id="pwErr">Incorrect password. Try again.</div>
+  </div>
+</div>
 
 <div id="mainContent">
 <div class="page">
@@ -204,6 +225,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   <div>
     <div class="page-title">SevenRooms Pre-Sales Dash</div>
     <div class="page-sub">2026 YTD (Jan–May 12) · Global AE/AM Reps · Ramp: 2026 Ramp Tracker SOT · SQOs: 2026 only</div>
+    <div class="page-updated" id="lastUpdated">Last updated: May 12, 2026</div>
   </div>
 </div>
 
@@ -505,6 +527,25 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 </div>
 
 <script>
+
+// PASSWORD GATE
+(function(){
+  const PW='speedboat26';
+  const KEY='sr_dash_auth';
+  function checkPw(){
+    const v=document.getElementById('pwInput').value;
+    if(v===PW){sessionStorage.setItem(KEY,'1');document.getElementById('pwGate').style.display='none';}
+    else{document.getElementById('pwErr').style.display='block';}
+  }
+  window.checkPw=checkPw;
+  if(sessionStorage.getItem(KEY)==='1'){
+    document.addEventListener('DOMContentLoaded',function(){
+      const g=document.getElementById('pwGate');
+      if(g) g.style.display='none';
+    });
+  }
+})();
+
 const REPS_NAM = [
 {id:"aisling_horgan",name:"Aisling Horgan",manager:"Dana Miller",region:"West",ae_am:"AE",rep_level:"D4",location:"Los Angeles",ramp:0.0,cohort:"6/16/2025 (RF)",cw2026:0,cw26sqo:0,cwNN:0,cwExp:0,mrr2026:0,sqo2026:0,ace:0,jack:0,king:0,janCW:0,febCW:0,marCW:0,aprCW:0,mayCW:0,cwT90:0,sqoT90:0,gongOverall:null},
 {id:"alden_diaz",name:"Alden Diaz",manager:"Tyler Florkowski",region:"Central",ae_am:"AE",rep_level:"I3",location:"Detroit",ramp:1.0,cohort:"46034",cw2026:5,cw26sqo:5,cwNN:5,cwExp:0,mrr2026:1514,sqo2026:28,ace:0,jack:5,king:0,janCW:0,febCW:0,marCW:2,aprCW:2,mayCW:1,cwT90:3,sqoT90:24,gongOverall:3.29,gongResearch:3.65,gongAgenda:0.45,gongDiscovery:2.55,gongPain:3.25,gongGoals:1.9,gongSolution:3.0,gongObjection:2.95,gongNextSteps:4.0},
