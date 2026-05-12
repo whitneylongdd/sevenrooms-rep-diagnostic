@@ -650,15 +650,15 @@ function cvrTier(cvr){
   return'Critical';
 }
 REPS_NAM.forEach(r=>{
-  r.cvr=r.sqo2026>0?parseFloat((r.cw2026/r.sqo2026*100).toFixed(1)):null;
+  r.cvr=r.sqo2026>0?Math.min(100,parseFloat((r.cw2026/r.sqo2026*100).toFixed(1))):null;
   r.cvrTier=cvrTier(r.cvr);
 });
 REPS_INTL.forEach(r=>{
-  r.cvr=r.sqo2026>0?parseFloat((r.cw2026/r.sqo2026*100).toFixed(1)):null;
+  r.cvr=r.sqo2026>0?Math.min(100,parseFloat((r.cw2026/r.sqo2026*100).toFixed(1))):null;
   r.cvrTier=cvrTier(r.cvr);
 });
 REPS_ENT.forEach(r=>{
-  r.cvr = r.sqo2026>0 ? parseFloat((r.cw2026/r.sqo2026*100).toFixed(1)) : null;
+  r.cvr = r.sqo2026>0 ? Math.min(100,parseFloat((r.cw2026/r.sqo2026*100).toFixed(1))) : null;
   r.cvrTier = cvrTier(r.cvr);
 });
 
