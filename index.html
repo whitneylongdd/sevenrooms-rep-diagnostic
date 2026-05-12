@@ -7,15 +7,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   :root {
-    --bg: #f9f8f6;
-    --surface: #ffffff;
-    --border: rgba(0,0,0,0.08);
-    --border-strong: rgba(0,0,0,0.15);
-    --text: #1a1a18;
-    --text-secondary: #6b6b67;
-    --text-tertiary: #9c9c96;
-    --radius: 12px;
-    --radius-sm: 8px;
+    --bg: #f9f8f6; --surface: #ffffff; --border: rgba(0,0,0,0.08); --border-strong: rgba(0,0,0,0.15);
+    --text: #1a1a18; --text-secondary: #6b6b67; --text-tertiary: #9c9c96;
+    --radius: 12px; --radius-sm: 8px;
     --red: #e24b4a; --red-bg: #fcebeb; --red-text: #a32d2d;
     --amber: #ba7517; --amber-bg: #faeeda; --amber-text: #854f0b;
     --blue: #185fa5; --blue-bg: #e6f1fb; --blue-text: #185fa5;
@@ -26,16 +20,14 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
-
-  /* Layout */
   .page { max-width: 1200px; margin: 0 auto; padding: 24px 20px 60px; }
   .page-header { margin-bottom: 24px; }
-  .page-title { font-size: 22px; font-weight: 600; color: var(--text); }
+  .page-title { font-size: 22px; font-weight: 600; }
   .page-subtitle { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
 
   /* Controls */
   .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
-  .control-label { font-size: 12px; color: var(--text-secondary); font-weight: 500; margin-right: 2px; }
+  .control-label { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
   .pill-group { display: flex; gap: 4px; flex-wrap: wrap; }
   .pill { padding: 5px 12px; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--surface); font-size: 12px; font-weight: 500; cursor: pointer; color: var(--text-secondary); transition: all 0.15s; }
   .pill:hover { border-color: var(--text-secondary); color: var(--text); }
@@ -47,11 +39,10 @@
   .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
   .summary-card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 14px 16px; box-shadow: var(--shadow); }
   .summary-card .label { font-size: 11px; font-weight: 500; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
-  .summary-card .value { font-size: 26px; font-weight: 600; color: var(--text); line-height: 1; }
+  .summary-card .value { font-size: 26px; font-weight: 600; line-height: 1; }
   .summary-card .sub { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
-  .summary-card .delta { font-size: 11px; font-weight: 500; }
-  .delta.bad { color: var(--red); }
-  .delta.warn { color: var(--amber); }
+  .delta.bad { color: var(--red); font-size: 11px; font-weight: 500; }
+  .delta.warn { color: var(--amber); font-size: 11px; font-weight: 500; }
 
   /* Rep grid */
   .rep-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 32px; }
@@ -63,8 +54,9 @@
   .rep-avatar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
   .rep-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: #e0e0e0; }
   .rep-avatar-fallback { width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: #fff; }
-  .rep-name { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.2; }
-  .rep-title { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
+  .rep-name { font-size: 13px; font-weight: 600; line-height: 1.2; }
+  .rep-title { font-size: 10px; color: var(--text-secondary); margin-top: 1px; }
+  .rep-city { font-size: 10px; color: var(--text-tertiary); margin-top: 1px; }
   .rep-meta-row { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
   .badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
   .badge-red { background: var(--red-bg); color: var(--red-text); }
@@ -72,26 +64,38 @@
   .badge-blue { background: var(--blue-bg); color: var(--blue-text); }
   .badge-teal { background: var(--teal-bg); color: var(--teal-text); }
   .badge-purple { background: var(--purple-bg); color: var(--purple-text); }
-  .badge-gray { background: #f1efe8; color: #5f5e5a; }
   .tenure-tag { font-size: 10px; color: var(--text-tertiary); }
   .metrics-list { display: flex; flex-direction: column; gap: 6px; }
   .metric-row { display: flex; justify-content: space-between; align-items: center; }
-  .metric-label { font-size: 11px; color: var(--text-secondary); }
+  .metric-label { font-size: 11px; color: var(--text-secondary); display: flex; align-items: center; gap: 3px; }
   .metric-val { font-size: 11px; font-weight: 600; }
   .metric-val.danger { color: var(--red); }
   .metric-val.warn { color: var(--amber); }
   .metric-val.ok { color: var(--green); }
   .metric-val.muted { color: var(--text-tertiary); }
-  .mini-bar-wrap { flex: 1; margin: 0 8px; height: 4px; background: #f1efe8; border-radius: 99px; position: relative; overflow: visible; }
+  .mini-bar-wrap { flex: 1; margin: 0 8px; height: 4px; background: #f1efe8; border-radius: 99px; position: relative; }
   .mini-bar { height: 100%; border-radius: 99px; position: absolute; top: 0; left: 0; }
   .elite-tick { position: absolute; top: -2px; width: 2px; height: 8px; background: var(--teal); border-radius: 1px; }
 
-  /* Section headers */
+  /* Tooltip */
+  .tooltip-wrap { position: relative; display: inline-flex; align-items: center; }
+  .tooltip-icon { width: 13px; height: 13px; border-radius: 50%; background: var(--border-strong); color: var(--text-secondary); font-size: 9px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; cursor: help; flex-shrink: 0; }
+  .tooltip-box { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: #1a1a18; color: #fff; font-size: 11px; line-height: 1.5; padding: 7px 10px; border-radius: 6px; width: 200px; z-index: 50; pointer-events: none; }
+  .tooltip-wrap:hover .tooltip-box { display: block; }
+
+  /* Section */
   .section-header { margin: 0 0 12px; }
-  .section-title { font-size: 15px; font-weight: 600; color: var(--text); }
+  .section-title { font-size: 15px; font-weight: 600; }
   .section-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
 
-  /* Chart panels */
+  /* Failure mode definitions */
+  .mode-defs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 28px; }
+  .mode-def-card { background: var(--surface); border-radius: var(--radius-sm); border: 1px solid var(--border); padding: 12px 14px; border-top-width: 3px; }
+  .mode-def-title { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+  .mode-def-reps { font-size: 10px; color: var(--text-tertiary); margin-bottom: 6px; }
+  .mode-def-body { font-size: 11px; color: var(--text-secondary); line-height: 1.5; }
+
+  /* Chart */
   .chart-panel { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 20px; box-shadow: var(--shadow); margin-bottom: 24px; }
   .chart-wrap { position: relative; width: 100%; }
 
@@ -101,10 +105,10 @@
   .heatmap-table th { font-size: 10px; font-weight: 600; color: var(--text-secondary); padding: 10px 8px; text-align: center; border-bottom: 1px solid var(--border); background: #fafaf8; text-transform: uppercase; letter-spacing: 0.05em; }
   .heatmap-table th.left-align { text-align: left; padding-left: 16px; }
   .heatmap-table td { padding: 8px; text-align: center; border-bottom: 1px solid var(--border); font-weight: 500; font-size: 12px; }
-  .heatmap-table td.name-cell { text-align: left; padding-left: 16px; font-size: 12px; color: var(--text); font-weight: 400; }
+  .heatmap-table td.name-cell { text-align: left; padding-left: 16px; color: var(--text); font-weight: 400; }
   .heatmap-table td.name-cell img { width: 22px; height: 22px; border-radius: 50%; margin-right: 8px; vertical-align: middle; object-fit: cover; }
   .heatmap-table tr:last-child td { border-bottom: none; }
-  .heatmap-table tr.elite-row td { background: #e8f8f0; color: #085041; font-size: 12px; }
+  .heatmap-table tr.elite-row td { background: #e8f8f0; color: #085041; }
   .heatmap-table tr.elite-row td.name-cell { font-weight: 600; color: #085041; }
   .heatmap-table tr:hover:not(.elite-row) td { background: #fafaf8; }
 
@@ -114,15 +118,13 @@
   .coaching-table th { font-size: 11px; font-weight: 600; color: var(--text-secondary); padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); background: #fafaf8; text-transform: uppercase; letter-spacing: 0.05em; }
   .coaching-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
   .coaching-table tr:last-child td { border-bottom: none; }
-  .coaching-table .mode-cell { font-weight: 600; white-space: nowrap; }
-  .coaching-table .reps-cell { font-size: 12px; color: var(--text-secondary); }
 
   /* Legend */
   .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; }
   .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-secondary); }
   .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
 
-  /* Modal overlay */
+  /* Modal */
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
   .modal-overlay.open { display: flex; }
   .modal { background: var(--surface); border-radius: var(--radius); max-width: 520px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); overflow: hidden; }
@@ -130,7 +132,8 @@
   .modal-avatar { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
   .modal-avatar-fb { width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: #fff; }
   .modal-name { font-size: 18px; font-weight: 600; }
-  .modal-title { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+  .modal-manager { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .modal-title { font-size: 12px; color: var(--text-tertiary); margin-top: 1px; }
   .modal-meta { margin-top: 6px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
   .modal-body { padding: 18px 20px; }
   .modal-body h3 { font-size: 12px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 10px; }
@@ -150,20 +153,14 @@
   .no-results { text-align: center; padding: 48px; color: var(--text-tertiary); font-size: 14px; display: none; }
   .no-results.visible { display: block; }
 
-  @media (max-width: 900px) {
-    .rep-grid { grid-template-columns: repeat(2, 1fr); }
-    .summary-grid { grid-template-columns: repeat(2, 1fr); }
-  }
-  @media (max-width: 600px) {
-    .rep-grid { grid-template-columns: 1fr; }
-    .summary-grid { grid-template-columns: 1fr 1fr; }
-  }
+  @media (max-width: 900px) { .rep-grid { grid-template-columns: repeat(2, 1fr); } .summary-grid { grid-template-columns: repeat(2, 1fr); } .mode-defs { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px) { .rep-grid { grid-template-columns: 1fr; } .summary-grid { grid-template-columns: 1fr 1fr; } .mode-defs { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 
 <!-- Password gate -->
-<div id="pwGate" style="display:none;position:fixed;inset:0;background:#f9f8f6;z-index:9999;display:flex;align-items:center;justify-content:center;">
+<div id="pwGate" style="position:fixed;inset:0;background:#f9f8f6;z-index:9999;display:flex;align-items:center;justify-content:center;">
   <div style="background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:16px;padding:40px 36px;max-width:360px;width:90%;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
     <div style="font-size:28px;margin-bottom:12px;">🔒</div>
     <div style="font-size:18px;font-weight:600;color:#1a1a18;margin-bottom:6px;">SevenRooms NAM SMB</div>
@@ -171,46 +168,11 @@
     <input type="password" id="pwInput" placeholder="Enter password" autofocus
       style="width:100%;padding:10px 14px;border:1px solid rgba(0,0,0,0.15);border-radius:8px;font-size:14px;outline:none;margin-bottom:10px;box-sizing:border-box;">
     <div id="pwError" style="font-size:12px;color:#e24b4a;margin-bottom:10px;display:none;">Incorrect password — try again.</div>
-    <button onclick="checkPassword()"
-      style="width:100%;padding:10px;background:#1a1a18;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;">
-      Continue
-    </button>
+    <button onclick="checkPassword()" style="width:100%;padding:10px;background:#1a1a18;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;">Continue</button>
   </div>
 </div>
+
 <div id="mainContent" style="display:none;">
-
-<script>
-(function() {
-  const HASH = '41dd3b413d67fd277d964bffb53f33585ffdccca01cfdf53fa4e3c566051b08c';
-  if (sessionStorage.getItem('sr_auth') === HASH) {
-    document.getElementById('pwGate').style.display = 'none';
-    document.getElementById('mainContent').style.display = 'block';
-  }
-  async function sha256(str) {
-    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-  }
-  window.checkPassword = async function() {
-    const val = document.getElementById('pwInput').value;
-    const h = await sha256(val);
-    if (h === HASH) {
-      sessionStorage.setItem('sr_auth', HASH);
-      document.getElementById('pwGate').style.display = 'none';
-      document.getElementById('mainContent').style.display = 'block';
-    } else {
-      document.getElementById('pwError').style.display = 'block';
-      document.getElementById('pwInput').value = '';
-      document.getElementById('pwInput').focus();
-    }
-  };
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('pwInput').addEventListener('keydown', e => {
-      if (e.key === 'Enter') window.checkPassword();
-    });
-  });
-})();
-</script>
-
 <div class="page">
 
   <div class="page-header">
@@ -228,17 +190,50 @@
     <div class="summary-card">
       <div class="label">Avg SQO / 100 acts</div>
       <div class="value">0.25</div>
-      <div class="sub delta bad">vs 21.7 for Scott Cannon (elite high)</div>
+      <div class="sub"><span class="delta bad">vs 56% avg win rate for elite tier</span></div>
     </div>
     <div class="summary-card">
       <div class="label">Avg win rate</div>
       <div class="value">11.6%</div>
-      <div class="sub delta bad">vs 56.0% elite avg</div>
+      <div class="sub"><span class="delta bad">vs 56.0% elite avg (7 reps)</span></div>
     </div>
     <div class="summary-card">
       <div class="label">Avg Gong score</div>
       <div class="value">3.1<span style="font-size:14px;font-weight:400;color:var(--text-tertiary)"> / 5</span></div>
-      <div class="sub delta warn">Goals & Asp avg 1.2 · Agenda avg 0.2</div>
+      <div class="sub"><span class="delta warn">Goals & Asp avg 1.2 · Agenda avg 0.2</span></div>
+    </div>
+  </div>
+
+  <!-- Failure mode definitions -->
+  <div class="section-header">
+    <div class="section-title">Failure modes</div>
+    <div class="section-sub">Each rep is assigned one primary failure mode based on where their funnel breaks down</div>
+  </div>
+  <div class="mode-defs">
+    <div class="mode-def-card" style="border-top-color:#e24b4a;">
+      <div class="mode-def-title" style="color:#a32d2d;">Activity trap</div>
+      <div class="mode-def-reps">Raefe Waltman · Jaison Williams</div>
+      <div class="mode-def-body">High dial volume but near-zero conversion to qualified opportunities. Activity is being logged without meaningful prospect qualification — volume becomes a vanity metric that masks the real problem.</div>
+    </div>
+    <div class="mode-def-card" style="border-top-color:#ba7517;">
+      <div class="mode-def-title" style="color:#854f0b;">Conversation stall</div>
+      <div class="mode-def-reps">Ali LaRaia · Doyle Cowart</div>
+      <div class="mode-def-body">Strong connect rates but calls don't advance. The rep is reaching people but pitching features before establishing a mutual agenda or understanding the operator's goals. Calls end without a committed next step.</div>
+    </div>
+    <div class="mode-def-card" style="border-top-color:#185fa5;">
+      <div class="mode-def-title" style="color:#185fa5;">Demo-to-close gap</div>
+      <div class="mode-def-reps">Mason Shank</div>
+      <div class="mode-def-body">Getting into deals and running demos but not closing them. Opportunities are created but stall at proposal/negotiation. The rep is likely not quantifying pain, building urgency, or multi-threading to the decision maker.</div>
+    </div>
+    <div class="mode-def-card" style="border-top-color:#1d9e75;">
+      <div class="mode-def-title" style="color:#0f6e56;">Pipeline starved</div>
+      <div class="mode-def-reps">Anna Navarro</div>
+      <div class="mode-def-body">Strong call quality (highest Gong score in the group) but a low connect rate means the pipeline never fills. The issue is upstream — sequence timing, ICP targeting, or channel mix — not conversion skill.</div>
+    </div>
+    <div class="mode-def-card" style="border-top-color:#7f77dd;">
+      <div class="mode-def-title" style="color:#534ab7;">Low connect rate</div>
+      <div class="mode-def-reps">Will Taylor · Jeremiah Tolbert</div>
+      <div class="mode-def-body">Dials aren't turning into conversations at a meaningful rate. Could be wrong call times, stale lists, poor ICP fit, or a sequencing issue. Jeremiah at 9.5 months fully ramped with zero closed won is the most urgent case.</div>
     </div>
   </div>
 
@@ -264,25 +259,27 @@
     </select>
   </div>
 
-  <!-- Rep grid -->
   <div class="rep-grid" id="repGrid"></div>
   <div class="no-results" id="noResults">No reps match this filter.</div>
 
   <!-- Benchmark chart -->
   <div class="section-header">
     <div class="section-title">SQO efficiency vs benchmarks</div>
-    <div class="section-sub">SQO per 100 activities. Elite avg win rate = 56% (Christopher Agard, Cass Gardner, Cole Wallace, Scott Cannon, Miguel Amaro, Shannon Fricke, Melissa Joubert)</div>
+    <div class="section-sub">
+      <span class="tooltip-wrap">SQO per 100 activities<span class="tooltip-icon">?</span><span class="tooltip-box">SQO = Sales Qualified Opportunity. SQO/100 acts measures how many qualified pipeline opportunities a rep creates for every 100 outreach activities (calls, emails, etc.). Elite average = 56% win rate cohort (Christopher Agard, Cass Gardner, Cole Wallace, Scott Cannon, Miguel Amaro, Shannon Fricke, Melissa Joubert).</span></span>
+      &nbsp;·&nbsp; Team avg = 0.62 &nbsp;·&nbsp; Elite avg win rate = 56%
+    </div>
   </div>
   <div class="chart-panel">
-    <div class="chart-wrap" style="height:360px;">
-      <canvas id="sqoChart" role="img" aria-label="Horizontal bar chart of SQO per 100 activities. Scott Cannon leads at 21.7, followed by team avg at 0.62. All 8 focus reps are at 1.0 or below."></canvas>
+    <div class="chart-wrap" style="height:300px;">
+      <canvas id="sqoChart" role="img" aria-label="Horizontal bar chart of SQO per 100 activities for 8 focus reps vs team average. All 8 reps are at 1.0 or below, well under team average of 0.62."></canvas>
     </div>
   </div>
 
   <!-- Gong heatmap -->
   <div class="section-header">
     <div class="section-title">Gong sub-score heatmap</div>
-    <div class="section-sub">Scored 0–5 · green ≥ 90% of elite · amber 70–89% · orange 50–69% · red &lt;50% · Elite benchmark estimated from top closed-won call patterns</div>
+    <div class="section-sub">Scored 0–5 · green ≥90% of elite · amber 70–89% · orange 50–69% · red &lt;50% · Elite benchmark estimated from top closed-won call patterns</div>
   </div>
   <div class="legend">
     <span class="legend-item"><span class="legend-dot" style="background:#c0dd97;"></span>≥90% of elite</span>
@@ -292,19 +289,12 @@
     <span class="legend-item"><span class="legend-dot" style="background:#9fe1cb;"></span>Elite benchmark</span>
   </div>
   <div class="heatmap-panel">
-    <table class="heatmap-table" id="heatmapTable">
+    <table class="heatmap-table">
       <thead>
         <tr>
           <th class="left-align" style="width:160px;">Rep</th>
-          <th>Research</th>
-          <th>Agenda</th>
-          <th>Discovery</th>
-          <th>Quant. Pain</th>
-          <th>Goals &amp; Asp.</th>
-          <th>Solution Map</th>
-          <th>Objection</th>
-          <th>Next Steps</th>
-          <th>Overall</th>
+          <th>Research</th><th>Agenda</th><th>Discovery</th><th>Quant. Pain</th>
+          <th>Goals &amp; Asp.</th><th>Solution Map</th><th>Objection</th><th>Next Steps</th><th>Overall</th>
         </tr>
       </thead>
       <tbody id="heatmapBody"></tbody>
@@ -321,47 +311,48 @@
       <thead>
         <tr>
           <th style="width:18%;">Failure mode</th>
-          <th style="width:20%;">Reps</th>
-          <th style="width:31%;">Root cause</th>
-          <th style="width:31%;">Top coaching action</th>
+          <th style="width:18%;">Reps</th>
+          <th style="width:32%;">Root cause</th>
+          <th style="width:32%;">Top coaching action</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td class="mode-cell" style="color:var(--red);">Activity trap</td>
-          <td class="reps-cell">Raefe Waltman<br>Jaison Williams</td>
+          <td style="font-weight:600;color:var(--red);">Activity trap</td>
+          <td style="font-size:12px;color:var(--text-secondary);">Raefe Waltman<br>Jaison Williams</td>
           <td style="font-size:12px;color:var(--text-secondary);">Logging activity without qualifying; treating all prospects as equal; volume becomes vanity metric</td>
           <td style="font-size:12px;color:var(--text-secondary);">Shift 1:1 primary metric from dial count to SQO/100. Audit prospect list ICP quality. Build disqualification habit.</td>
         </tr>
         <tr>
-          <td class="mode-cell" style="color:var(--amber);">Conversation stall</td>
-          <td class="reps-cell">Ali LaRaia<br>Doyle Cowart</td>
+          <td style="font-weight:600;color:var(--amber);">Conversation stall</td>
+          <td style="font-size:12px;color:var(--text-secondary);">Ali LaRaia<br>Doyle Cowart</td>
           <td style="font-size:12px;color:var(--text-secondary);">High connect rates but calls don't advance. Feature pitching without a mutual agenda or defined next step.</td>
           <td style="font-size:12px;color:var(--text-secondary);">Call recording review: open → agenda → pain loop → next step. Mutual action plan drill. Score agenda setting weekly.</td>
         </tr>
         <tr>
-          <td class="mode-cell" style="color:var(--blue);">Demo-to-close gap</td>
-          <td class="reps-cell">Mason Shank</td>
-          <td style="font-size:12px;color:var(--text-secondary);">Generating opps but not closing. Likely missing urgency, champion building, or ROI quantification in demos.</td>
+          <td style="font-weight:600;color:var(--blue);">Demo-to-close gap</td>
+          <td style="font-size:12px;color:var(--text-secondary);">Mason Shank</td>
+          <td style="font-size:12px;color:var(--text-secondary);">Generating opps but not closing. Missing urgency, champion building, or ROI quantification in demos.</td>
           <td style="font-size:12px;color:var(--text-secondary);">Champion mapping exercise. Add ROI calculator to demo. Multi-thread deals. Focus on Goals & Asp score (currently 2.0).</td>
         </tr>
         <tr>
-          <td class="mode-cell" style="color:var(--teal);">Pipeline starved</td>
-          <td class="reps-cell">Anna Navarro</td>
-          <td style="font-size:12px;color:var(--text-secondary);">Highest call quality of the group (Gong 3.9) but 15% connect rate means pipeline never fills. Upstream problem.</td>
-          <td style="font-size:12px;color:var(--text-secondary);">Sequence timing / cadence refresh. Improve ICP targeting. Diversify channel mix (phone → LinkedIn + email). Anna has the skill to convert once she gets meetings.</td>
+          <td style="font-weight:600;color:var(--teal);">Pipeline starved</td>
+          <td style="font-size:12px;color:var(--text-secondary);">Anna Navarro</td>
+          <td style="font-size:12px;color:var(--text-secondary);">Highest call quality of the group (Gong 3.9) but 15% connect rate means pipeline never fills.</td>
+          <td style="font-size:12px;color:var(--text-secondary);">Sequence timing / cadence refresh. Improve ICP targeting. Diversify channel mix (phone → LinkedIn + email).</td>
         </tr>
         <tr>
-          <td class="mode-cell" style="color:var(--purple);">Low connect rate</td>
-          <td class="reps-cell">Will Taylor<br>Jeremiah Tolbert</td>
-          <td style="font-size:12px;color:var(--text-secondary);">Low answer rates despite reasonable activity. Time-of-day, channel mix, or stale list. Jeremiah at 9.5 months with 0 CW needs escalation.</td>
-          <td style="font-size:12px;color:var(--text-secondary);">A/B call times. Add LinkedIn + email touches. Validate list ICP. Jeremiah: immediate performance conversation — ramp window has closed.</td>
+          <td style="font-weight:600;color:var(--purple);">Low connect rate</td>
+          <td style="font-size:12px;color:var(--text-secondary);">Will Taylor<br>Jeremiah Tolbert</td>
+          <td style="font-size:12px;color:var(--text-secondary);">Low answer rates despite reasonable activity. Time-of-day, channel mix, or stale list.</td>
+          <td style="font-size:12px;color:var(--text-secondary);">A/B call times. Add LinkedIn + email touches. Validate list ICP. Jeremiah: immediate performance conversation.</td>
         </tr>
       </tbody>
     </table>
   </div>
 
 </div><!-- .page -->
+</div><!-- #mainContent -->
 
 <!-- Modal -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
@@ -370,220 +361,133 @@
       <div id="modalAvatarWrap"></div>
       <div style="flex:1;">
         <div class="modal-name" id="modalName"></div>
+        <div class="modal-manager" id="modalManager"></div>
         <div class="modal-title" id="modalTitle"></div>
         <div class="modal-meta" id="modalMeta"></div>
       </div>
       <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.remove('open')">✕</button>
     </div>
     <div class="modal-body">
-      <h3>Key metrics vs elite benchmark (56% WR)</h3>
+      <h3>Key metrics vs elite benchmark (56% avg win rate)</h3>
       <div class="modal-metrics" id="modalMetrics"></div>
       <h3 style="margin-top:4px;">Coaching priority</h3>
       <div class="modal-coaching" id="modalCoaching"></div>
     </div>
   </div>
 </div>
-</div><!-- #mainContent -->
 
 <script>
+// ——— Auth ———
+const HASH = '41dd3b413d67fd277d964bffb53f33585ffdccca01cfdf53fa4e3c566051b08c';
+(function() {
+  if (sessionStorage.getItem('sr_auth') === HASH) {
+    document.getElementById('pwGate').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+  }
+  async function sha256(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+  window.checkPassword = async function() {
+    const val = document.getElementById('pwInput').value;
+    const h = await sha256(val);
+    if (h === HASH) {
+      sessionStorage.setItem('sr_auth', HASH);
+      document.getElementById('pwGate').style.display = 'none';
+      document.getElementById('mainContent').style.display = 'block';
+    } else {
+      document.getElementById('pwError').style.display = 'block';
+      document.getElementById('pwInput').value = '';
+      document.getElementById('pwInput').focus();
+    }
+  };
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('pwInput').addEventListener('keydown', e => { if (e.key === 'Enter') window.checkPassword(); });
+  });
+})();
+
+// ——— Data ———
 const TODAY = new Date('2026-05-11');
-
-function monthsAgo(dateStr) {
-  const d = new Date(dateStr);
-  const diff = (TODAY - d) / (1000 * 60 * 60 * 24 * 30.44);
-  return Math.round(diff * 10) / 10;
-}
-
-function fmtDate(dateStr) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-}
+function monthsAgo(d) { return Math.round(((TODAY - new Date(d)) / (1000*60*60*24*30.44)) * 10) / 10; }
+function fmtDate(d) { return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
 
 const REPS = [
   {
-    id: 'raefe',
-    name: 'Raefe Waltman',
-    title: 'Lead Account Executive, In-Store',
+    id: 'raefe', name: 'Raefe Waltman', title: 'Lead AE, In-Store', manager: 'Cydney Engle',
     photo: 'https://avatars.slack-edge.com/2025-10-27/9775454826613_5c9a259ad3296f60e4a9_original.png',
-    startDate: '2025-08-18',
-    mode: 'activity-trap',
-    modeLabel: 'Activity trap',
-    modeBadge: 'badge-red',
-    accentColor: '#e24b4a',
-    avatarBg: '#e24b4a',
-    initials: 'RW',
-    q2Acts: 1150,
-    connectPct: 7.8,
-    meetingsSet: 0,
-    sqo100: 0.3,
-    winRate: 30.0,
-    gongOverall: 3.1,
-    gongCalls: 8,
+    startDate: '2025-08-18', city: 'Atlanta, GA',
+    mode: 'activity-trap', modeLabel: 'Activity trap', modeBadge: 'badge-red', accentColor: '#e24b4a', avatarBg: '#e24b4a', initials: 'RW',
+    q2Acts: 1150, connectPct: 7.8, meetingsSet: 0, sqo100: 0.3, winRate: 30.0, gongOverall: 3.1, gongCalls: 8,
     gongScores: [null, 0.3, 3.0, 3.2, 1.3, 3.6, 3.2, 3.0],
-    coaching: '<strong>Primary lever: Stop rewarding dial counts.</strong> Raefe has the highest activity in this cohort (1,150 Q2 dials) but produced 0 meetings. The behavior to change is treating volume as success. In your next 1:1, shift the KPI conversation entirely to SQO/100 acts. Ask: "Of your last 50 dials, how many were genuinely in-ICP?" Audit the prospect list together.',
+    coaching: '<strong>Primary lever: stop rewarding dial counts.</strong> Raefe has the highest activity in this cohort (1,150 Q2 dials) but produced 0 meetings. In your next 1:1, shift the KPI conversation entirely to SQO/100 acts. Ask: "Of your last 50 dials, how many were genuinely in-ICP?" Audit the prospect list together.',
   },
   {
-    id: 'jaison',
-    name: 'Jaison Williams',
-    title: 'Account Executive - In Store',
+    id: 'jaison', name: 'Jaison Williams', title: 'Account Executive, In-Store', manager: 'Cydney Engle',
     photo: 'https://avatars.slack-edge.com/2025-12-16/10130222099605_ef1409edc983f1f0d89d_original.png',
-    startDate: '2025-12-15',
-    mode: 'activity-trap',
-    modeLabel: 'Activity trap',
-    modeBadge: 'badge-red',
-    accentColor: '#e24b4a',
-    avatarBg: '#c0392b',
-    initials: 'JW',
-    q2Acts: 866,
-    connectPct: 23.8,
-    meetingsSet: 10,
-    sqo100: 0.0,
-    winRate: 17.2,
-    gongOverall: 2.4,
-    gongCalls: 17,
+    startDate: '2025-12-15', city: 'Charlotte, NC',
+    mode: 'activity-trap', modeLabel: 'Activity trap', modeBadge: 'badge-red', accentColor: '#e24b4a', avatarBg: '#c0392b', initials: 'JW',
+    q2Acts: 866, connectPct: 23.8, meetingsSet: 10, sqo100: 0.0, winRate: 17.2, gongOverall: 2.4, gongCalls: 17,
     gongScores: [null, 0.0, 2.4, 2.5, 1.7, 2.8, 2.4, 2.3],
-    coaching: '<strong>10 meetings, 0 SQOs — the meetings are not real opportunities.</strong> Jaison has a 23.8% connect rate and is getting meetings, but none are converting to qualified opportunities. The issue is likely discovery depth: he\'s booking calls but not uncovering enough pain. Focus Gong review on Goals & Aspirations (1.7) and Quantifying Pain. What is he hearing that causes him to call it a meeting?',
+    coaching: '<strong>10 meetings, 0 SQOs — the meetings aren\'t real opportunities.</strong> Jaison has a 23.8% connect rate and is getting meetings, but none are converting to qualified opportunities. Focus Gong review on Goals & Aspirations (1.7) and Quantifying Pain. What is he hearing that causes him to call it a meeting?',
   },
   {
-    id: 'ali',
-    name: 'Ali LaRaia',
-    title: 'Senior Account Executive, In-Store',
+    id: 'ali', name: 'Ali LaRaia', title: 'Senior AE, In-Store', manager: 'Nick (manager)',
     photo: 'https://avatars.slack-edge.com/2026-01-07/10277551820400_1d5d1e7a6a4dbb085a3a_original.jpg',
-    startDate: '2025-12-15',
-    mode: 'conv-stall',
-    modeLabel: 'Conversation stall',
-    modeBadge: 'badge-amber',
-    accentColor: '#ba7517',
-    avatarBg: '#ba7517',
-    initials: 'AL',
-    q2Acts: 478,
-    connectPct: 63.9,
-    meetingsSet: 1,
-    sqo100: 0.2,
-    winRate: null,
-    gongOverall: 3.3,
-    gongCalls: 3,
+    startDate: '2025-12-15', city: 'Tampa, FL',
+    mode: 'conv-stall', modeLabel: 'Conversation stall', modeBadge: 'badge-amber', accentColor: '#ba7517', avatarBg: '#ba7517', initials: 'AL',
+    q2Acts: 478, connectPct: 63.9, meetingsSet: 1, sqo100: 0.2, winRate: null, gongOverall: 3.3, gongCalls: 3,
     gongScores: [null, 0.0, 3.1, 3.5, 0.3, 3.8, 3.5, 3.4],
-    coaching: '<strong>63.9% connect rate is elite-level — the problem is what happens on the call.</strong> Ali is reaching people but cannot advance the conversation. Goals & Aspirations score of 0.3 is the lowest in the group. Pull 2-3 recent Gong recordings and listen specifically for the moment she shifts to product. Bet she\'s pitching before she\'s heard the operator\'s vision. Drill: first 8 minutes of a call must be all questions.',
+    coaching: '<strong>63.9% connect rate is elite-level — the problem is what happens on the call.</strong> Goals & Aspirations score of 0.3 is the lowest in the group. Pull 2–3 recent Gong recordings and listen specifically for the moment she shifts to product. Bet she\'s pitching before she\'s heard the operator\'s vision. Drill: first 8 minutes of a call must be all questions.',
   },
   {
-    id: 'doyle',
-    name: 'Doyle Cowart',
-    title: 'Senior Account Executive, In-Store',
+    id: 'doyle', name: 'Doyle Cowart', title: 'Senior AE, In-Store', manager: 'Cydney Engle',
     photo: 'https://avatars.slack-edge.com/2026-01-20/10331960912837_514859a08b75ac0acef6_original.png',
-    startDate: '2025-12-15',
-    mode: 'conv-stall',
-    modeLabel: 'Conversation stall',
-    modeBadge: 'badge-amber',
-    accentColor: '#ba7517',
-    avatarBg: '#9b5900',
-    initials: 'DC',
-    q2Acts: 937,
-    connectPct: 76.0,
-    meetingsSet: 0,
-    sqo100: 0.5,
-    winRate: 5.1,
-    gongOverall: 3.0,
-    gongCalls: 17,
+    startDate: '2025-12-15', city: 'Washington, DC',
+    mode: 'conv-stall', modeLabel: 'Conversation stall', modeBadge: 'badge-amber', accentColor: '#ba7517', avatarBg: '#9b5900', initials: 'DC',
+    q2Acts: 937, connectPct: 76.0, meetingsSet: 0, sqo100: 0.5, winRate: 5.1, gongOverall: 3.0, gongCalls: 17,
     gongScores: [null, 0.2, 2.8, 3.0, 1.5, 3.3, 2.9, 2.7],
-    coaching: '<strong>76% connect rate with 0 meetings booked — the highest call access waste in the pod.</strong> Doyle is reaching 3 of every 4 people he dials but getting zero commitment. With 17 Gong calls scored, you have rich data. Agenda Setting is 0.2 — he\'s not opening with a structure that earns the next step. Prescribe: every call must open with "Here\'s what I\'d like to cover today — does that work for you?" and close with a calendar invite before hanging up.',
+    coaching: '<strong>76% connect rate with 0 meetings — the highest call-access waste in the pod.</strong> Doyle is reaching 3 of every 4 people he dials but getting zero commitment. Agenda Setting is 0.2 — he\'s not opening with a structure that earns the next step. Prescribe: every call must open with a stated agenda and close with a calendar invite before hanging up.',
   },
   {
-    id: 'mason',
-    name: 'Mason Shank',
-    title: 'Account Executive - In Store',
+    id: 'mason', name: 'Mason Shank', title: 'Account Executive, In-Store', manager: 'Cydney Engle',
     photo: 'https://avatars.slack-edge.com/2026-01-14/10302183925076_a09d603697768178813b_original.jpg',
-    startDate: '2026-01-05',
-    mode: 'demo-close',
-    modeLabel: 'Demo-to-close gap',
-    modeBadge: 'badge-blue',
-    accentColor: '#185fa5',
-    avatarBg: '#185fa5',
-    initials: 'MS',
-    q2Acts: 391,
-    connectPct: 19.0,
-    meetingsSet: 6,
-    sqo100: 1.0,
-    winRate: 8.7,
-    gongOverall: 2.7,
-    gongCalls: 6,
+    startDate: '2026-01-05', city: 'Nashville, TN',
+    mode: 'demo-close', modeLabel: 'Demo-to-close gap', modeBadge: 'badge-blue', accentColor: '#185fa5', avatarBg: '#185fa5', initials: 'MS',
+    q2Acts: 391, connectPct: 19.0, meetingsSet: 6, sqo100: 1.0, winRate: 8.7, gongOverall: 2.7, gongCalls: 6,
     gongScores: [null, 0.1, 2.6, 2.8, 2.0, 3.1, 2.7, 2.5],
-    coaching: '<strong>Getting into deals but not closing — the gap is value anchoring.</strong> Mason is generating opportunities (SQO/100 of 1.0, highest in this group) but only closing 8.7% of them. At 4 months he\'s still building skill, but 6 Gong calls show the pattern: Goals & Aspirations at 2.0 means he\'s not connecting the product to the operator\'s stated ambitions. Coaching: introduce ROI conversation in every demo. "You told me you want X — here\'s what that is worth in dollars."',
+    coaching: '<strong>Getting into deals but not closing — the gap is value anchoring.</strong> Mason is generating opportunities (SQO/100 of 1.0, highest in this group) but only closing 8.7%. Goals & Aspirations at 2.0 means he\'s not connecting the product to the operator\'s stated ambitions. Coaching: introduce ROI conversation in every demo. "You told me you want X — here\'s what that is worth."',
   },
   {
-    id: 'anna',
-    name: 'Anna Navarro',
-    title: 'Account Executive - In Store',
+    id: 'anna', name: 'Anna Navarro', title: 'Account Executive, In-Store', manager: 'Cydney Engle',
     photo: 'https://avatars.slack-edge.com/2025-12-03/10044563956466_9f2efe847dac88ff39a3_original.png',
-    startDate: '2025-12-02',
-    mode: 'pipeline-starved',
-    modeLabel: 'Pipeline starved',
-    modeBadge: 'badge-teal',
-    accentColor: '#1d9e75',
-    avatarBg: '#1d9e75',
-    initials: 'AN',
-    q2Acts: 758,
-    connectPct: 15.1,
-    meetingsSet: 1,
-    sqo100: 0.0,
-    winRate: 6.2,
-    gongOverall: 3.9,
-    gongCalls: 15,
+    startDate: '2025-12-02', city: 'Washington, DC',
+    mode: 'pipeline-starved', modeLabel: 'Pipeline starved', modeBadge: 'badge-teal', accentColor: '#1d9e75', avatarBg: '#1d9e75', initials: 'AN',
+    q2Acts: 758, connectPct: 15.1, meetingsSet: 1, sqo100: 0.0, winRate: 6.2, gongOverall: 3.9, gongCalls: 15,
     gongScores: [null, 0.5, 3.5, 3.9, 3.4, 4.1, 4.0, 3.9],
-    coaching: '<strong>Best call quality in the pod — this is a targeting problem, not a skills problem.</strong> Anna\'s Gong 3.9 on 15 calls shows genuine capability. 15% connect rate at 758 dials means she\'s working a list that isn\'t picking up. Diagnose: what is her sequence look like? What time of day is she calling? Is her ICP list fresh? This is a quick win — fix the top of funnel and she has every skill needed to convert.',
+    coaching: '<strong>Best call quality in the pod — this is a targeting problem, not a skills problem.</strong> Anna\'s Gong 3.9 on 15 calls shows genuine capability. 15% connect rate at 758 dials means her list isn\'t picking up. Diagnose: sequence timing, time of day, ICP list freshness. This is a quick win — fix the top of funnel and she has every skill needed to convert.',
   },
   {
-    id: 'will',
-    name: 'Will Taylor',
-    title: 'Senior Account Executive - In Store',
+    id: 'will', name: 'Will Taylor', title: 'Senior AE, In-Store', manager: 'Nick (manager)',
     photo: 'https://avatars.slack-edge.com/2025-11-06/9889655900208_accd8af4a33818a986f3_original.png',
-    startDate: '2025-11-06',
-    mode: 'low-connect',
-    modeLabel: 'Low connect rate',
-    modeBadge: 'badge-purple',
-    accentColor: '#7f77dd',
-    avatarBg: '#534ab7',
-    initials: 'WT',
-    q2Acts: 463,
-    connectPct: 5.4,
-    meetingsSet: 1,
-    sqo100: 0.0,
-    winRate: 25.0,
-    gongOverall: 4.0,
-    gongCalls: 2,
-    gongCalls: 2,
+    startDate: '2025-11-06', city: 'Tampa, FL',
+    mode: 'low-connect', modeLabel: 'Low connect rate', modeBadge: 'badge-purple', accentColor: '#7f77dd', avatarBg: '#534ab7', initials: 'WT',
+    q2Acts: 463, connectPct: 5.4, meetingsSet: 1, sqo100: 0.0, winRate: 25.0, gongOverall: 4.0, gongCalls: 2,
     gongScores: [null, 0.0, 3.9, 4.0, 3.0, 4.2, 4.0, 3.8],
-    coaching: '<strong>5.4% connect rate is the core blocker — only 2 Gong calls to judge from.</strong> Will\'s win rate when he does close is 25% (above team avg of 33.9% is close), and his Gong shows real skill. The question is purely why calls aren\'t connecting. Check: is his list cold/stale? Is he calling at wrong hours? Is the Outreach sequence set up correctly? At 6 months this should have resolved naturally — something structural is wrong with his prospecting setup.',
+    coaching: '<strong>5.4% connect rate is the core blocker — only 2 Gong calls to judge from.</strong> Will\'s Gong shows real skill when he does get on a call. The question is purely structural: wrong call times, stale list, or sequencing issue. At 6 months this should have resolved naturally — something is wrong with his prospecting setup that needs to be diagnosed now.',
   },
   {
-    id: 'jeremiah',
-    name: 'Jeremiah Tolbert',
-    title: 'Strategic Account Executive, In-Store',
+    id: 'jeremiah', name: 'Jeremiah Tolbert', title: 'Strategic AE, In-Store', manager: 'Nick (manager)',
     photo: 'https://avatars.slack-edge.com/2025-07-30/9261873393351_a1f7c3bd6db2dbee1925_original.png',
-    startDate: '2025-07-28',
-    mode: 'low-connect',
-    modeLabel: 'Low connect rate',
-    modeBadge: 'badge-purple',
-    accentColor: '#7f77dd',
-    avatarBg: '#3d356e',
-    initials: 'JT',
-    q2Acts: 429,
-    connectPct: null,
-    meetingsSet: 1,
-    sqo100: 0.0,
-    winRate: 0,
-    gongOverall: 3.1,
-    gongCalls: 7,
+    startDate: '2025-07-28', city: 'Miami, FL',
+    mode: 'low-connect', modeLabel: 'Low connect rate', modeBadge: 'badge-purple', accentColor: '#7f77dd', avatarBg: '#3d356e', initials: 'JT',
+    q2Acts: 429, connectPct: null, meetingsSet: 1, sqo100: 0.0, winRate: 0, gongOverall: 3.1, gongCalls: 7,
     gongScores: [null, 0.2, 2.9, 3.1, 0.8, 3.4, 3.0, 2.8],
-    coaching: '<strong>9.5 months with 0 closed won — the ramp window has closed.</strong> Jeremiah is the most urgent case in this group. He\'s fully ramped by any measure, yet has no closed revenue. Goals & Aspirations at 0.8 is second-lowest in the group. This needs a formal performance conversation now, not a coaching adjustment. Build a 30-day plan with specific weekly SQO targets and a decision gate.',
+    coaching: '<strong>9.5 months with 0 closed won — the ramp window has closed.</strong> Jeremiah is the most urgent case. He\'s fully ramped by any measure yet has no closed revenue. Goals & Aspirations at 0.8 is second-lowest in the group. This needs a formal performance conversation now, not a coaching adjustment. Build a 30-day plan with specific weekly SQO targets and a decision gate.',
   },
 ];
 
 const ELITE_GONG = [3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5];
-const ELITE_WR = 56.0;
-const SUB_LABELS = ['Research','Agenda Setting','Discovery','Quantifying Pain','Goals & Asp.','Solution Map','Objection Handling','Next Steps'];
 
-// ——— Render rep cards ———
 function getHeatColor(val, eliteVal) {
   if (val === null) return {bg:'#f5f5f3', color:'#aaa'};
   const r = val / eliteVal;
@@ -593,18 +497,17 @@ function getHeatColor(val, eliteVal) {
   return {bg:'#f09595', color:'#791f1f'};
 }
 
-function metricClass(val, goodThreshold, warnThreshold) {
+function metricClass(val, good, warn) {
   if (val === null || val === undefined) return 'muted';
-  if (val >= goodThreshold) return 'ok';
-  if (val >= warnThreshold) return 'warn';
-  return 'danger';
+  return val >= good ? 'ok' : val >= warn ? 'warn' : 'danger';
 }
 
+// ——— Cards ———
 function buildCard(rep) {
   const tenure = monthsAgo(rep.startDate);
   const isRamping = tenure < 6;
   const card = document.createElement('div');
-  card.className = `rep-card`;
+  card.className = 'rep-card';
   card.dataset.mode = rep.mode;
   card.dataset.sqo = rep.sqo100;
   card.dataset.winrate = rep.winRate || 0;
@@ -616,11 +519,9 @@ function buildCard(rep) {
   const wrClass = rep.winRate !== null ? metricClass(rep.winRate, 40, 20) : 'muted';
   const connectDisp = rep.connectPct !== null ? rep.connectPct.toFixed(1) + '%' : '—';
   const connectClass = rep.connectPct !== null ? metricClass(rep.connectPct, 40, 15) : 'muted';
-
-  // Elite tick position for SQO bar (Scott Cannon = 21.7, bar max = 22)
-  const sqoMax = 22;
-  const sqoElitePct = Math.min((0.62 / sqoMax) * 100, 100); // team avg line
+  const sqoMax = 2; // scale bar to 2 for these reps
   const sqoFill = Math.min((rep.sqo100 / sqoMax) * 100, 100);
+  const teamAvgPct = Math.min((0.62 / sqoMax) * 100, 100);
 
   card.innerHTML = `
     <div class="rep-card-accent" style="background:${rep.accentColor};"></div>
@@ -630,12 +531,12 @@ function buildCard(rep) {
         <div class="rep-avatar-fallback" style="background:${rep.avatarBg};display:none;">${rep.initials}</div>
         <div>
           <div class="rep-name">${rep.name}</div>
-          <div class="rep-title">${rep.title.replace('Account Executive','AE').replace('Senior ','Sr. ').replace('Strategic ','Strategic ').replace('Lead ','Lead ')}</div>
+          <div class="rep-city">📍 ${rep.city}</div>
         </div>
       </div>
       <div class="rep-meta-row">
         <span class="badge ${rep.modeBadge}">${rep.modeLabel}</span>
-        <span class="tenure-tag">${tenure.toFixed(1)} mo ${isRamping ? '· ramping' : '· ramped'}</span>
+        <span class="tenure-tag">${tenure.toFixed(1)} mo${isRamping ? ' · ramping' : ''}</span>
       </div>
       <div class="metrics-list">
         <div class="metric-row">
@@ -643,16 +544,20 @@ function buildCard(rep) {
           <span class="metric-val">${rep.q2Acts.toLocaleString()}</span>
         </div>
         <div class="metric-row">
-          <span class="metric-label">Connect rate</span>
+          <span class="metric-label">
+            <span class="tooltip-wrap">Connect rate<span class="tooltip-icon">?</span><span class="tooltip-box">% of outbound dials that result in a live conversation with a prospect.</span></span>
+          </span>
           <span class="metric-val ${connectClass}">${connectDisp}</span>
         </div>
         <div class="metric-row">
-          <span class="metric-label">SQO / 100 acts</span>
+          <span class="metric-label">
+            <span class="tooltip-wrap">SQO/100 acts<span class="tooltip-icon">?</span><span class="tooltip-box">Sales Qualified Opportunities created per 100 outreach activities. Measures how efficiently activity turns into real pipeline. Team avg = 0.62.</span></span>
+          </span>
           <div class="mini-bar-wrap">
-            <div class="mini-bar" style="width:${sqoFill}%;background:${rep.sqo100 >= 1 ? '#185fa5' : rep.sqo100 >= 0.3 ? '#ba7517' : '#e24b4a'};"></div>
-            <div class="elite-tick" style="left:${sqoElitePct}%;"></div>
+            <div class="mini-bar" style="width:${sqoFill}%;background:${rep.sqo100>=1?'#185fa5':rep.sqo100>=0.3?'#ba7517':'#e24b4a'};"></div>
+            <div class="elite-tick" style="left:${teamAvgPct}%;" title="Team avg 0.62"></div>
           </div>
-          <span class="metric-val ${metricClass(rep.sqo100, 1, 0.3)}">${rep.sqo100.toFixed(1)}</span>
+          <span class="metric-val ${metricClass(rep.sqo100,1,0.3)}">${rep.sqo100.toFixed(1)}</span>
         </div>
         <div class="metric-row">
           <span class="metric-label">Win rate</span>
@@ -660,7 +565,7 @@ function buildCard(rep) {
         </div>
         <div class="metric-row">
           <span class="metric-label">Gong score</span>
-          <span class="metric-val ${metricClass(rep.gongOverall, 3.5, 2.5)}">${rep.gongOverall.toFixed(1)} <span style="font-weight:400;color:var(--text-tertiary);font-size:10px;">(${rep.gongCalls} calls)</span></span>
+          <span class="metric-val ${metricClass(rep.gongOverall,3.5,2.5)}">${rep.gongOverall.toFixed(1)} <span style="font-weight:400;color:var(--text-tertiary);font-size:10px;">(${rep.gongCalls} calls)</span></span>
         </div>
       </div>
     </div>
@@ -668,24 +573,23 @@ function buildCard(rep) {
   return card;
 }
 
+let currentFilter = 'all';
 function renderCards(sortKey) {
-  const grid = document.getElementById('repGrid');
   let reps = [...REPS];
   if (sortKey === 'tenure') reps.sort((a,b) => monthsAgo(b.startDate) - monthsAgo(a.startDate));
   else if (sortKey === 'sqo') reps.sort((a,b) => b.sqo100 - a.sqo100);
   else if (sortKey === 'winrate') reps.sort((a,b) => (b.winRate||0) - (a.winRate||0));
   else if (sortKey === 'gong') reps.sort((a,b) => b.gongOverall - a.gongOverall);
+  const grid = document.getElementById('repGrid');
   grid.innerHTML = '';
   reps.forEach(r => grid.appendChild(buildCard(r)));
   applyFilter(currentFilter);
 }
 
-let currentFilter = 'all';
 function applyFilter(filter) {
   currentFilter = filter;
-  const cards = document.querySelectorAll('.rep-card');
   let visible = 0;
-  cards.forEach(c => {
+  document.querySelectorAll('.rep-card').forEach(c => {
     const show = filter === 'all' || c.dataset.mode === filter;
     c.classList.toggle('hidden', !show);
     if (show) visible++;
@@ -699,56 +603,45 @@ document.getElementById('filterPills').addEventListener('click', e => {
   e.target.classList.add('active');
   applyFilter(e.target.dataset.filter);
 });
-
-document.getElementById('sortSelect').addEventListener('change', e => {
-  renderCards(e.target.value);
-});
-
+document.getElementById('sortSelect').addEventListener('change', e => renderCards(e.target.value));
 renderCards('default');
 
 // ——— Heatmap ———
-function buildHeatmap() {
+(function() {
   const tbody = document.getElementById('heatmapBody');
-
-  // Elite row
   const eliteRow = document.createElement('tr');
   eliteRow.className = 'elite-row';
-  let html = `<td class="name-cell"><strong>Elite benchmark (avg 7 reps)</strong></td>`;
+  let html = `<td class="name-cell"><strong>Elite benchmark (7-rep avg)</strong></td>`;
   ELITE_GONG.forEach(v => { html += `<td>${v.toFixed(1)}</td>`; });
   html += `<td><strong>3.5</strong></td>`;
   eliteRow.innerHTML = html;
   tbody.appendChild(eliteRow);
 
-  // Rep rows sorted by overall desc
-  const sorted = [...REPS].sort((a,b) => b.gongOverall - a.gongOverall);
-  sorted.forEach(rep => {
+  [...REPS].sort((a,b) => b.gongOverall - a.gongOverall).forEach(rep => {
     const tr = document.createElement('tr');
     let h = `<td class="name-cell"><img src="${rep.photo}" alt="" onerror="this.style.display='none'">${rep.name}</td>`;
-    rep.gongScores.forEach((s, i) => {
-      const { bg, color } = getHeatColor(s, ELITE_GONG[i] || 3.5);
-      const disp = s === null ? '—' : s.toFixed(1);
-      h += `<td style="background:${bg};color:${color};">${disp}</td>`;
+    rep.gongScores.forEach((s,i) => {
+      const {bg,color} = getHeatColor(s, ELITE_GONG[i]||3.5);
+      h += `<td style="background:${bg};color:${color};">${s===null?'—':s.toFixed(1)}</td>`;
     });
-    const { bg: obg, color: ocol } = getHeatColor(rep.gongOverall, 3.5);
+    const {bg:obg,color:ocol} = getHeatColor(rep.gongOverall,3.5);
     h += `<td style="background:${obg};color:${ocol};font-weight:700;">${rep.gongOverall.toFixed(1)}</td>`;
     tr.innerHTML = h;
     tbody.appendChild(tr);
   });
-}
-buildHeatmap();
+})();
 
-// ——— SQO Chart ———
+// ——— SQO Chart (elite avg benchmark, no Scott Cannon) ———
 const sqoData = [
-  { label: 'Scott Cannon (elite high)', val: 21.7, color: '#1d9e75' },
-  { label: 'Elite avg (7 reps)', val: 8.2, color: '#3b6d11' },
+  { label: 'Elite avg (7 reps, 56% WR)', val: 8.2, color: '#1d9e75' },
   { label: 'Team avg', val: 0.62, color: '#888780' },
   { label: 'Mason Shank', val: 1.0, color: '#185fa5' },
   { label: 'Doyle Cowart', val: 0.5, color: '#ba7517' },
-  { label: 'Raefe Waltman', val: 0.3, color: '#e24b4a' },
-  { label: 'Will Taylor', val: 0.0, color: '#7f77dd' },
   { label: 'Ali LaRaia', val: 0.2, color: '#ba7517' },
+  { label: 'Raefe Waltman', val: 0.3, color: '#e24b4a' },
   { label: 'Jeremiah Tolbert', val: 0.0, color: '#7f77dd' },
   { label: 'Jaison Williams', val: 0.0, color: '#e24b4a' },
+  { label: 'Will Taylor', val: 0.0, color: '#7f77dd' },
   { label: 'Anna Navarro', val: 0.0, color: '#1d9e75' },
 ];
 
@@ -756,59 +649,34 @@ new Chart(document.getElementById('sqoChart'), {
   type: 'bar',
   data: {
     labels: sqoData.map(d => d.label),
-    datasets: [{
-      data: sqoData.map(d => d.val),
-      backgroundColor: sqoData.map(d => d.color),
-      borderRadius: 4,
-      barThickness: 24,
-    }]
+    datasets: [{ data: sqoData.map(d => d.val), backgroundColor: sqoData.map(d => d.color), borderRadius: 4, barThickness: 22 }]
   },
   options: {
-    indexAxis: 'y',
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.x.toFixed(1)} SQO/100 acts` } }
-    },
+    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.x.toFixed(1)} SQO/100 acts` } } },
     scales: {
-      x: {
-        grid: { color: 'rgba(0,0,0,0.05)' },
-        ticks: { font: { size: 11 }, color: '#888', callback: v => v.toFixed(0) },
-        title: { display: true, text: 'SQO per 100 activities', font: { size: 11 }, color: '#888' }
-      },
-      y: {
-        grid: { display: false },
-        ticks: { font: { size: 11 }, color: '#444' }
-      }
+      x: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 11 }, color: '#888' }, title: { display: true, text: 'SQO per 100 activities', font: { size: 11 }, color: '#888' } },
+      y: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#444' } }
     }
   }
 });
-
-// Note: Elite avg SQO/100 is estimated at ~8.2 based on known elite reps;
-// Scott Cannon at 21.7 is the confirmed data point.
 
 // ——— Modal ———
 function openModal(rep) {
   const tenure = monthsAgo(rep.startDate);
   document.getElementById('modalName').textContent = rep.name;
-  document.getElementById('modalTitle').textContent = rep.title;
-
-  const metaEl = document.getElementById('modalMeta');
-  metaEl.innerHTML = `
+  document.getElementById('modalManager').textContent = `Manager: ${rep.manager}`;
+  document.getElementById('modalTitle').textContent = `${rep.title} · ${rep.city}`;
+  document.getElementById('modalMeta').innerHTML = `
     <span class="badge ${rep.modeBadge}">${rep.modeLabel}</span>
     <span style="font-size:11px;color:var(--text-tertiary);">Started ${fmtDate(rep.startDate)} · ${tenure.toFixed(1)} months</span>
   `;
-
-  const aw = document.getElementById('modalAvatarWrap');
-  aw.innerHTML = `
+  document.getElementById('modalAvatarWrap').innerHTML = `
     <img class="modal-avatar" src="${rep.photo}" alt="${rep.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
     <div class="modal-avatar-fb" style="background:${rep.avatarBg};display:none;">${rep.initials}</div>
   `;
-
   const wrDisp = rep.winRate !== null ? rep.winRate.toFixed(1) + '%' : '< 5 closed';
   const connectDisp = rep.connectPct !== null ? rep.connectPct.toFixed(1) + '%' : '—';
-
   document.getElementById('modalMetrics').innerHTML = `
     <div class="modal-metric">
       <div class="ml">Q2 Activities</div>
@@ -818,16 +686,16 @@ function openModal(rep) {
     <div class="modal-metric">
       <div class="ml">SQO / 100 acts</div>
       <div class="mv ${metricClass(rep.sqo100,1,0.3)}">${rep.sqo100.toFixed(1)}</div>
-      <div class="mb">Elite high: 21.7 (Cannon)</div>
+      <div class="mb">Elite avg: ~8.2</div>
     </div>
     <div class="modal-metric">
       <div class="ml">Connect rate</div>
-      <div class="mv ${rep.connectPct !== null ? metricClass(rep.connectPct,40,15) : 'muted'}">${connectDisp}</div>
+      <div class="mv ${rep.connectPct!==null?metricClass(rep.connectPct,40,15):'muted'}">${connectDisp}</div>
       <div class="mb">Team avg: ~25%</div>
     </div>
     <div class="modal-metric">
       <div class="ml">Win rate</div>
-      <div class="mv ${rep.winRate !== null ? metricClass(rep.winRate,40,20) : 'muted'}">${wrDisp}</div>
+      <div class="mv ${rep.winRate!==null?metricClass(rep.winRate,40,20):'muted'}">${wrDisp}</div>
       <div class="mb">Elite avg: 56.0%</div>
     </div>
     <div class="modal-metric">
@@ -841,19 +709,14 @@ function openModal(rep) {
       <div class="mb">${rep.gongCalls} calls · Elite: ~3.5</div>
     </div>
   `;
-
   document.getElementById('modalCoaching').innerHTML = rep.coaching;
   document.getElementById('modalOverlay').classList.add('open');
 }
 
 function closeModal(e) {
-  if (e.target === document.getElementById('modalOverlay')) {
-    document.getElementById('modalOverlay').classList.remove('open');
-  }
+  if (e.target === document.getElementById('modalOverlay')) document.getElementById('modalOverlay').classList.remove('open');
 }
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') document.getElementById('modalOverlay').classList.remove('open');
-});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') document.getElementById('modalOverlay').classList.remove('open'); });
 </script>
 </body>
 </html>
