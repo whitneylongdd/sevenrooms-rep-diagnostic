@@ -238,6 +238,9 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   <div class="filter-divider"></div>
   <span class="filter-label">Ramp</span>
   <div class="pill-group" id="rampPills"></div>
+  <div class="filter-divider"></div>
+  <span class="filter-label">Role</span>
+  <div class="pill-group" id="aeamPills"></div>
   <div class="search-wrap">
     <input id="repSearch" placeholder="Search reps…" oninput="render()">
   </div>
@@ -725,7 +728,7 @@ function initials(name){
 const REPS_ALL=[...REPS_NAM,...REPS_INTL,...REPS_ENT];
 let currentSeg='ALL';
 let activeREPS=REPS_ALL;
-let filters={region:'All',manager:'All',facecard:'All',ramp:'All'};
+let filters={region:'All',manager:'All',facecard:'All',ramp:'All',aeam:'All'};
 let currentSort='cw2026';
 function setSort(s){
   currentSort=s;
@@ -737,7 +740,7 @@ function switchSeg(seg){
   if(currentSeg===seg){seg='ALL';}
   currentSeg=seg;
   activeREPS={NAM:REPS_NAM,INTL:REPS_INTL,ENT:REPS_ENT,ALL:REPS_ALL}[seg];
-  filters={region:'All',manager:'All',facecard:'All',ramp:'All'};
+  filters={region:'All',manager:'All',facecard:'All',ramp:'All',aeam:'All'};
   document.querySelectorAll('.seg-btn').forEach(b=>b.classList.toggle('active',b.dataset.seg===seg));
   initFilters();
   render();
@@ -760,6 +763,7 @@ function filteredReps(){
       if(filters.ramp==='Fully Ramped'&&r.ramp<1)return false;
       if(filters.ramp==='Ramping'&&r.ramp>=1)return false;
     }
+    if(filters.aeam!=='All'&&r.ae_am!==filters.aeam)return false;
     if(search&&!r.name.toLowerCase().includes(search)&&!r.manager.toLowerCase().includes(search))return false;
     return true;
   });
@@ -856,6 +860,9 @@ function initFilters(){
   // Ramp pills
   const rpEl=document.getElementById('rampPills');
   rpEl.innerHTML=['All','Fully Ramped','Ramping'].map(v=>`<div class="pill ${v==='All'?'active':''}" onclick="setFilter('ramp','${v}');updatePills('rampPills','ramp','${v}')">${v}</div>`).join('');
+  // AE/AM pills
+  const aeamEl=document.getElementById('aeamPills');
+  aeamEl.innerHTML=['All','AE','AM'].map(v=>`<div class="pill ${filters.aeam===v||(!filters.aeam&&v==='All')?'active':''}" onclick="setFilter('aeam','${v}');updatePills('aeamPills','aeam','${v}')">${v}</div>`).join('');
 }
 
 function updatePills(containerId, filterKey, val){
