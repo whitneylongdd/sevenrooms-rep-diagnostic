@@ -78,10 +78,10 @@
   .elite-tick { position: absolute; top: -2px; width: 2px; height: 8px; background: var(--teal); border-radius: 1px; }
 
   /* Tooltip */
-  .tooltip-wrap { position: relative; display: inline-flex; align-items: center; }
+  .tooltip-wrap { display: inline-flex; align-items: center; }
   .tooltip-icon { width: 13px; height: 13px; border-radius: 50%; background: var(--border-strong); color: var(--text-secondary); font-size: 9px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; cursor: help; flex-shrink: 0; }
-  .tooltip-box { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: #1a1a18; color: #fff; font-size: 11px; line-height: 1.5; padding: 7px 10px; border-radius: 6px; width: 200px; z-index: 50; pointer-events: none; }
-  .tooltip-wrap:hover .tooltip-box { display: block; }
+  #global-tooltip { display: none; position: fixed; background: #1a1a18; color: #fff; font-size: 11px; line-height: 1.5; padding: 7px 10px; border-radius: 6px; width: 220px; z-index: 9999; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+  .tooltip-box { display: none !important; }
 
   /* Section */
   .section-header { margin: 0 0 12px; }
@@ -717,6 +717,31 @@ function closeModal(e) {
   if (e.target === document.getElementById('modalOverlay')) document.getElementById('modalOverlay').classList.remove('open');
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') document.getElementById('modalOverlay').classList.remove('open'); });
+
+// Global floating tooltip — escapes overflow:hidden on cards
+(function() {
+  const tip = document.getElementById('global-tooltip');
+  document.querySelectorAll('.tooltip-icon').forEach(icon => {
+    const box = icon.nextElementSibling;
+    const text = box ? box.textContent : icon.dataset.tip;
+    icon.addEventListener('mouseenter', () => {
+      tip.textContent = text;
+      tip.style.display = 'block';
+    });
+    icon.addEventListener('mousemove', e => {
+      const pad = 10, w = 220, vw = window.innerWidth;
+      let left = e.clientX - w / 2;
+      if (left < pad) left = pad;
+      if (left + w > vw - pad) left = vw - w - pad;
+      let top = e.clientY - tip.offsetHeight - 10;
+      if (top < pad) top = e.clientY + 20;
+      tip.style.left = left + 'px';
+      tip.style.top = top + 'px';
+    });
+    icon.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+  });
+})();
 </script>
+<div id="global-tooltip"></div>
 </body>
 </html>
