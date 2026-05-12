@@ -246,7 +246,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <div class="sort-row">
   <span class="sort-label">Sort by</span>
   <button class="sort-btn active" data-sort="cw2026" onclick="setSort('cw2026')">CW '26</button>
-  <button class="sort-btn" data-sort="cvr" onclick="setSort('cvr')"> '26 CVR</button>
+  <button class="sort-btn" data-sort="cvr" onclick="setSort('cvr')">T90 CVR</button>
   <button class="sort-btn" data-sort="sqo2026" onclick="setSort('sqo2026')">SQOs</button>
   <button class="sort-btn" data-sort="mrr2026" onclick="setSort('mrr2026')">MRR</button>
   <button class="sort-btn" data-sort="ace" onclick="setSort('ace')">Ace</button>
@@ -310,8 +310,8 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     </div>
     <div class="about-card">
       <div class="term">Avg CVR</div>
-      <div class="formula">AVG(cw26sqo / sqo2026) — '26 SQOs that closed as '26 CW</div>
-      <div class="def">Average Conversion Rate across all filtered reps who have at least one SQO in 2026. Reps with zero SQOs are excluded from this average. Color-coded: green ≥30%, amber 20–29%, red &lt;20%.</div>
+      <div class="formula">AVG(T90 CVR per rep) — CW from cohort SQOs / SQOs in 90-day window (EOM−90d → EOM)</div>
+      <div class="def">Average T90 CVR across all filtered reps who have at least one SQO in the 90-day window. Reps with zero SQOs are excluded from this average. Color-coded: green ≥30%, amber 20–29%, red &lt;20%.</div>
       <div class="source">Source: Opps CW + Opps Created tabs</div>
     </div>
     <div class="about-card">
@@ -385,8 +385,8 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
       <div class="source">Source: Raw Data – Opps CW · Column: MRR Final</div>
     </div>
     <div class="about-card">
-      <div class="term">CVR (Conversion Rate)</div>
-      <div class="formula">cw26sqo / sqo2026 × 100</div>
+      <div class="term">T90 CVR</div>
+      <div class="formula">CW from cohort SQOs / SQOs created in 90-day window (EOM−90d → EOM) × 100</div>
       <div class="def">Percentage of SQOs that converted to closed-won. Tiers: Elite ≥45%, Solid 30–44%, At Risk 20–29%, Critical &lt;20%. Reps with 0 SQOs show no CVR. Only counts CW deals whose SQO was also created in 2026, giving a true cohort conversion rate.</div>
       <div class="source">Source: Opps CW + Opps Created, 2026 YTD</div>
     </div>
@@ -872,7 +872,7 @@ function repCardHTML(r){
   const ini=initials(r.name);
   const qCW=r.cw2026;
   const tierC=r.cvrTier?tierClass(r.cvrTier):'nodata';
-  const tierLabel=r.cvr!=null?Math.round(r.cvr)+"% '26 CVR":'No CVR';
+  const tierLabel=r.cvr!=null?Math.round(r.cvr)+"% T90 CVR":'No CVR';
   const gongLabel=r.gongOverall!=null?r.gongOverall.toFixed(1)+' Gong':'No Gong';
   const gongC=r.gongOverall!=null?'gong':'nodata';
   const isRamping=r.ramp<1;
@@ -1014,7 +1014,7 @@ function openModal(id){
         <div class="ms-card"><div class="mv">${r.cw2026}</div><div class="ml">CW 2026</div></div>
         <div class="ms-card"><div class="mv">${r.sqo2026||'—'}</div><div class="ml">SQOs 2026</div></div>
         <div class="ms-card"><div class="mv ${r.cvrTier?tierClass(r.cvrTier)+' chip':''}">
-          ${r.cvr!=null?Math.round(r.cvr)+"%":'—'}</div><div class="ml">'26 CVR</div></div>
+          ${r.cvr!=null?Math.round(r.cvr)+"%":'—'}</div><div class="ml">T90 CVR</div></div>
       </div>
       <div class="fc-row">
         <div class="fc-item"><div class="fv" style="color:var(--teal)">${r.ace}</div><div class="fl">Ace CW</div></div>
