@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SevenRooms NAM SMB · Team Diagnostic</title>
+<title>SevenRooms Pre-Sales Dash</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -24,7 +24,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 
 
 /* LAYOUT */
-.page{max-width:1400px;margin:0 auto;padding:20px}
+.page{max-width:1440px;margin:0 auto;padding:28px 32px}
 .tab-nav{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:20px}
 .tab-btn{padding:8px 20px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s}
 .tab-btn:hover{color:var(--text)}
@@ -40,17 +40,17 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .about-card .def{font-size:12px;color:var(--text2);line-height:1.5}
 .about-card .source{font-size:10px;color:var(--text3);margin-top:6px;font-style:italic}
 .about-note{background:#fffbf0;border:1px solid #e8d88a;border-radius:var(--radius);padding:12px 16px;font-size:12px;color:#5a4a00;line-height:1.6;margin-bottom:16px}
-.page-header{margin-bottom:16px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.page-header{margin-bottom:24px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px}
 .page-title{font-size:20px;font-weight:800;margin-bottom:3px}
 .page-sub{font-size:12px;color:var(--text2)}
 .source-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .chip-src{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;background:var(--blue-bg);color:var(--blue-text);font-size:11px;font-weight:500;border:1px solid rgba(24,95,165,.2)}
 
 /* SUMMARY CARDS */
-.summary-row{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px}
-.sum-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow)}
+.summary-row{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:24px}
+.sum-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow)}
 .sum-card .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);font-weight:600;margin-bottom:4px}
-.sum-card .val{font-size:24px;font-weight:800;line-height:1}
+.sum-card .val{font-size:26px;font-weight:800;line-height:1.1}
 .sum-card .sub{font-size:10px;color:var(--text3);margin-top:3px}
 .sum-card.red .val{color:var(--red)}
 .sum-card.green .val{color:var(--green)}
@@ -59,18 +59,18 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .sum-card.purple .val{color:var(--purple)}
 
 /* TREND BAR */
-.trend-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.trend-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:24px;box-shadow:var(--shadow)}
 .trend-title{font-size:13px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px}
-.trend-bars{display:flex;gap:8px;align-items:flex-end;height:60px}
+.trend-bars{display:flex;gap:12px;align-items:flex-end;height:120px}
 .trend-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
 .trend-bar{width:100%;background:var(--blue-bg);border-radius:3px 3px 0 0;min-height:4px;position:relative;transition:background .15s}
 .trend-bar.highlight{background:var(--blue)}
-.trend-bar-val{font-size:10px;font-weight:700;color:var(--text)}
-.trend-bar-lbl{font-size:9px;color:var(--text3);text-transform:uppercase}
+.trend-bar-val{font-size:11px;font-weight:700;color:var(--text)}
+.trend-bar-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;margin-top:4px}
 .trend-note{font-size:10px;color:var(--text3);margin-top:6px;font-style:italic}
 
 /* FILTERS */
-.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center;padding-top:12px}
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;align-items:center;padding:14px 0 0}
 .filter-label{font-size:11px;font-weight:600;color:var(--text2);white-space:nowrap}
 .pill-group{display:flex;gap:4px;flex-wrap:wrap}
 .pill{padding:4px 10px;border-radius:999px;border:1px solid var(--border-strong);background:var(--surface);font-size:11px;cursor:pointer;color:var(--text2);font-weight:500;white-space:nowrap;user-select:none}
@@ -83,11 +83,11 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .search-wrap input{padding:5px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-strong);background:var(--surface);font-size:12px;width:160px;color:var(--text)}
 
 /* REP GRID */
-.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;margin-top:8px}
 .section-title{font-size:14px;font-weight:700}
 .rep-count{font-size:11px;color:var(--text3)}
-.rep-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
-.rep-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);cursor:pointer;transition:border-color .15s,transform .1s}
+.rep-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.rep-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);cursor:pointer;transition:border-color .15s,transform .1s}
 .rep-card:hover{border-color:rgba(0,0,0,.2);transform:translateY(-1px)}
 .rep-card-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .rep-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;font-size:13px}
@@ -194,8 +194,8 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <div id="tab-dashboard" class="tab-pane active">
 <div class="page-header">
   <div>
-    <div class="page-title">SevenRooms NAM SMB · Team Diagnostic</div>
-    <div class="page-sub">2026 YTD (Jan–May 12) · Gong Feb 10–May 11 · NAM AE/AM reps</div>
+    <div class="page-title">SevenRooms Pre-Sales Dash</div>
+    <div class="page-sub">2026 YTD (Jan–May 12) · Global AE/AM Reps</div>
     <div class="source-chips">
       <span class="chip-src">📊 2026 Rep Productivity Tracker</span>
       <span class="chip-src">🎙 Gong Scorecard</span>
