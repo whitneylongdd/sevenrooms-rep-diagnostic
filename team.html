@@ -212,13 +212,6 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <!-- SUMMARY -->
 <div class="summary-row" id="summaryRow"></div>
 
-<!-- TEAM TREND -->
-<div class="trend-section">
-  <div class="trend-title">Team monthly CW trend — 2026 YTD <span style="font-size:10px;font-weight:400;color:var(--text3);">(updates with filters)</span></div>
-  <div class="trend-bars" id="trendBars"></div>
-  <div class="trend-note" id="trendNote"></div>
-</div>
-
 <!-- FILTERS -->
 <div class="seg-toggle">
   <button class="seg-btn active" data-seg="ALL" onclick="switchSeg('ALL')">🌐 Global</button>
@@ -244,6 +237,13 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   <div class="search-wrap">
     <input id="repSearch" placeholder="Search reps…" oninput="render()">
   </div>
+</div>
+
+<!-- TEAM TREND -->
+<div class="trend-section">
+  <div class="trend-title">Team monthly CW trend — 2026 YTD <span style="font-size:10px;font-weight:400;color:var(--text3);">(updates with filters)</span></div>
+  <div class="trend-bars" id="trendBars"></div>
+  <div class="trend-note" id="trendNote"></div>
 </div>
 
 <div class="sort-row">
