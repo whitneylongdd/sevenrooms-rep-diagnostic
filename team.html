@@ -25,8 +25,8 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 
 /* LAYOUT */
 .page{max-width:1440px;margin:0 auto;padding:28px 32px}
-.tab-nav{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:20px}
-.tab-btn{padding:8px 20px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s}
+.tab-nav{display:flex;align-items:center;gap:0;border-bottom:2px solid var(--border);margin-bottom:20px}
+.tab-btn{padding:8px 20px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s}.tab-btn.about-btn{margin-left:auto;font-size:12px;color:var(--text3)}.tab-btn.about-btn:hover{color:var(--text2)}.tab-btn.about-btn.active{color:var(--text2);border-bottom-color:var(--text3)}
 .tab-btn:hover{color:var(--text)}
 .tab-btn.active{color:#1a1a18;border-bottom-color:#1a1a18}
 .tab-pane{display:none}
@@ -280,8 +280,8 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <div class="tab-nav">
   <button class="tab-btn active" onclick="switchTab('dashboard')">Dashboard</button>
   <button class="tab-btn" onclick="switchTab('insights')">Insights</button>
-  <button class="tab-btn" onclick="switchTab('about')">About</button>
   <button class="tab-btn" onclick="switchTab('enablement')">🎯 Enablement</button>
+  <button class="tab-btn about-btn" onclick="switchTab('about')">About this file</button>
 </div>
 
 <div id="tab-dashboard" class="tab-pane active">
@@ -1605,7 +1605,7 @@ function render(){
 }
 
 function switchTab(tab){
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',(tab==='dashboard'&&b.textContent==='Dashboard')||(tab==='about'&&b.textContent==='About')||(tab==='insights'&&b.textContent==='Insights')||(tab==='enablement'&&b.textContent==='🎯 Enablement')));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',(tab==='dashboard'&&b.textContent==='Dashboard')||(tab==='about'&&b.textContent==='About this file')||(tab==='insights'&&b.textContent==='Insights')||(tab==='enablement'&&b.textContent==='🎯 Enablement')));
   document.querySelectorAll('.tab-pane').forEach(p=>p.classList.toggle('active',p.id==='tab-'+tab));
   if(tab==='insights') setTimeout(renderInsights,50);
 }
