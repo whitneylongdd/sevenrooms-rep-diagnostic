@@ -1288,7 +1288,7 @@ function renderSummary(reps){
   const avgWR=wrReps.length?wrReps.reduce((s,r)=>s+r.cvr,0)/wrReps.length:null;
   const gReps=reps.filter(r=>r.gongOverall!=null);
   const avgGong=gReps.length?gReps.reduce((s,r)=>s+r.gongOverall,0)/gReps.length:null;
-  const activeReps=reps.filter(r=>(fcActive?r[fcField]:r.cw2026)>0).length;
+  const activeReps=reps.filter(r=>r.tag!=='loa'&&r.tag!=='left'&&(fcActive?r[fcField]:r.cw2026)>0).length;
   const qLabel='Jan–May';
   const cwLabel=fcActive?`${fc} CW 2026`:'Total CW 2026';
   const cwSub=fcActive?'full-year':(totalNN!=null?totalNN+' net new':'—');
@@ -1302,7 +1302,7 @@ function renderSummary(reps){
       <div class="sub">${wrReps.length} reps w/ SQOs</div>
     </div>
     <div class="sum-card purple"><div class="lbl">Avg Gong</div><div class="val">${avgGong!=null?avgGong.toFixed(1):'—'}</div><div class="sub">${gReps.length} reps scored</div></div>
-    <div class="sum-card"><div class="lbl">Active Reps</div><div class="val">${activeReps}</div><div class="sub">with 2026 CW</div></div>
+    <div class="sum-card"><div class="lbl">Current Active Reps</div><div class="val">${activeReps}</div><div class="sub">excl. LOA &amp; left team</div></div>
     <div class="sum-card amber">
       <div class="lbl">Jack Mix</div>
       <div class="val">${jackMixBase>0?Math.round(reps.reduce((s,r)=>s+r.jack,0)/jackMixBase*100)+'%':'—'}</div>
