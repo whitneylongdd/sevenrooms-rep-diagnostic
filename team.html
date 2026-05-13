@@ -1314,8 +1314,11 @@ function renderSummary(reps){
 function renderTrend(reps){
   const months=['jan','feb','mar','apr','may'];
   const labels=['Jan','Feb','Mar','Apr','May'];
-  // Always compute from filtered rep list for consistency across all filters
-  const vals=months.map(m=>reps.reduce((s,r)=>s+(r[m+'CW']||0),0));
+  // Use sheet-level unique-venue counts when unfiltered (matches source spreadsheet)
+  const noOtherFilters=filters.region==='All'&&filters.manager==='All'&&filters.facecard==='All'&&filters.aeam==='All'&&!(document.getElementById('repSearch')||{value:''}).value;
+  const isGlobalUnfiltered=currentSeg==='ALL'&&noOtherFilters;
+  const isSegUnfiltered=currentSeg!=='ALL'&&noOtherFilters&&SEGMENT_MONTHLY[currentSeg];
+  const vals=isGlobalUnfiltered?months.map(m=>TEAM_MONTHLY[m]):isSegUnfiltered?months.map(m=>SEGMENT_MONTHLY[currentSeg][m]):months.map(m=>reps.reduce((s,r)=>s+(r[m+'CW']||0),0));
   // Avg CW per rep per month — always computed from the filtered rep list
   const repCount=Math.max(reps.length,1);
   const avgVals=vals.map(v=>(v/repCount).toFixed(1));
