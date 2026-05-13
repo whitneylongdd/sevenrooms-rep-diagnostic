@@ -27,9 +27,14 @@ CW_SHEET_ID   = '1RGwcqbWrYk1WUVphvPJ7EnDw4TxBLpV1lwoa-EqbHbU'
 RAMP_SHEET_ID = '1N5_gpIXPsQVrHB529OhlIqqmSdTQif9-mDcKvYrNbvs'
 HTML_PATH     = os.path.join(os.path.dirname(__file__), '..', 'team.html')
 
-# T90 window: EOMONTH of current month, minus 90 days
+# T90 window: EOMONTH of the last COMPLETED month (matches spreadsheet which uses
+# a fixed monthly column — current month is incomplete so we anchor to prior EOMONTH)
 today = date.today()
-eom = date(today.year, today.month, calendar.monthrange(today.year, today.month)[1])
+if today.month == 1:
+    prev_year, prev_month = today.year - 1, 12
+else:
+    prev_year, prev_month = today.year, today.month - 1
+eom = date(prev_year, prev_month, calendar.monthrange(prev_year, prev_month)[1])
 t90_start = eom - __import__('datetime').timedelta(days=90)
 print(f"T90 window: {t90_start} → {eom}  (EOMONTH={eom}, EOMONTH-90={t90_start})")
 
@@ -58,6 +63,11 @@ print("Pulling Raw Data - Opps CW...")
 cw_rows = fetch_sheet(CW_SHEET_ID, 'Raw Data - Opps CW').get('values', [])
 print(f"  {len(cw_rows)-1} rows")
 
+# Use sets of venue IDs to count unique venues per rep (matches spreadsheet COUNTUNIQUEIFS)
+rep_venues = defaultdict(lambda: {
+    'all':set(),'nn':set(),'exp':set(),
+    'jan':set(),'feb':set(),'mar':set(),'apr':set(),'may':set()
+})
 rep = defaultdict(lambda: {
     'cw2026':0,'cwNN':0,'cwExp':0,'mrr2026':0.0,
     'ace':0,'jack':0,'king':0,
@@ -78,14 +88,16 @@ for row in cw_rows[1:]:
     mo = parts[0]
     if mo not in MONTHS_2026: continue
 
-    d = rep[rep_name]
-    d['cw2026'] += 1
-    d[MO_KEY[mo]] += 1
+    venue_id = row[9].strip() if len(row) > 9 else ''
+    v = rep_venues[rep_name]
+    v['all'].add(venue_id)
+    v[MO_KEY[mo]].add(venue_id)
 
     ot = opp_type.lower()
-    if 'net new' in ot: d['cwNN'] += 1
-    elif 'expansion' in ot or 'upsell' in ot: d['cwExp'] += 1
+    if 'net new' in ot: v['nn'].add(venue_id)
+    elif 'expansion' in ot or 'upsell' in ot: v['exp'].add(venue_id)
 
+    d = rep[rep_name]
     fc = facecard.lower()
     if fc == 'ace': d['ace'] += 1
     elif fc == 'jack': d['jack'] += 1
@@ -95,6 +107,17 @@ for row in cw_rows[1:]:
     try: d['mrr2026'] += float(mrr_clean)
     except: pass
 
+# Collapse venue sets to counts
+for name, v in rep_venues.items():
+    d = rep[name]
+    d['cw2026'] = len(v['all'])
+    d['cwNN']   = len(v['nn'])
+    d['cwExp']  = len(v['exp'])
+    d['jan']    = len(v['jan'])
+    d['feb']    = len(v['feb'])
+    d['mar']    = len(v['mar'])
+    d['apr']    = len(v['apr'])
+    d['may']    = len(v['may'])
 print(f"  Reps with CW: {len(rep)},  total cw2026: {sum(v['cw2026'] for v in rep.values()):,}")
 
 # ── Team-level unique venue counts per month (for TEAM_MONTHLY constant) ──────
