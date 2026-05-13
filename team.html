@@ -1303,7 +1303,7 @@ function renderInsights(){
         borderWidth:2,borderColor:"#fff",hoverOffset:6}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:"62%",
       plugins:{legend:{position:"bottom",labels:{font:baseFont,boxWidth:10,padding:12}},
-        tooltip:{callbacks:{label:i=>i.label+": "+i.raw+" deals ("+(i.raw/(aceTotal+jackTotal+kingTotal)*100).toFixed(1)+"%)"}}}}}
+        tooltip:{callbacks:{label:i=>i.label+": "+i.raw+" deals ("+(i.raw/(aceTotal+jackTotal+kingTotal)*100).toFixed(1)+"%)"}}}}
   });
 
   // ── 5. Top 15 reps horizontal bar ──────────────────────────────────────────
@@ -1315,8 +1315,8 @@ function renderInsights(){
       datasets:[{label:"Net New CW", data:top15.map(r=>r.cwNN),
         backgroundColor:t15Colors, borderRadius:3}]},
     options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,
-      plugins:{legend:noLegend,tooltip:{callbacks:{label:i=>i.raw+" venues",afterLabel:ctx=>{const r=top15[ctx.dataIndex];const cvr=r.sqoT90?((r.cwT90/r.sqoT90)*100).toFixed(0)+"% CVR":"no CVR";return r.manager+" · "+cvr;}}}}},
-      scales:{x:{grid:baseGrid,ticks:{font:baseFont}},y:{grid:{display:false},ticks:{font:{...baseFont,size:10}}}}}
+      plugins:{legend:noLegend,tooltip:{callbacks:{label:i=>i.raw+" venues",afterLabel:function(ctx){const r=top15[ctx.dataIndex];const cvr=r.sqoT90?((r.cwT90/r.sqoT90)*100).toFixed(0)+"% CVR":"no CVR";return r.manager+" - "+cvr;}}}},
+      scales:{x:{grid:baseGrid,ticks:{font:baseFont}},y:{grid:{display:false},ticks:{font:Object.assign({},baseFont,{size:10})}}}}
   });
 
   // ── 6. MRR by segment donut ────────────────────────────────────────────────
@@ -1327,7 +1327,7 @@ function renderInsights(){
       backgroundColor:[C.blue,C.teal,C.purple],borderWidth:2,borderColor:"#fff",hoverOffset:6}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:"60%",
       plugins:{legend:{position:"bottom",labels:{font:baseFont,boxWidth:10,padding:12}},
-        tooltip:{callbacks:{label:i=>i.label+": "+fmtMRR(i.raw)+" ("+((i.raw/mrrSeg.reduce((a,b)=>a+b,0))*100).toFixed(1)+"%)"}}}}}
+        tooltip:{callbacks:{label:i=>i.label+": "+fmtMRR(i.raw)+" ("+((i.raw/mrrSeg.reduce((a,b)=>a+b,0))*100).toFixed(1)+"%)"}}}}
   });
 
   // ── 7. CVR vs CW scatter ───────────────────────────────────────────────────
