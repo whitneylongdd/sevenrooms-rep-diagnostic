@@ -45,7 +45,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .page-updated{font-size:11px;color:var(--text3);margin-top:4px}
 .page-sub{font-size:12px;color:var(--text2)}
 .source-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.chip-src{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;background:var(--blue-bg);color:var(--blue-text);font-size:11px;font-weight:500;border:1px solid rgba(24,95,165,.2)}
+.chip-src{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;background:var(--blue-bg);color:var(--blue-text);font-size:11px;font-weight:500;border:1px solid rgba(24,95,165,.2);text-decoration:none;cursor:pointer}.chip-src:hover{background:rgba(24,95,165,.15);border-color:rgba(24,95,165,.4)}
 
 /* SUMMARY CARDS */
 .summary-row{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:24px}
@@ -331,9 +331,9 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <div class="about-section">
   <h2>📦 Data Sources</h2>
   <div class="source-chips" style="margin-bottom:14px">
-    <span class="chip-src">📊 2026 Rep Productivity Tracker</span>
-    <span class="chip-src">🎙 Gong Scorecard</span>
-    <span class="chip-src">📋 Gong Scoring Rubric</span>
+    <a class="chip-src" href="https://docs.google.com/spreadsheets/d/1RGwcqbWrYk1WUVphvPJ7EnDw4TxBLpV1lwoa-EqbHbU/edit?gid=9457474#gid=9457474" target="_blank" rel="noopener">📊 2026 Rep Productivity Tracker</a>
+    <a class="chip-src" href="https://docs.google.com/spreadsheets/d/1yxSglgMCz5a3Wyb73VajXPIwQVLfb_zdG9_1_C0jUOo/edit?gid=557561918#gid=557561918" target="_blank" rel="noopener">🎙 Gong Scorecard</a>
+    <a class="chip-src" href="https://docs.google.com/document/d/1xAPcqD9gEk4Pu1u_WjkZhNsx7Fh3dxNN2LZS5XQt4Ko/edit?tab=t.0" target="_blank" rel="noopener">📋 Gong Scoring Rubric</a>
   </div>
   <div class="about-grid">
     <div class="about-card">
