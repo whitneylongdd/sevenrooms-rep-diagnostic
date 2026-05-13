@@ -313,9 +313,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   <div class="filter-divider"></div>
   <span class="filter-label">Role</span>
   <div class="pill-group" id="aeamPills"></div>
-  <div class="filter-divider"></div>
-  <span class="filter-label">Status</span>
-  <div class="pill-group" id="tagPills"></div>
+
 </div>
 <div class="seg-note" id="segNote"><em>Filtering causes the dash to sum per-rep deal counts, which is the best available approximation since we don't store venue IDs at the rep level — but it may result in some minimal double counting if deals are attributed to 2 reps in different segments.</em></div>
 
@@ -346,9 +344,13 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   </div>
 </div>
 <!-- REP GRID -->
-<div class="section-header">
+<div class="section-header" style="margin-bottom:8px">
   <span class="section-title">Rep Scorecards</span>
   <span class="rep-count" id="repCount"></span>
+</div>
+<div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
+  <span style="font-size:12px;font-weight:600;color:#64748b;white-space:nowrap">Show:</span>
+  <div class="pill-group" id="cardTagPills"></div>
 </div>
 <div class="hidden-banner" id="hiddenBanner">
   <span id="hiddenCount"></span>
@@ -1214,6 +1216,7 @@ const SEGMENT_MONTHLY={
 };
 let currentSeg='ALL';
 const hiddenReps=new Set();
+let cardTagFilter='All';
 let activeREPS=REPS_ALL;
 let filters={region:'All',manager:'All',facecard:'All',aeam:'All',tag:'All'};
 let currentSort='cw2026';
@@ -1246,6 +1249,11 @@ function showAllReps(){
   hiddenReps.clear();
   render();
 }
+function setCardTagFilter(val){
+  cardTagFilter=val;
+  document.querySelectorAll('#cardTagPills .pill').forEach(p=>p.classList.toggle('active',p.dataset.val===val));
+  render();
+}
 function filteredReps(){
   const search=(document.getElementById('repSearch')||{value:''}).value.toLowerCase();
   return activeREPS.filter(r=>{
@@ -1260,7 +1268,6 @@ function filteredReps(){
       if(filters.facecard==='King'&&r.king===0)return false;
     }
     if(filters.aeam!=='All'&&r.ae_am!==filters.aeam)return false;
-    if(filters.tag!=='All'&&(r.tag||'none')!==filters.tag)return false;
     if(search&&!r.name.toLowerCase().includes(search)&&!r.manager.toLowerCase().includes(search))return false;
     return true;
   });
@@ -1375,7 +1382,14 @@ function initFilters(){
     {val:'none',label:'Standard'},
     {val:'left',label:'👋 Left Team'},
   ];
-  tagEl.innerHTML=tagOpts.map(o=>`<div class="pill ${filters.tag===o.val||(!filters.tag&&o.val==='All')?'active':''}" data-val="${o.val}" onclick="setFilter('tag','${o.val}');updatePills('tagPills','tag','${o.val}')">${o.label}</div>`).join('');
+  // Card tag pills (LOA + Left Team) — separate from summary filters
+  const ctEl=document.getElementById('cardTagPills');
+  const cardTagOpts=[
+    {val:'All',label:'All'},
+    {val:'loa',label:'🏠 LOA'},
+    {val:'left',label:'👋 Left Team'},
+  ];
+  if(ctEl) ctEl.innerHTML=cardTagOpts.map(o=>`<div class="pill ${o.val==='All'?'active':''}" data-val="${o.val}" onclick="setCardTagFilter('${o.val}')">${o.label}</div>`).join('');
 }
 
 function updatePills(containerId, filterKey, val){
@@ -1574,7 +1588,7 @@ function render(){
   const reps=filteredReps();
   renderSummary(reps);
   renderTrend(reps);
-  document.getElementById('repCount').textContent=`${reps.length} rep${reps.length!==1?'s':''}`;
+  document.getElementById('repCount').textContent=`${sorted.length} rep${sorted.length!==1?'s':''}`;
   const banner=document.getElementById('hiddenBanner');
   if(banner){
     const n=hiddenReps.size;
@@ -1591,7 +1605,12 @@ function render(){
     king:(a,b)=>b.king-a.king,
     gong:(a,b)=>(b.gongOverall??-1)-(a.gongOverall??-1),
   };
-  const sorted=[...reps].sort(sortFn[currentSort]||sortFn.cw2026);
+  const cardReps=cardTagFilter==='All'?reps:reps.filter(r=>{
+    if(cardTagFilter==='loa')return r.tag==='loa';
+    if(cardTagFilter==='left')return r.tag==='left';
+    return true;
+  });
+  const sorted=[...cardReps].sort(sortFn[currentSort]||sortFn.cw2026);
   if(sorted.length===0){
     document.getElementById('repGrid').innerHTML='';
     document.getElementById('noResults').style.display='block';
