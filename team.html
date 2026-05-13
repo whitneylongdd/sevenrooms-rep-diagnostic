@@ -1588,7 +1588,6 @@ function render(){
   const reps=filteredReps();
   renderSummary(reps);
   renderTrend(reps);
-  document.getElementById('repCount').textContent=`${sorted.length} rep${sorted.length!==1?'s':''}`;
   const banner=document.getElementById('hiddenBanner');
   if(banner){
     const n=hiddenReps.size;
@@ -1611,6 +1610,7 @@ function render(){
     return true;
   });
   const sorted=[...cardReps].sort(sortFn[currentSort]||sortFn.cw2026);
+  document.getElementById('repCount').textContent=`${sorted.length} rep${sorted.length!==1?'s':''}`;
   if(sorted.length===0){
     document.getElementById('repGrid').innerHTML='';
     document.getElementById('noResults').style.display='block';
