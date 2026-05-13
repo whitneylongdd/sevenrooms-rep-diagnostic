@@ -281,6 +281,9 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   <div class="filter-divider"></div>
   <span class="filter-label">Role</span>
   <div class="pill-group" id="aeamPills"></div>
+  <div class="filter-divider"></div>
+  <span class="filter-label">Status</span>
+  <div class="pill-group" id="tagPills"></div>
 </div>
 <div class="seg-note" id="segNote"><em>Filtering causes the dash to sum per-rep deal counts, which is the best available approximation since we don't store venue IDs at the rep level — but it may result in some minimal double counting if deals are attributed to 2 reps in different segments.</em></div>
 
@@ -826,7 +829,7 @@ const SEGMENT_MONTHLY={
 let currentSeg='ALL';
 const hiddenReps=new Set();
 let activeREPS=REPS_ALL;
-let filters={region:'All',manager:'All',facecard:'All',aeam:'All'};
+let filters={region:'All',manager:'All',facecard:'All',aeam:'All',tag:'All'};
 let currentSort='cw2026';
 function setSort(s){
   currentSort=s;
@@ -839,7 +842,7 @@ function switchSeg(seg){
   if(currentSeg===seg){seg='ALL';}
   currentSeg=seg;
   activeREPS={NAM:REPS_NAM,INTL:REPS_INTL,ENT:REPS_ENT,ALL:REPS_ALL}[seg];
-  filters={region:'All',manager:'All',facecard:'All',aeam:'All'};
+  filters={region:'All',manager:'All',facecard:'All',aeam:'All',tag:'All'};
   document.querySelectorAll('.seg-btn').forEach(b=>b.classList.toggle('active',b.dataset.seg===seg));
   const note=document.getElementById('segNote');
   if(note) note.classList.toggle('visible', seg!=='ALL');
@@ -871,6 +874,7 @@ function filteredReps(){
       if(filters.facecard==='King'&&r.king===0)return false;
     }
     if(filters.aeam!=='All'&&r.ae_am!==filters.aeam)return false;
+    if(filters.tag!=='All'&&(r.tag||'none')!==filters.tag)return false;
     if(search&&!r.name.toLowerCase().includes(search)&&!r.manager.toLowerCase().includes(search))return false;
     return true;
   });
@@ -918,7 +922,7 @@ function renderTrend(reps){
   const months=['jan','feb','mar','apr','may'];
   const labels=['Jan','Feb','Mar','Apr','May'];
   // Use sheet-level unique-venue counts when unfiltered (matches source spreadsheet)
-  const noOtherFilters=filters.region==='All'&&filters.manager==='All'&&filters.facecard==='All'&&filters.aeam==='All'&&!(document.getElementById('repSearch')||{value:''}).value;
+  const noOtherFilters=filters.region==='All'&&filters.manager==='All'&&filters.facecard==='All'&&filters.aeam==='All'&&filters.tag==='All'&&!(document.getElementById('repSearch')||{value:''}).value;
   const isGlobalUnfiltered=currentSeg==='ALL'&&noOtherFilters;
   const isSegUnfiltered=currentSeg!=='ALL'&&noOtherFilters&&SEGMENT_MONTHLY[currentSeg];
   const vals=isGlobalUnfiltered?months.map(m=>TEAM_MONTHLY[m]):isSegUnfiltered?months.map(m=>SEGMENT_MONTHLY[currentSeg][m]):months.map(m=>reps.reduce((s,r)=>s+(r[m+'CW']||0),0));
@@ -980,12 +984,23 @@ function initFilters(){
   // AE/AM pills
   const aeamEl=document.getElementById('aeamPills');
   aeamEl.innerHTML=['All','AE','AM'].map(v=>`<div class="pill ${filters.aeam===v||(!filters.aeam&&v==='All')?'active':''}" onclick="setFilter('aeam','${v}');updatePills('aeamPills','aeam','${v}')">${v}</div>`).join('');
+  // Tag pills
+  const tagEl=document.getElementById('tagPills');
+  const tagOpts=[
+    {val:'All',label:'All'},
+    {val:'monitoring',label:'👀 Monitoring'},
+    {val:'coaching',label:'📋 Coaching Plan'},
+    {val:'loa',label:'🏠 LOA'},
+    {val:'none',label:'Standard'},
+  ];
+  tagEl.innerHTML=tagOpts.map(o=>`<div class="pill ${filters.tag===o.val||(!filters.tag&&o.val==='All')?'active':''}" data-val="${o.val}" onclick="setFilter('tag','${o.val}');updatePills('tagPills','tag','${o.val}')">${o.label}</div>`).join('');
 }
 
 function updatePills(containerId, filterKey, val){
   filters[filterKey]=val;
   document.querySelectorAll(`#${containerId} .pill`).forEach(p=>{
-    p.classList.toggle('active', p.textContent===val||(val==='All'&&p.textContent==='All'));
+    const pv=p.dataset.val!==undefined?p.dataset.val:p.textContent;
+    p.classList.toggle('active', pv===val||(val==='All'&&pv==='All'));
   });
   render();
 }
