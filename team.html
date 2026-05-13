@@ -69,6 +69,13 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .trend-bar-val{font-size:11px;font-weight:700;color:var(--text)}
 .trend-bar-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;margin-top:4px}
 .trend-bar-avg{font-size:9px;color:var(--text3);margin-top:2px;white-space:nowrap}
+.rep-hide-btn{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;border:1px solid var(--border);background:var(--surface2);color:var(--text3);font-size:12px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;z-index:2}
+.rep-card:hover .rep-hide-btn{opacity:1}
+.rep-card{position:relative}
+.hidden-banner{display:none;align-items:center;gap:10px;padding:7px 14px;background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;font-size:12px;color:#92400e;margin-bottom:12px}
+.hidden-banner.visible{display:flex}
+.hidden-banner button{padding:2px 10px;border-radius:999px;border:1px solid #fcd34d;background:#fff;color:#92400e;font-size:11px;font-weight:600;cursor:pointer}
+.hidden-banner button:hover{background:#fef3c7}
 .trend-avg-badge{display:inline-block;margin-left:10px;font-size:11px;font-weight:600;color:var(--blue);background:var(--blue-bg);border:1px solid rgba(24,95,165,.2);border-radius:999px;padding:2px 9px;vertical-align:middle}
 .trend-note{font-size:10px;color:var(--text3);margin-top:6px;font-style:italic}
 
@@ -304,6 +311,10 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <div class="section-header">
   <span class="section-title">Rep Scorecards</span>
   <span class="rep-count" id="repCount"></span>
+</div>
+<div class="hidden-banner" id="hiddenBanner">
+  <span id="hiddenCount"></span>
+  <button onclick="showAllReps()">Show all</button>
 </div>
 <div class="rep-grid" id="repGrid"></div>
 <div class="no-results" id="noResults" style="display:none">No reps match the current filters.</div>
@@ -812,6 +823,7 @@ const SEGMENT_MONTHLY={
   ENT:{"jan":78,"feb":105,"mar":125,"apr":101,"may":17}
 };
 let currentSeg='ALL';
+const hiddenReps=new Set();
 let activeREPS=REPS_ALL;
 let filters={region:'All',manager:'All',facecard:'All',aeam:'All'};
 let currentSort='cw2026';
@@ -835,11 +847,21 @@ function switchSeg(seg){
 }
 
 // ── FILTERED activeREPS ─────────────────────────────────────────────────────
+function hideRep(id,e){
+  e.stopPropagation();
+  hiddenReps.add(id);
+  render();
+}
+function showAllReps(){
+  hiddenReps.clear();
+  render();
+}
 function filteredReps(){
   const search=(document.getElementById('repSearch')||{value:''}).value.toLowerCase();
   return activeREPS.filter(r=>{
     if(!r.manager||['#REF!','-',''].includes(r.manager))return false;
     if(r.name.includes('Deactivated'))return false;
+    if(hiddenReps.has(r.id))return false;
     if(filters.region!=='All'&&r.region!==filters.region)return false;
     if(filters.manager!=='All'&&r.manager!==filters.manager)return false;
     if(filters.facecard!=='All'){
@@ -986,6 +1008,7 @@ function repCardHTML(r){
   const regionBadge=r.region&&!['','-','--'].includes(r.region)?`· ${r.region}`:'';
 
   return `<div class="rep-card" onclick="openModal('${r.id}')">
+    <button class="rep-hide-btn" onclick="hideRep('${r.id}',event)" title="Deselect rep">✕</button>
     <div class="rep-card-top">
       <div class="rep-avatar" style="background:${color}">${ini}</div>
       <div>
@@ -1153,6 +1176,12 @@ function render(){
   renderSummary(reps);
   renderTrend(reps);
   document.getElementById('repCount').textContent=`${reps.length} rep${reps.length!==1?'s':''}`;
+  const banner=document.getElementById('hiddenBanner');
+  if(banner){
+    const n=hiddenReps.size;
+    banner.classList.toggle('visible',n>0);
+    if(n>0){const c=document.getElementById('hiddenCount');if(c)c.textContent=`${n} rep${n!==1?'s':''} deselected from stats`;}
+  }
   const sortFn={
     cw2026:(a,b)=>b.cw2026-a.cw2026,
     cvr:(a,b)=>(b.cvr??-1)-(a.cvr??-1),
