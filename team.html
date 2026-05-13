@@ -199,7 +199,27 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 #pwBtn{width:100%;padding:10px;background:#185fa5;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer}
 #pwBtn:hover{background:#0f3d6e}
 #pwErr{color:#e24b4a;font-size:12px;margin-top:8px;display:none}
+
+/* INSIGHTS TAB */
+.insights-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:20px;margin-bottom:24px}
+.insights-grid.wide{grid-template-columns:1fr 1fr}
+.insights-grid.full{grid-template-columns:1fr}
+.insight-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.insight-card h3{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:3px}
+.insight-card .card-sub{font-size:11px;color:var(--text3);margin-bottom:16px}
+.insight-chart-wrap{position:relative;height:240px}
+.insight-chart-wrap.tall{height:320px}
+.insight-chart-wrap.short{height:180px}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.kpi-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;text-align:center;box-shadow:var(--shadow)}
+.kpi-box .kv{font-size:28px;font-weight:800;color:var(--text);line-height:1}
+.kpi-box .kl{font-size:11px;color:var(--text3);margin-top:6px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.kpi-box .kd{font-size:11px;color:var(--text2);margin-top:3px}
+.kpi-box.green .kv{color:var(--green)}
+.kpi-box.blue .kv{color:var(--blue)}
+.kpi-box.amber .kv{color:var(--amber)}
   </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 <body>
 <div id="pwGate">
@@ -217,6 +237,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 
 <div class="tab-nav">
   <button class="tab-btn active" onclick="switchTab('dashboard')">Dashboard</button>
+  <button class="tab-btn" onclick="switchTab('insights')">Insights</button>
   <button class="tab-btn" onclick="switchTab('about')">About</button>
 </div>
 
@@ -286,6 +307,18 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <div class="no-results" id="noResults" style="display:none">No reps match the current filters.</div>
 
 </div><!-- /tab-dashboard -->
+
+
+<!-- INSIGHTS TAB -->
+<div id="tab-insights" class="tab-pane">
+<div class="page-header">
+  <div>
+    <div class="page-title">Revenue Insights</div>
+    <div class="page-sub">2026 YTD · Cross-segment analysis for leadership</div>
+  </div>
+</div>
+<div id="insightsContent"></div>
+</div><!-- /tab-insights -->
 
 <!-- ABOUT TAB -->
 <div id="tab-about" class="tab-pane">
@@ -771,6 +804,11 @@ function initials(name){
 // ── FILTER STATE ─────────────────────────────────────────────────────
 const REPS_ALL=[...REPS_NAM,...REPS_INTL,...REPS_ENT];
 const TEAM_MONTHLY={"jan":568,"feb":654,"mar":996,"apr":776,"may":202};
+const SEGMENT_MONTHLY={
+  NAM:{"jan":195,"feb":233,"mar":426,"apr":227,"may":70},
+  INTL:{"jan":291,"feb":314,"mar":445,"apr":448,"may":115},
+  ENT:{"jan":78,"feb":105,"mar":125,"apr":101,"may":17}
+};
 let currentSeg='ALL';
 let activeREPS=REPS_ALL;
 let filters={region:'All',manager:'All',facecard:'All',aeam:'All'};
@@ -855,8 +893,10 @@ function renderTrend(reps){
   const months=['jan','feb','mar','apr','may'];
   const labels=['Jan','Feb','Mar','Apr','May'];
   // Use sheet-level unique-venue counts when unfiltered (matches source spreadsheet)
-  const isUnfiltered=currentSeg==='ALL'&&filters.region==='All'&&filters.manager==='All'&&filters.facecard==='All'&&filters.aeam==='All'&&!(document.getElementById('repSearch')||{value:''}).value;
-  const vals=isUnfiltered?months.map(m=>TEAM_MONTHLY[m]):months.map(m=>reps.reduce((s,r)=>s+(r[m+'CW']||0),0));
+  const noOtherFilters=filters.region==='All'&&filters.manager==='All'&&filters.facecard==='All'&&filters.aeam==='All'&&!(document.getElementById('repSearch')||{value:''}).value;
+  const isGlobalUnfiltered=currentSeg==='ALL'&&noOtherFilters;
+  const isSegUnfiltered=currentSeg!=='ALL'&&noOtherFilters&&SEGMENT_MONTHLY[currentSeg];
+  const vals=isGlobalUnfiltered?months.map(m=>TEAM_MONTHLY[m]):isSegUnfiltered?months.map(m=>SEGMENT_MONTHLY[currentSeg][m]):months.map(m=>reps.reduce((s,r)=>s+(r[m+'CW']||0),0));
   const mx=Math.max(...vals,1);
   const bars=vals.map((v,i)=>{
     const h=Math.max(Math.round(v/mx*100),4);
@@ -1123,8 +1163,9 @@ function render(){
 }
 
 function switchTab(tab){
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.textContent.toLowerCase()===tab||(tab==='dashboard'&&b.textContent==='Dashboard')||(tab==='about'&&b.textContent==='About')));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',(tab==='dashboard'&&b.textContent==='Dashboard')||(tab==='about'&&b.textContent==='About')||(tab==='insights'&&b.textContent==='Insights')));
   document.querySelectorAll('.tab-pane').forEach(p=>p.classList.toggle('active',p.id==='tab-'+tab));
+  if(tab==='insights') setTimeout(renderInsights,50);
 }
 
 function init(){
@@ -1132,6 +1173,193 @@ function init(){
   render();
 }
 init();
+
+// ── INSIGHTS TAB ──────────────────────────────────────────────────────────────
+let _insightCharts = {};
+function destroyCharts(){
+  Object.values(_insightCharts).forEach(c=>{ try{c.destroy();}catch(e){} });
+  _insightCharts = {};
+}
+
+function renderInsights(){
+  destroyCharts();
+  const all = REPS_ALL.filter(r=>r.manager&&!["#REF!","-",""].includes(r.manager));
+  const months = ["jan","feb","mar","apr","may"];
+  const monthLabels = ["Jan","Feb","Mar","Apr","May"];
+  const C = {
+    blue:"#185fa5", blueA:"rgba(24,95,165,.15)",
+    green:"#2d7a3a", greenA:"rgba(45,122,58,.15)",
+    amber:"#ba7517", amberA:"rgba(186,117,23,.15)",
+    red:"#e24b4a", redA:"rgba(226,75,74,.15)",
+    purple:"#6b46c1", purpleA:"rgba(107,70,193,.15)",
+    teal:"#0e7b65", tealA:"rgba(14,123,101,.15)",
+    orange:"#c2470a", orangeA:"rgba(194,71,10,.15)",
+    gray:"#9c9c96",
+  };
+
+  // ── KPI summary row ─────────────────────────────────────────────────────────
+  const totalCW = Object.values(TEAM_MONTHLY).reduce((a,b)=>a+b,0);
+  const totalSQO = all.reduce((s,r)=>s+(r.sqo2026||0),0);
+  const totalMRR = all.reduce((s,r)=>s+(r.mrr2026||0),0);
+  const repsWithCVR = all.filter(r=>r.sqoT90>0);
+  const avgCVR = repsWithCVR.length ? (repsWithCVR.reduce((s,r)=>s+(r.cwT90/r.sqoT90*100),0)/repsWithCVR.length).toFixed(1) : "—";
+  const fmtMRR = v => v>=1000000 ? "$"+(v/1000000).toFixed(1)+"M" : v>=1000 ? "$"+(v/1000).toFixed(0)+"K" : "$"+v;
+
+  document.getElementById("insightsContent").innerHTML = `
+<div class="kpi-row">
+  <div class="kpi-box blue"><div class="kv">${totalCW.toLocaleString()}</div><div class="kl">Total CW Venues</div><div class="kd">2026 YTD · unique</div></div>
+  <div class="kpi-box"><div class="kv">${totalSQO.toLocaleString()}</div><div class="kl">Total SQOs</div><div class="kd">2026 YTD</div></div>
+  <div class="kpi-box green"><div class="kv">${fmtMRR(totalMRR)}</div><div class="kl">Total MRR</div><div class="kd">2026 YTD closed-won</div></div>
+  <div class="kpi-box amber"><div class="kv">${avgCVR}%</div><div class="kl">Avg T90 CVR</div><div class="kd">across reps with SQOs</div></div>
+</div>
+<div class="insights-grid wide">
+  <div class="insight-card"><h3>Monthly CW by Segment</h3><div class="card-sub">Unique venues closed-won per month — stacked by segment</div><div class="insight-chart-wrap"><canvas id="cSegMonth"></canvas></div></div>
+  <div class="insight-card"><h3>T90 CVR Distribution</h3><div class="card-sub">How many reps fall in each conversion rate band</div><div class="insight-chart-wrap"><canvas id="cCVRDist"></canvas></div></div>
+</div>
+<div class="insights-grid wide">
+  <div class="insight-card"><h3>SQO → CW Funnel by Segment</h3><div class="card-sub">2026 YTD pipeline volume and conversion</div><div class="insight-chart-wrap"><canvas id="cFunnel"></canvas></div></div>
+  <div class="insight-card"><h3>Facecard Mix</h3><div class="card-sub">Ace / Jack / King deal distribution across all reps</div><div class="insight-chart-wrap short"><canvas id="cFacecard"></canvas></div></div>
+</div>
+<div class="insights-grid wide">
+  <div class="insight-card"><h3>Top 15 Reps by Net New CW</h3><div class="card-sub">2026 YTD unique net-new venues</div><div class="insight-chart-wrap tall"><canvas id="cTop15"></canvas></div></div>
+  <div class="insight-card"><h3>MRR by Segment</h3><div class="card-sub">Closed-won MRR mix 2026 YTD</div><div class="insight-chart-wrap short"><canvas id="cMRR"></canvas></div></div>
+</div>
+<div class="insights-grid full">
+  <div class="insight-card"><h3>Rep CVR vs CW Scatter — Efficiency View</h3><div class="card-sub">Bubble size = MRR. Top-right = high volume AND high conversion. T90 CVR (Jan 30–Apr 30 window).</div><div class="insight-chart-wrap tall"><canvas id="cScatter"></canvas></div></div>
+</div>
+`;
+
+  const baseFont = {family:"system-ui,sans-serif", size:11};
+  const baseGrid = {color:"rgba(0,0,0,.06)"};
+  const noLegend = {display:false};
+
+  // ── 1. Monthly CW stacked bar ───────────────────────────────────────────────
+  _insightCharts.segMonth = new Chart(document.getElementById("cSegMonth"),{
+    type:"bar",
+    data:{
+      labels:monthLabels,
+      datasets:[
+        {label:"NAM SMB", data:months.map(m=>SEGMENT_MONTHLY.NAM[m]), backgroundColor:C.blue, stack:"s"},
+        {label:"INTL SMB", data:months.map(m=>SEGMENT_MONTHLY.INTL[m]), backgroundColor:C.teal, stack:"s"},
+        {label:"Enterprise", data:months.map(m=>SEGMENT_MONTHLY.ENT[m]), backgroundColor:C.purple, stack:"s"},
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:"bottom",labels:{font:baseFont,boxWidth:10,padding:10}},tooltip:{callbacks:{footer:items=>{const t=items.reduce((s,i)=>s+i.raw,0);return "Total: "+t;}}}},
+      scales:{x:{grid:{display:false},ticks:{font:baseFont}},y:{stacked:true,grid:baseGrid,ticks:{font:baseFont}}}}
+  });
+
+  // ── 2. T90 CVR distribution histogram ──────────────────────────────────────
+  const bands=["0–20%","21–40%","41–60%","61–80%","81–100%","100%+"];
+  const bandCounts=[0,0,0,0,0,0];
+  all.forEach(r=>{
+    if(!r.sqoT90) return;
+    const cvr=r.cwT90/r.sqoT90*100;
+    if(cvr<=20) bandCounts[0]++;
+    else if(cvr<=40) bandCounts[1]++;
+    else if(cvr<=60) bandCounts[2]++;
+    else if(cvr<=80) bandCounts[3]++;
+    else if(cvr<=100) bandCounts[4]++;
+    else bandCounts[5]++;
+  });
+  _insightCharts.cvrDist = new Chart(document.getElementById("cCVRDist"),{
+    type:"bar",
+    data:{labels:bands, datasets:[{label:"Reps", data:bandCounts,
+      backgroundColor:[C.redA,C.orangeA,C.amberA,C.blueA,C.greenA,C.purpleA].map(a=>a),
+      borderColor:[C.red,C.orange,C.amber,C.blue,C.green,C.purple],
+      borderWidth:1.5, borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:noLegend,tooltip:{callbacks:{label:i=>i.raw+" reps"}}},
+      scales:{x:{grid:{display:false},ticks:{font:baseFont}},y:{grid:baseGrid,ticks:{font:baseFont,stepSize:1}}}}
+  });
+
+  // ── 3. SQO → CW Funnel ─────────────────────────────────────────────────────
+  const segReps = {NAM:REPS_NAM, INTL:REPS_INTL, ENT:REPS_ENT};
+  const segLabels = ["NAM SMB","INTL SMB","Enterprise"];
+  const segKeys = ["NAM","INTL","ENT"];
+  const sqoVals = segKeys.map(s=>segReps[s].reduce((a,r)=>a+(r.sqo2026||0),0));
+  const cwVals  = segKeys.map(s=>Object.values(SEGMENT_MONTHLY[s]).reduce((a,b)=>a+b,0));
+  _insightCharts.funnel = new Chart(document.getElementById("cFunnel"),{
+    type:"bar",
+    data:{labels:segLabels,datasets:[
+      {label:"SQOs", data:sqoVals, backgroundColor:C.blueA, borderColor:C.blue, borderWidth:1.5, borderRadius:4},
+      {label:"CW Venues", data:cwVals, backgroundColor:C.blue, borderRadius:4}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:"bottom",labels:{font:baseFont,boxWidth:10,padding:10}},
+        tooltip:{callbacks:{afterLabel:ctx=>{if(ctx.datasetIndex===1){const cvr=(cwVals[ctx.dataIndex]/sqoVals[ctx.dataIndex]*100).toFixed(1);return "CVR: "+cvr+"%";}}}}},
+      scales:{x:{grid:{display:false},ticks:{font:baseFont}},y:{grid:baseGrid,ticks:{font:baseFont}}}}
+  });
+
+  // ── 4. Facecard donut ───────────────────────────────────────────────────────
+  const aceTotal=all.reduce((s,r)=>s+(r.ace||0),0);
+  const jackTotal=all.reduce((s,r)=>s+(r.jack||0),0);
+  const kingTotal=all.reduce((s,r)=>s+(r.king||0),0);
+  _insightCharts.facecard = new Chart(document.getElementById("cFacecard"),{
+    type:"doughnut",
+    data:{labels:["Ace","Jack","King"],
+      datasets:[{data:[aceTotal,jackTotal,kingTotal],
+        backgroundColor:[C.teal,C.orange,C.green],
+        borderWidth:2,borderColor:"#fff",hoverOffset:6}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:"62%",
+      plugins:{legend:{position:"bottom",labels:{font:baseFont,boxWidth:10,padding:12}},
+        tooltip:{callbacks:{label:i=>i.label+": "+i.raw+" deals ("+(i.raw/(aceTotal+jackTotal+kingTotal)*100).toFixed(1)+"%)"}}}}}
+  });
+
+  // ── 5. Top 15 reps horizontal bar ──────────────────────────────────────────
+  const top15 = [...all].filter(r=>r.cwNN>0).sort((a,b)=>b.cwNN-a.cwNN).slice(0,15);
+  const t15Colors = top15.map(r=>r.cwNN>=20?C.blue:r.cwNN>=10?C.teal:C.gray);
+  _insightCharts.top15 = new Chart(document.getElementById("cTop15"),{
+    type:"bar",
+    data:{labels:top15.map(r=>r.name.split(" ").slice(-1)[0]+", "+r.name.split(" ")[0].charAt(0)+"."),
+      datasets:[{label:"Net New CW", data:top15.map(r=>r.cwNN),
+        backgroundColor:t15Colors, borderRadius:3}]},
+    options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,
+      plugins:{legend:noLegend,tooltip:{callbacks:{label:i=>i.raw+" venues",afterLabel:ctx=>{const r=top15[ctx.dataIndex];const cvr=r.sqoT90?((r.cwT90/r.sqoT90)*100).toFixed(0)+"% CVR":"no CVR";return r.manager+" · "+cvr;}}}}},
+      scales:{x:{grid:baseGrid,ticks:{font:baseFont}},y:{grid:{display:false},ticks:{font:{...baseFont,size:10}}}}}
+  });
+
+  // ── 6. MRR by segment donut ────────────────────────────────────────────────
+  const mrrSeg = segKeys.map(s=>segReps[s].reduce((a,r)=>a+(r.mrr2026||0),0));
+  _insightCharts.mrr = new Chart(document.getElementById("cMRR"),{
+    type:"doughnut",
+    data:{labels:segLabels,datasets:[{data:mrrSeg,
+      backgroundColor:[C.blue,C.teal,C.purple],borderWidth:2,borderColor:"#fff",hoverOffset:6}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:"60%",
+      plugins:{legend:{position:"bottom",labels:{font:baseFont,boxWidth:10,padding:12}},
+        tooltip:{callbacks:{label:i=>i.label+": "+fmtMRR(i.raw)+" ("+((i.raw/mrrSeg.reduce((a,b)=>a+b,0))*100).toFixed(1)+"%)"}}}}}
+  });
+
+  // ── 7. CVR vs CW scatter ───────────────────────────────────────────────────
+  const scatterData = all.filter(r=>r.sqoT90>0&&r.cwNN>0).map(r=>({
+    x: parseFloat((r.cwT90/r.sqoT90*100).toFixed(1)),
+    y: r.cwNN,
+    r: Math.max(5, Math.sqrt(r.mrr2026||0)/18),
+    name: r.name, manager: r.manager,
+    cvr: parseFloat((r.cwT90/r.sqoT90*100).toFixed(1)),
+    mrr: r.mrr2026
+  }));
+  const scatterColors = scatterData.map(d=>{
+    if(d.x>=70&&d.y>=20) return C.green;
+    if(d.x>=70) return C.blue;
+    if(d.y>=20) return C.teal;
+    if(d.x<40) return C.red;
+    return C.amber;
+  });
+  _insightCharts.scatter = new Chart(document.getElementById("cScatter"),{
+    type:"bubble",
+    data:{datasets:[{label:"Reps", data:scatterData,
+      backgroundColor:scatterColors.map(c=>c+"55"),
+      borderColor:scatterColors, borderWidth:1.5}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:noLegend,tooltip:{callbacks:{label:i=>{const d=i.raw;return [d.name,"CW: "+d.y+" venues","T90 CVR: "+d.cvr+"%","MRR: "+fmtMRR(d.mrr),"Mgr: "+d.manager];}}}},
+      scales:{
+        x:{title:{display:true,text:"T90 CVR (%)",font:baseFont},min:0,max:110,grid:baseGrid,ticks:{font:baseFont,callback:v=>v+"%"}},
+        y:{title:{display:true,text:"Net New CW Venues",font:baseFont},grid:baseGrid,ticks:{font:baseFont}}
+      }}
+  });
+}
+
 </script>
 </body>
 </html>
