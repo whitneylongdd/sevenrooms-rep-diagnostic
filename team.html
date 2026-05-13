@@ -68,6 +68,8 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .trend-bar.highlight{background:var(--blue)}
 .trend-bar-val{font-size:11px;font-weight:700;color:var(--text)}
 .trend-bar-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;margin-top:4px}
+.trend-bar-avg{font-size:9px;color:var(--text3);margin-top:2px;white-space:nowrap}
+.trend-avg-badge{display:inline-block;margin-left:10px;font-size:11px;font-weight:600;color:var(--blue);background:var(--blue-bg);border:1px solid rgba(24,95,165,.2);border-radius:999px;padding:2px 9px;vertical-align:middle}
 .trend-note{font-size:10px;color:var(--text3);margin-top:6px;font-style:italic}
 
 /* FILTERS */
@@ -277,7 +279,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 
 <!-- TEAM TREND -->
 <div class="trend-section">
-  <div class="trend-title">Team monthly CW trend — 2026 YTD <span style="font-size:10px;font-weight:400;color:var(--text3);">(updates with filters)</span></div>
+  <div class="trend-title">Team monthly CW trend — 2026 YTD <span style="font-size:10px;font-weight:400;color:var(--text3);">(updates with filters)</span><span class="trend-avg-badge" id="trendAvgBadge">Avg: — venues/rep/mo</span></div>
   <div class="trend-bars" id="trendBars"></div>
   <div class="trend-note" id="trendNote"></div>
 </div>
@@ -897,17 +899,26 @@ function renderTrend(reps){
   const isGlobalUnfiltered=currentSeg==='ALL'&&noOtherFilters;
   const isSegUnfiltered=currentSeg!=='ALL'&&noOtherFilters&&SEGMENT_MONTHLY[currentSeg];
   const vals=isGlobalUnfiltered?months.map(m=>TEAM_MONTHLY[m]):isSegUnfiltered?months.map(m=>SEGMENT_MONTHLY[currentSeg][m]):months.map(m=>reps.reduce((s,r)=>s+(r[m+'CW']||0),0));
+  // Avg CW per rep per month — always computed from the filtered rep list
+  const repCount=Math.max(reps.length,1);
+  const avgVals=vals.map(v=>(v/repCount).toFixed(1));
+  const activeMos=vals.filter(v=>v>0).length||1;
+  const ytdAvg=(vals.reduce((a,b)=>a+b,0)/repCount/activeMos).toFixed(1);
   const mx=Math.max(...vals,1);
   const bars=vals.map((v,i)=>{
     const h=Math.max(Math.round(v/mx*100),4);
     const isMar=(i===2),isMay=(i===4);
     return `<div class="trend-bar-wrap">
       <div class="trend-bar-val">${v}</div>
-      <div class="trend-bar ${isMar?'highlight':''}" style="height:${h}px" title="${labels[i]}: ${v} CW"></div>
+      <div class="trend-bar ${isMar?'highlight':''}" style="height:${h}px" title="${labels[i]}: ${v} CW · ${avgVals[i]}/rep"></div>
       <div class="trend-bar-lbl">${labels[i]}</div>
+      <div class="trend-bar-avg">${avgVals[i]}/rep</div>
     </div>`;
   }).join('');
   document.getElementById('trendBars').innerHTML=bars;
+  // Update avg badge
+  const badge=document.getElementById('trendAvgBadge');
+  if(badge) badge.textContent=`Avg: ${ytdAvg} venues/rep/mo`;
   const isMar=(currentSeg==='NAM'||currentSeg==='ALL'?'March spike reflects Q1 end-of-quarter ELQ pull-forward. ':'');
   document.getElementById('trendNote').textContent=isMar+'May is partial (data through May 12).';
 }
