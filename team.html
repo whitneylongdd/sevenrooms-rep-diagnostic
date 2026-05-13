@@ -230,7 +230,37 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .kpi-box.green .kv{color:var(--green)}
 .kpi-box.blue .kv{color:var(--blue)}
 .kpi-box.amber .kv{color:var(--amber)}
-  </style>
+  
+.esession{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:20px;overflow:hidden;box-shadow:var(--shadow)}
+.esession-header{display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid var(--border)}
+.esession-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0}
+.esession-title{font-size:15px;font-weight:700;color:var(--text)}
+.esession-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.esession-badge{margin-left:auto;font-size:11px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.esession-why{padding:12px 20px;font-size:12px;color:var(--text2);line-height:1.6;border-bottom:1px solid var(--border);background:#fafaf9}
+.esession-cols{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.esession-col{padding:16px 20px}
+.esession-col:first-child{border-right:1px solid var(--border)}
+.ecol-label{font-size:11px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px}
+.ecol-note{font-weight:400;color:var(--text3);text-transform:none;letter-spacing:0}
+.eperson-grid{display:flex;flex-direction:column;gap:6px}
+.eperson{padding:7px 10px;border-radius:6px;background:var(--surface2);border:1px solid var(--border)}
+.eperson.star{background:#fefce8;border-color:#fde68a}
+.eperson.warn{background:#fff7ed;border-color:#fed7aa}
+.ename{font-size:12px;font-weight:600;color:var(--text)}
+.emeta{font-size:11px;color:var(--text3);margin-top:1px}
+
+.cohort-row{display:flex;gap:0;align-items:stretch;padding:14px 20px}
+.cohort-meta{width:130px;flex-shrink:0;padding-right:16px}
+.cohort-label{font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px}
+.cohort-n{font-weight:400;color:var(--text3);font-size:11px}
+.cohort-median{font-size:11px;color:var(--text3)}
+.cohort-cols{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.cohort-half{display:flex;flex-direction:column;gap:5px}
+.cohort-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.cohort-tag.high{color:#16a34a}
+.cohort-tag.low{color:#dc2626}
+</style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 <body>
@@ -251,6 +281,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   <button class="tab-btn active" onclick="switchTab('dashboard')">Dashboard</button>
   <button class="tab-btn" onclick="switchTab('insights')">Insights</button>
   <button class="tab-btn" onclick="switchTab('about')">About</button>
+  <button class="tab-btn" onclick="switchTab('enablement')">🎯 Enablement</button>
 </div>
 
 <div id="tab-dashboard" class="tab-pane active">
@@ -562,6 +593,360 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 </div>
 
 </div><!-- /tab-about -->
+<div id="tab-enablement" class="tab-pane">
+<div style="max-width:900px;margin:0 auto;padding:8px 0 40px">
+
+  <div style="margin-bottom:24px">
+    <div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px">Enablement Sessions</div>
+    <div style="font-size:13px;color:var(--text2)">Five targeted sessions based on current rep data. Role models are current team members with standout metrics in that area — not external experts.</div>
+  </div>
+
+  <!-- SESSION 1: Agenda Setting -->
+  <div class="esession">
+    <div class="esession-header" style="background:#f0f9ff;border-color:#bae6fd">
+      <div class="esession-num" style="background:#0ea5e9;color:#fff">01</div>
+      <div>
+        <div class="esession-title">Agenda Setting on Discovery Calls</div>
+        <div class="esession-sub">Gong Agenda dimension · max score 1.0 · team avg ~0.12</div>
+      </div>
+      <div class="esession-badge" style="background:#e0f2fe;color:#0369a1">Universal gap — invite broadly</div>
+    </div>
+    <div class="esession-why">Nearly every rep scores 0.0–0.15 on agenda setting. This is a structural skill, not a talent issue — reps who state the agenda upfront control conversation flow and get better discovery. One focused session with a shared talk-track framework can move this fast.</div>
+    <div class="esession-cols">
+      <div class="esession-col">
+        <div class="ecol-label">📋 Participants <span class="ecol-note">(lowest agenda scores)</span></div>
+        <div class="eperson-grid">
+          <div class="eperson"><div class="ename">Anna Navarro</div><div class="emeta">0.0 agenda · Monitoring</div></div>
+          <div class="eperson warn"><div class="ename">Doyle Cowart</div><div class="emeta">0.0 agenda · Monitoring</div></div>
+          <div class="eperson warn"><div class="ename">Mason Shank</div><div class="emeta">0.0 agenda · Monitoring</div></div>
+          <div class="eperson"><div class="ename">Kevin Paz</div><div class="emeta">0.0 agenda · Coaching Plan</div></div>
+          <div class="eperson"><div class="ename">Nicole Cotton</div><div class="emeta">0.0 agenda · Coaching Plan</div></div>
+          <div class="eperson"><div class="ename">Christian Montoya</div><div class="emeta">0.0 agenda</div></div>
+          <div class="eperson"><div class="ename">Drew Barrett</div><div class="emeta">0.0 agenda</div></div>
+          <div class="eperson"><div class="ename">Casey Atamaniuk</div><div class="emeta">0.0 agenda</div></div>
+          <div class="eperson"><div class="ename">Franz Luigi De Guzman</div><div class="emeta">0.0 agenda</div></div>
+          <div class="eperson"><div class="ename">Brandon Rothberg</div><div class="emeta">0.0 agenda</div></div>
+        </div>
+      </div>
+      <div class="esession-col">
+        <div class="ecol-label">⭐ Role Models <span class="ecol-note">(highest agenda scores on team)</span></div>
+        <div class="eperson-grid">
+          <div class="eperson star"><div class="ename">John Williams</div><div class="emeta">0.53 agenda · best on team</div></div>
+          <div class="eperson star"><div class="ename">Elliott Bogdan</div><div class="emeta">0.50 agenda</div></div>
+          <div class="eperson star"><div class="ename">Tarah Drouin</div><div class="emeta">0.50 agenda · also Coaching Plan — proof the skill can be learned</div></div>
+          <div class="eperson star"><div class="ename">Alden Diaz</div><div class="emeta">0.45 agenda</div></div>
+          <div class="eperson star"><div class="ename">Erin Caramanico</div><div class="emeta">0.38 agenda</div></div>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-top:8px;font-style:italic">Note: even the "best" scores are below 0.55/1.0 — this is a team-wide gap, not just a few reps.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SESSION 2: Qualification / CVR -->
+  <div class="esession">
+    <div class="esession-header" style="background:#fef2f2;border-color:#fecaca">
+      <div class="esession-num" style="background:#dc2626;color:#fff">02</div>
+      <div>
+        <div class="esession-title">Qualification — What Actually Deserves SQO Status</div>
+        <div class="esession-sub">T90 CVR among reps with 8+ SQOs in last 90 days</div>
+      </div>
+      <div class="esession-badge" style="background:#fee2e2;color:#991b1b">Coaching + Monitoring priority</div>
+    </div>
+    <div class="esession-why">These reps have substantial pipeline (8–39 SQOs) but are converting below 8%. That's not a closing problem — it's deals being advanced to SQO before they're real. The session focus: what does a qualified deal actually look like? What questions must be answered before SQO? Have role models walk through a recent win from first call to close.</div>
+    <div class="esession-cols">
+      <div class="esession-col">
+        <div class="ecol-label">📋 Participants <span class="ecol-note">(low CVR, meaningful pipeline)</span></div>
+        <div class="eperson-grid">
+          <div class="eperson warn"><div class="ename">Doyle Cowart</div><div class="emeta">2.6% CVR · 39 SQOs · Monitoring</div></div>
+          <div class="eperson warn"><div class="ename">Mason Shank</div><div class="emeta">3.8% CVR · 26 SQOs · Monitoring</div></div>
+          <div class="eperson"><div class="ename">Tarah Drouin</div><div class="emeta">5.4% CVR · 37 SQOs · Coaching Plan</div></div>
+          <div class="eperson"><div class="ename">Kevin Paz</div><div class="emeta">5.9% CVR · 17 SQOs · Coaching Plan</div></div>
+          <div class="eperson"><div class="ename">Nicole Cotton</div><div class="emeta">6.2% CVR · 16 SQOs · Coaching Plan</div></div>
+          <div class="eperson"><div class="ename">Emily Sweet</div><div class="emeta">5.7% CVR · 35 SQOs</div></div>
+          <div class="eperson"><div class="ename">Jeremiah Tolbert</div><div class="emeta">6.7% CVR · 15 SQOs</div></div>
+          <div class="eperson"><div class="ename">Ali LaRaia</div><div class="emeta">7.7% CVR · 13 SQOs</div></div>
+        </div>
+      </div>
+      <div class="esession-col">
+        <div class="ecol-label">⭐ Role Models <span class="ecol-note">(top CVR with real volume)</span></div>
+        <div class="eperson-grid">
+          <div class="eperson star"><div class="ename">Georgio Ntontos</div><div class="emeta">82.5% CVR · 40 SQOs · volume + quality</div></div>
+          <div class="eperson star"><div class="ename">Mahmoud Arabi</div><div class="emeta">73.3% CVR · 15 SQOs</div></div>
+          <div class="eperson star"><div class="ename">Daniel Katz</div><div class="emeta">71.9% CVR · 32 SQOs · highest volume + CVR</div></div>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-top:8px;font-style:italic">Ask role models: what questions do they need answered before marking SQO? What does a "no" look like vs. a "not yet"?</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SESSION 3: Pipeline Pacing -->
+  <div class="esession">
+    <div class="esession-header" style="background:#fff7ed;border-color:#fed7aa">
+      <div class="esession-num" style="background:#ea580c;color:#fff">03</div>
+      <div>
+        <div class="esession-title">Pipeline Pacing — Closing All Month, Not Just at ELQ</div>
+        <div class="esession-sub">Ratio of March CW vs. avg of other months</div>
+      </div>
+      <div class="esession-badge" style="background:#ffedd5;color:#9a3412">Behavior + habits focus</div>
+    </div>
+    <div class="esession-why">Several reps closed 10–20x more in March than any other month. This signals ELQ deal hoarding — reps holding deals until end-of-quarter pressure forces a close. It creates pipeline gaps in April/May, makes forecasting unreliable, and puts quota pressure into a single week. Role models close evenly because they create urgency in the deal, not the calendar.</div>
+    <div class="esession-cols">
+      <div class="esession-col">
+        <div class="ecol-label">📋 Participants <span class="ecol-note">(most March-concentrated)</span></div>
+        <div class="eperson-grid">
+          <div class="eperson warn"><div class="ename">Luis Carrillo Navarro</div><div class="emeta">44x March spike · 11 in Mar, 0.2 avg other months</div></div>
+          <div class="eperson warn"><div class="ename">Kevin Florence</div><div class="emeta">20x March spike · 5 in Mar, 0.2 avg other months</div></div>
+          <div class="eperson"><div class="ename">Dillan Agostinelli</div><div class="emeta">14x March spike · 18 in Mar</div></div>
+          <div class="eperson"><div class="ename">Drew Barrett</div><div class="emeta">13x March spike · 10 in Mar</div></div>
+          <div class="eperson"><div class="ename">Ryan Leung</div><div class="emeta">12x March spike · 15 in Mar</div></div>
+          <div class="eperson"><div class="ename">Brandon Gesualdi</div><div class="emeta">8x March spike</div></div>
+        </div>
+      </div>
+      <div class="esession-col">
+        <div class="ecol-label">⭐ Role Models <span class="ecol-note">(most consistent month-to-month)</span></div>
+        <div class="eperson-grid">
+          <div class="eperson star"><div class="ename">Elliott Bogdan</div><div class="emeta">1, 5, 7, 12, 0 — steady build</div></div>
+          <div class="eperson star"><div class="ename">Henry Behar</div><div class="emeta">3, 3, 6, 5, 1 — most even distribution</div></div>
+          <div class="eperson star"><div class="ename">Franz Luigi De Guzman</div><div class="emeta">1, 3, 4, 6, 1 — consistent</div></div>
+          <div class="eperson star"><div class="ename">Brett Bartholomew</div><div class="emeta">9, 2, 6, 9, 0 — volume + spread</div></div>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-top:8px;font-style:italic">Ask role models: how do they create deal urgency outside of ELQ? What's their weekly pipeline review habit?</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SESSION 4: Expansion Motion -->
+  <div class="esession">
+    <div class="esession-header" style="background:#f0fdf4;border-color:#bbf7d0">
+      <div class="esession-num" style="background:#16a34a;color:#fff">04</div>
+      <div>
+        <div class="esession-title">Expansion Selling — Growing Existing Accounts</div>
+        <div class="esession-sub">Expansion CW venues among reps with 8+ total CW</div>
+      </div>
+      <div class="esession-badge" style="background:#dcfce7;color:#15803d">Revenue unlock · most reps at 0</div>
+    </div>
+    <div class="esession-why">The majority of high-volume reps have zero expansion deals YTD — they're running a purely net-new motion. For a product like SevenRooms that sells into venue groups, an existing customer is a warm intro to every other property in that group. This session should focus on: how to identify expansion signals, how the expansion conversation differs from net-new, and how to get referrals within a group account.</div>
+    <div class="esession-cols">
+      <div class="esession-col">
+        <div class="ecol-label">📋 Participants <span class="ecol-note">(high volume, zero expansion)</span></div>
+        <div class="eperson-grid">
+          <div class="eperson"><div class="ename">Christian Ortega</div><div class="emeta">39 CW · 0 expansion</div></div>
+          <div class="eperson"><div class="ename">Christopher Agard</div><div class="emeta">24 CW · 0 expansion</div></div>
+          <div class="eperson"><div class="ename">Dillan Agostinelli</div><div class="emeta">23 CW · 0 expansion</div></div>
+          <div class="eperson"><div class="ename">Elliott Bogdan</div><div class="emeta">25 CW · 0 expansion</div></div>
+          <div class="eperson"><div class="ename">Amy Phung</div><div class="emeta">15 CW · 0 expansion</div></div>
+          <div class="eperson"><div class="ename">Benjamin Jeanty</div><div class="emeta">13 CW · 0 expansion</div></div>
+          <div class="eperson"><div class="ename">Drew Barrett</div><div class="emeta">13 CW · 0 expansion</div></div>
+          <div class="eperson"><div class="ename">Cam McRae</div><div class="emeta">10 CW · 0 expansion</div></div>
+        </div>
+      </div>
+      <div class="esession-col">
+        <div class="ecol-label">⭐ Role Models <span class="ecol-note">(highest expansion volume)</span></div>
+        <div class="eperson-grid">
+          <div class="eperson star"><div class="ename">Daniel Katz</div><div class="emeta">69 exp / 91 total · 76% expansion rate</div></div>
+          <div class="eperson star"><div class="ename">Georgio Ntontos</div><div class="emeta">61 exp / 89 total · 69% expansion rate</div></div>
+          <div class="eperson star"><div class="ename">Jakub Drozd</div><div class="emeta">18 exp / 36 total · 50% expansion</div></div>
+          <div class="eperson star"><div class="ename">Cody Goetze</div><div class="emeta">1 exp — ask about the deal story</div></div>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-top:8px;font-style:italic">Ask role models: how do they identify the next property in a group? What triggers the expansion conversation?</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SESSION 5: Monitoring + Coaching Cohort -->
+  <div class="esession">
+    <div class="esession-header" style="background:#faf5ff;border-color:#e9d5ff">
+      <div class="esession-num" style="background:#7c3aed;color:#fff">05</div>
+      <div>
+        <div class="esession-title">Manager Sync — Monitoring & Coaching Plan Cohort</div>
+        <div class="esession-sub">8 reps flagged · managers only · no role models needed</div>
+      </div>
+      <div class="esession-badge" style="background:#ede9fe;color:#6d28d9">Manager-only session</div>
+    </div>
+    <div class="esession-why">All 8 flagged reps share the same pattern: adequate-to-high SQO volume, very low CVR (1–8%), and 1–3 CW YTD despite being multiple months into the year. The issue isn't activity — it's quality. This session should align managers on a consistent diagnostic framework and agree on specific 30-day milestones per rep before the next review.</div>
+    <div class="esession-cols">
+      <div class="esession-col">
+        <div class="ecol-label">📋 Monitoring — invite their managers</div>
+        <div class="eperson-grid">
+          <div class="eperson warn"><div class="ename">Doyle Cowart</div><div class="emeta">1 CW · 2.6% CVR · 39 SQOs · Gong 3.0</div></div>
+          <div class="eperson warn"><div class="ename">Mason Shank</div><div class="emeta">1 CW · 3.8% CVR · 26 SQOs · Gong 2.67</div></div>
+          <div class="eperson"><div class="ename">Anna Navarro</div><div class="emeta">2 CW · CVR weak · 25 SQOs · Gong 3.93</div></div>
+          <div class="eperson"><div class="ename">Sharroni Lewis-Keith</div><div class="emeta">2 CW · 13 SQOs · Gong 3.62</div></div>
+        </div>
+      </div>
+      <div class="esession-col">
+        <div class="ecol-label">📋 Coaching Plans — invite their managers</div>
+        <div class="eperson-grid">
+          <div class="eperson"><div class="ename">Tarah Drouin</div><div class="emeta">2 CW · 5.4% CVR · 37 SQOs · Gong 3.33</div></div>
+          <div class="eperson"><div class="ename">Kevin Paz</div><div class="emeta">1 CW · 5.9% CVR · 17 SQOs · no Gong data</div></div>
+          <div class="eperson"><div class="ename">Nicole Cotton</div><div class="emeta">1 CW · 6.2% CVR · 16 SQOs · Gong 1.91</div></div>
+          <div class="eperson"><div class="ename">Sindri Raguseo</div><div class="emeta">3 CW · 11 SQOs · Gong 1.90</div></div>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-top:10px;font-style:italic">Key pattern: Gong scores split between 1.9–2.0 (Nicole, Sindri — skill gap) and 3.0–3.9 (Anna, Doyle, Sharroni, Tarah — motivation/process gap). Different interventions needed.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── COHORT ANALYSIS ─────────────────────────────────────────── -->
+  <div style="margin:36px 0 20px">
+    <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px">Cohort Performance — Trailing 30 Days</div>
+    <div style="font-size:12px;color:var(--text2)">April CW venues/rep used as T30 proxy (last fully completed month). Outliers flagged within cohort — compare peers at same tenure, not the whole team.</div>
+  </div>
+
+  <!-- NAM -->
+  <div class="esession" style="margin-bottom:16px">
+    <div class="esession-header" style="background:#f0f9ff;border-color:#bae6fd">
+      <div class="esession-num" style="background:#0284c7;color:#fff;font-size:10px;width:38px;border-radius:6px">NAM</div>
+      <div><div class="esession-title">NAM SMB — 81 AEs</div><div class="esession-sub">Grouped by hire cohort · T30 = April CW venues</div></div>
+    </div>
+    <div style="padding:4px 0">
+
+      <!-- 0-6 mo -->
+      <div class="cohort-row">
+        <div class="cohort-meta">
+          <div class="cohort-label">0–6 mo <span class="cohort-n">n=16</span></div>
+          <div class="cohort-median">median <strong>2.0</strong>/rep</div>
+        </div>
+        <div class="cohort-cols">
+          <div class="cohort-half">
+            <div class="cohort-tag high">⬆ High</div>
+            <div class="eperson star" style="margin-top:4px"><div class="ename">Taylor Scoma</div><div class="emeta">7 CW · 3.5× cohort median</div></div>
+          </div>
+          <div class="cohort-half">
+            <div class="cohort-tag low">⬇ Low / Stalled</div>
+            <div class="eperson warn" style="margin-top:4px"><div class="ename">Ali LaRaia</div><div class="emeta">0 CW in Apr</div></div>
+            <div class="eperson warn"><div class="ename">Anna Navarro</div><div class="emeta">0 CW in Apr · Monitoring</div></div>
+            <div class="eperson warn"><div class="ename">Emmett Turner-Jackson</div><div class="emeta">0 CW in Apr</div></div>
+            <div class="eperson warn"><div class="ename">Erin Caramanico</div><div class="emeta">0 CW in Apr</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6-12 mo -->
+      <div class="cohort-row" style="border-top:1px solid var(--border)">
+        <div class="cohort-meta">
+          <div class="cohort-label">6–12 mo <span class="cohort-n">n=44</span></div>
+          <div class="cohort-median">median <strong>1.0</strong>/rep</div>
+        </div>
+        <div class="cohort-cols">
+          <div class="cohort-half">
+            <div class="cohort-tag high">⬆ High</div>
+            <div class="eperson star" style="margin-top:4px"><div class="ename">Ross Heuer</div><div class="emeta">14 CW · 14× median</div></div>
+            <div class="eperson star"><div class="ename">Elliott Bogdan</div><div class="emeta">12 CW · 12× median</div></div>
+            <div class="eperson star"><div class="ename">Christian Ortega</div><div class="emeta">9 CW</div></div>
+            <div class="eperson star"><div class="ename">Kathryn Shelman</div><div class="emeta">7 CW</div></div>
+          </div>
+          <div class="cohort-half">
+            <div class="cohort-tag low">⬇ Low / Stalled</div>
+            <div class="eperson warn" style="margin-top:4px"><div class="ename">Brandon Gesualdi</div><div class="emeta">0 CW in Apr</div></div>
+            <div class="eperson warn"><div class="ename">Caelin Brooks</div><div class="emeta">0 CW in Apr</div></div>
+            <div class="eperson warn"><div class="ename">Cameron Holmes</div><div class="emeta">0 CW in Apr</div></div>
+            <div class="eperson warn"><div class="ename">Casey Atamaniuk</div><div class="emeta">0 CW in Apr</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 24+ mo -->
+      <div class="cohort-row" style="border-top:1px solid var(--border)">
+        <div class="cohort-meta">
+          <div class="cohort-label">24+ mo <span class="cohort-n">n=9</span></div>
+          <div class="cohort-median">median <strong>5.0</strong>/rep</div>
+        </div>
+        <div class="cohort-cols">
+          <div class="cohort-half">
+            <div class="cohort-tag high">⬆ High</div>
+            <div class="eperson star" style="margin-top:4px"><div class="ename">Jessica Henkel</div><div class="emeta">16 CW · 3.2× median</div></div>
+            <div class="eperson star"><div class="ename">Luka Liska</div><div class="emeta">16 CW · 3.2× median</div></div>
+          </div>
+          <div class="cohort-half">
+            <div class="cohort-tag low">⬇ Low</div>
+            <div class="eperson warn" style="margin-top:4px"><div class="ename">Cole Wallace</div><div class="emeta">1 CW · expected 5+ at tenure</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Unknown/Existing -->
+      <div class="cohort-row" style="border-top:1px solid var(--border)">
+        <div class="cohort-meta">
+          <div class="cohort-label">Existing / no cohort <span class="cohort-n">n=12</span></div>
+          <div class="cohort-median">median <strong>1.5</strong>/rep</div>
+        </div>
+        <div class="cohort-cols">
+          <div class="cohort-half">
+            <div class="cohort-tag high">⬆ High</div>
+            <div class="eperson star" style="margin-top:4px"><div class="ename">Daniel Katz</div><div class="emeta">10 CW</div></div>
+            <div class="eperson star"><div class="ename">Christopher Agard</div><div class="emeta">8 CW</div></div>
+          </div>
+          <div class="cohort-half">
+            <div class="cohort-tag low">⬇ Low</div>
+            <div class="eperson warn" style="margin-top:4px"><div class="ename">Sydney Comeaux</div><div class="emeta">0 CW in Apr</div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- INTL -->
+  <div class="esession" style="margin-bottom:16px">
+    <div class="esession-header" style="background:#f0fdf4;border-color:#bbf7d0">
+      <div class="esession-num" style="background:#16a34a;color:#fff;font-size:10px;width:38px;border-radius:6px">INTL</div>
+      <div><div class="esession-title">INTL SMB — 40 AEs</div><div class="esession-sub">Grouped by hire cohort · T30 = April CW venues · note: INTL venue counts are naturally higher per deal</div></div>
+    </div>
+    <div style="padding:4px 0">
+
+      <!-- 0-6 mo -->
+      <div class="cohort-row">
+        <div class="cohort-meta">
+          <div class="cohort-label">0–6 mo <span class="cohort-n">n=11</span></div>
+          <div class="cohort-median">median <strong>4.0</strong>/rep</div>
+        </div>
+        <div class="cohort-cols">
+          <div class="cohort-half">
+            <div class="cohort-tag high">⬆ High</div>
+            <div class="eperson star" style="margin-top:4px"><div class="ename">James Shalala</div><div class="emeta">12 CW · 3× median</div></div>
+            <div class="eperson star"><div class="ename">Zach Smith</div><div class="emeta">8 CW · 2× median</div></div>
+          </div>
+          <div class="cohort-half">
+            <div class="cohort-tag low">⬇ Low</div>
+            <div class="eperson" style="margin-top:4px;background:#f9fafb;border-color:#e5e7eb"><div class="ename" style="color:var(--text2)">No stalled reps in this cohort</div><div class="emeta">All new INTL hires above 2 CW in Apr</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Existing/Unknown -->
+      <div class="cohort-row" style="border-top:1px solid var(--border)">
+        <div class="cohort-meta">
+          <div class="cohort-label">Existing / no cohort <span class="cohort-n">n=29</span></div>
+          <div class="cohort-median">median <strong>14.0</strong>/rep</div>
+        </div>
+        <div class="cohort-cols">
+          <div class="cohort-half">
+            <div class="cohort-tag high">⬆ High</div>
+            <div class="eperson star" style="margin-top:4px"><div class="ename">Giorgia Warsama</div><div class="emeta">51 CW — significant outlier, verify data</div></div>
+            <div class="eperson star"><div class="ename">Megan Wall</div><div class="emeta">29 CW · 2× median</div></div>
+          </div>
+          <div class="cohort-half">
+            <div class="cohort-tag low">⬇ Low / Stalled</div>
+            <div class="eperson warn" style="margin-top:4px"><div class="ename">Geraint Powell</div><div class="emeta">0 CW in Apr · well below median of 14</div></div>
+            <div class="eperson warn"><div class="ename">Ghazal Vahed</div><div class="emeta">0 CW in Apr</div></div>
+            <div class="eperson warn"><div class="ename">Cam McRae</div><div class="emeta">1 CW in Apr</div></div>
+            <div class="eperson warn"><div class="ename">Will Taylor</div><div class="emeta">1 CW in Apr</div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ENT note -->
+  <div style="padding:12px 16px;background:#fafaf9;border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--text2)">
+    <strong>Enterprise (ENT):</strong> Only 3 AE reps — cohort analysis not meaningful at this size. Median April CW is 15/rep. Review individually rather than as a cohort.
+  </div>
+
+</div>
+</div><!-- /tab-enablement -->
+
 
 </div><!-- /page -->
 
@@ -1220,7 +1605,7 @@ function render(){
 }
 
 function switchTab(tab){
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',(tab==='dashboard'&&b.textContent==='Dashboard')||(tab==='about'&&b.textContent==='About')||(tab==='insights'&&b.textContent==='Insights')));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',(tab==='dashboard'&&b.textContent==='Dashboard')||(tab==='about'&&b.textContent==='About')||(tab==='insights'&&b.textContent==='Insights')||(tab==='enablement'&&b.textContent==='🎯 Enablement')));
   document.querySelectorAll('.tab-pane').forEach(p=>p.classList.toggle('active',p.id==='tab-'+tab));
   if(tab==='insights') setTimeout(renderInsights,50);
 }
