@@ -778,6 +778,37 @@ function toggleView(){
 }
 
 
+
+function cvrBarSVG(vals, moLabels){
+  var maxV=Math.max.apply(null,vals.map(function(v){return v!=null?v:0;}).concat([0.01]))||0.01;
+  var n=vals.length;
+  var NUMLH=13, LBLH=12, W=430, H=90;
+  var chartH=H-NUMLH-LBLH;
+  var gap=3;
+  var barW=Math.max(6,Math.floor((W-(n-1)*gap)/n));
+  var totalW=(barW+gap)*n-gap;
+  var offsetX=Math.floor((W-totalW)/2);
+  var svgParts="";
+  // 40% guideline
+  var glY=NUMLH+Math.round(chartH*(1-0.40/Math.max(maxV,0.40)));
+  svgParts+='<line x1="'+offsetX+'" y1="'+glY+'" x2="'+(offsetX+totalW)+'" y2="'+glY+'" stroke="#22c55e" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>';
+  svgParts+='<text x="'+(offsetX-2)+'" y="'+(glY+3)+'" text-anchor="end" font-size="7" fill="#22c55e" font-family="-apple-system,sans-serif">40%</text>';
+  for(var j=0;j<n;j++){
+    var v=vals[j];
+    if(v==null){ 
+      svgParts+='<text x="'+((offsetX+j*(barW+gap))+barW/2)+'" y="'+(H-1)+'" text-anchor="middle" font-size="8" fill="#ccc" font-family="-apple-system,sans-serif">'+moLabels[j]+'</text>';
+      continue;
+    }
+    var color=v>=0.40?"#22c55e":v>=0.20?"#f59e0b":"#ef4444";
+    var barH=Math.max(3,Math.round((v/Math.max(maxV,0.01))*(chartH-2)));
+    var bx=offsetX+j*(barW+gap);
+    var by=NUMLH+(chartH-barH);
+    svgParts+='<rect x="'+bx+'" y="'+by+'" width="'+barW+'" height="'+barH+'" rx="2" fill="'+color+'" fill-opacity="0.80"/>';
+    svgParts+='<text x="'+(bx+barW/2)+'" y="'+(by-3)+'" text-anchor="middle" font-size="8.5" font-weight="700" fill="'+color+'" font-family="-apple-system,sans-serif">'+Math.round(v*100)+'%</text>';
+    svgParts+='<text x="'+(bx+barW/2)+'" y="'+(H-1)+'" text-anchor="middle" font-size="8" fill="#999" font-family="-apple-system,sans-serif">'+moLabels[j]+'</text>';
+  }
+  return '<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:90px;display:block;">'+svgParts+'</svg>';
+}
 function detailBarSVG(vals, moLabels, color, fmtFn){
   var maxV=Math.max.apply(null,vals.map(function(v){return Math.abs(v);}))||1;
   var n=vals.length;
@@ -821,13 +852,19 @@ function renderDetail(){
   var dname=displayName(rep.name||"");
   var geo_em=geoEmoji(rep);
 
-  var tlRows="", cwChart=[], mrrChart=[], moChart=[];
+  var tlRows="", cwChart=[], mrrChart=[], moChart=[], cvrChart=[], cvrSqos=[];
   for(var i=s;i<=e;i++){
     var row=tl[i]||{};
     cwChart.push(row.deals||0);
     mrrChart.push(row.mrr||0);
     moChart.push(MOS[i]?MOS[i].substring(0,3):"");
-    tlRows+="<tr><td>"+escH(MOS[i])+"</td><td>"+(row.deals||0).toFixed(1)+"</td><td>"+fmtM(row.mrr||0)+"</td></tr>";
+    var cvrV=(rep.cvr_timeline&&rep.cvr_timeline[i]!=null)?rep.cvr_timeline[i]:null;
+    var sqoN=(rep.cvr_sqos&&rep.cvr_sqos[i]!=null)?rep.cvr_sqos[i]:null;
+    cvrChart.push(cvrV);
+    cvrSqos.push(sqoN);
+    var cvrCell=cvrV!=null?'<td style="color:'+(cvrV>=0.40?"#22c55e":cvrV>=0.20?"#f59e0b":"#ef4444")+';font-weight:700;">'+Math.round(cvrV*100)+'%</td>':'<td style="color:#ccc;">—</td>';
+    var sqoCell=sqoN!=null?'<td>'+sqoN+'</td>':'<td style="color:#ccc;">—</td>';
+    tlRows+="<tr><td>"+escH(MOS[i])+"</td><td>"+(row.deals||0).toFixed(1)+"</td><td>"+fmtM(row.mrr||0)+"</td>"+sqoCell+cvrCell+"</tr>";
   }
 
   var srcRows="";
@@ -863,8 +900,12 @@ function renderDetail(){
     +'<div class="section-title" style="margin-bottom:6px;">MRR Won — '+escH(fields.n)+'</div>'
     +detailBarSVG(mrrChart,moChart,'#1e2330',fmtM)
     +'</div>'
+    +'<div class="detail-section" style="padding-top:4px;">'
+    +'<div class="section-title" style="margin-bottom:6px;">T90 Conversion Rate (SQO → Won)</div>'
+    +cvrBarSVG(cvrChart,moChart)
+    +'</div>'
     +'<div class="detail-section"><div class="section-title">Monthly Detail</div>'
-    +'<table class="detail-tbl"><thead><tr><th>Month</th><th>Venues CW</th><th>MRR Won</th></tr></thead>'
+    +'<table class="detail-tbl"><thead><tr><th>Month</th><th>Venues CW</th><th>MRR Won</th><th>SQOs</th><th>T90 CVR</th></tr></thead>'
     +'<tbody>'+tlRows+'</tbody></table></div>'
     +(srcRows?'<div class="detail-section"><div class="section-title">By Source</div>'
     +'<table class="detail-tbl"><thead><tr><th>Source</th><th>Venues</th><th>MRR</th></tr></thead>'
