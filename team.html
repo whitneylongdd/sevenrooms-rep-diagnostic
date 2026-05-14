@@ -3,6 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SevenRooms Rep Productivity 2026</title>
+<style>
+#pw-gate{position:fixed;inset:0;background:#0a0f1e;z-index:99999;display:flex;align-items:center;justify-content:center;}
+#pw-box{background:#13182a;border:1px solid #1e2a40;border-radius:16px;padding:40px 48px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.6);}
+#pw-box h2{color:#fff;font-family:system-ui,sans-serif;margin:0 0 8px;font-size:22px;letter-spacing:.02em;}
+#pw-box p{color:#6b7fa3;font-family:system-ui,sans-serif;font-size:13px;margin:0 0 24px;}
+#pw-box input{background:#0a0f1e;border:1px solid #2a3a5c;border-radius:8px;color:#fff;font-size:15px;padding:10px 16px;width:220px;outline:none;font-family:system-ui,sans-serif;}
+#pw-box input:focus{border-color:#ff3008;}
+#pw-box button{display:block;margin:14px auto 0;background:#ff3008;border:none;color:#fff;font-size:13px;font-weight:700;padding:10px 32px;border-radius:8px;cursor:pointer;font-family:system-ui,sans-serif;letter-spacing:.04em;}
+#pw-box button:hover{background:#e02800;}
+#pw-err{color:#ff3008;font-size:12px;font-family:system-ui,sans-serif;margin-top:10px;min-height:16px;}
+</style>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>2026 Rep Productivity Tracker</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
@@ -171,26 +186,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 #ai-clear-filter{display:none;margin-top:8px;background:#1a2235;border:1px solid #ff3008;color:#ff7050;border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;width:100%;}
 #ai-clear-filter:hover{background:#ff300815;}
 </style>
+
 </head>
-<body><script>
+<body>
+<div id="pw-gate">
+  <div id="pw-box">
+    <h2>🍽️ Rep Productivity Tracker</h2>
+    <p>SevenRooms Sales Intelligence — 2026</p>
+    <input type="password" id="pw-input" placeholder="Enter password" onkeydown="if(event.key==='Enter')checkPW()">
+    <button onclick="checkPW()">Access Dashboard</button>
+    <div id="pw-err"></div>
+  </div>
+</div>
+<script>
 (function(){
-  var PW='speedboat26',KEY='srep_auth';
-  if(sessionStorage.getItem(KEY)===PW)return;
-  var ov=document.createElement('div');
-  ov.id='pw-overlay';
-  ov.style.cssText='position:fixed;inset:0;background:#0f1420;display:flex;align-items:center;justify-content:center;z-index:99999;font-family:-apple-system,BlinkMacSystemFont,sans-serif;';
-  ov.innerHTML='<div style="text-align:center;padding:40px;"><div style="font-size:28px;font-weight:800;color:#fff;margin-bottom:8px;">Rep Productivity Tracker</div><div style="font-size:13px;color:#8a9ab8;margin-bottom:32px;">2026 · DoorDash Sales</div><input id="pw-input" type="password" placeholder="Enter password" autofocus style="width:260px;padding:12px 16px;border-radius:10px;border:1.5px solid #2d3650;background:#1e2330;color:#fff;font-size:15px;outline:none;display:block;margin:0 auto 12px;text-align:center;"/><div id="pw-err" style="color:#ff6b6b;font-size:12px;min-height:18px;margin-bottom:12px;"></div><button id="pw-btn" style="background:#ff3008;color:#fff;border:none;padding:12px 36px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">ENTER</button></div>';
-  document.body.prepend(ov);
-  document.body.style.overflow='hidden';
-  function tryAuth(){
-    var val=document.getElementById('pw-input').value;
-    if(val===PW){sessionStorage.setItem(KEY,PW);document.getElementById('pw-overlay').remove();document.body.style.overflow='';}
-    else{document.getElementById('pw-err').textContent='Incorrect password — try again.';document.getElementById('pw-input').value='';document.getElementById('pw-input').focus();}
-  }
-  document.getElementById('pw-btn').addEventListener('click',tryAuth);
-  document.getElementById('pw-input').addEventListener('keydown',function(e){if(e.key==='Enter')tryAuth();});
+  if(sessionStorage.getItem('sr_auth')==='ok'){document.getElementById('pw-gate').style.display='none';}
 })();
+function checkPW(){
+  var v=document.getElementById('pw-input').value.trim();
+  if(v==='speedboat26'){
+    sessionStorage.setItem('sr_auth','ok');
+    document.getElementById('pw-gate').style.display='none';
+  } else {
+    document.getElementById('pw-err').textContent='Incorrect password. Try again.';
+    document.getElementById('pw-input').value='';
+  }
+}
 </script>
+
 <div id="sidebar">
   <h2>Filters</h2>
   <div class="filter-group"><div class="filter-label">Geo</div><div class="pills-wrap" id="geo-pills"></div></div>
@@ -985,7 +1008,7 @@ function buildAI(){
   });
 
   /* welcome message */
-  aiAddMsg('ai','Hi! I'm your Rep Intelligence assistant. I know everything about your <strong>'
+  aiAddMsg('ai','Hi! I\'m your Rep Intelligence assistant. I know everything about your <strong>'
     +AI_STATS.length+' active reps</strong> across '+
     ['NAM','EMEA','APAC'].map(function(g){
       return '<span class="ai-stat">'+AI_STATS.filter(function(s){return s.geo===g;}).length+' '+g+'</span>';
@@ -1042,9 +1065,9 @@ document.addEventListener('DOMContentLoaded',function(){
 /* ══════════════════════════
    QUERY ENGINE
    ══════════════════════════ */
-var MOS_SHORT=['Jan'25','Feb'25','Mar'25','Apr'25','May'25','Jun'25',
-               'Jul'25','Aug'25','Sep'25','Oct'25','Nov'25','Dec'25',
-               'Jan'26','Feb'26','Mar'26','Apr'26','May'26'];
+var MOS_SHORT=["Jan'25","Feb'25","Mar'25","Apr'25","May'25","Jun'25",
+               "Jul'25","Aug'25","Sep'25","Oct'25","Nov'25","Dec'25",
+               "Jan'26","Feb'26","Mar'26","Apr'26","May'26"];
 var MOS_FULL=['January 2025','February 2025','March 2025','April 2025','May 2025','June 2025',
               'July 2025','August 2025','September 2025','October 2025','November 2025','December 2025',
               'January 2026','February 2026','March 2026','April 2026','May 2026'];
@@ -1307,5 +1330,6 @@ function answerByManager(pool){
   return {html:html, names:null};
 }
 </script>
+
 </body>
 </html>
