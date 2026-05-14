@@ -147,11 +147,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 
 
 /* ── AI Assistant ── */
-#ai-fab{position:fixed;bottom:24px;right:24px;z-index:9999;background:#ff3008;color:#fff;border:none;border-radius:50px;padding:12px 20px;font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.04em;box-shadow:0 4px 20px rgba(255,48,8,.45);display:flex;align-items:center;gap:8px;transition:all .2s;}
-#ai-fab:hover{background:#e02800;transform:translateY(-2px);box-shadow:0 6px 24px rgba(255,48,8,.5);}
+#ai-fab{position:fixed;bottom:24px;right:24px;z-index:99990;background:#ff3008;color:#fff;border:none;border-radius:50px;padding:12px 20px;font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.04em;box-shadow:0 4px 20px rgba(255,48,8,.45);display:flex;align-items:center;gap:8px;transition:background .2s,box-shadow .2s;}
+#ai-fab:hover{background:#e02800;box-shadow:0 6px 24px rgba(255,48,8,.5);}
 #ai-fab .fab-icon{font-size:16px;}
-#ai-panel{position:fixed;bottom:0;right:0;width:400px;height:100vh;background:#13182a;border-left:1px solid #1e2a40;z-index:9998;pointer-events:none;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);box-shadow:-8px 0 40px rgba(0,0,0,.4);}
-#ai-panel.open{transform:translateX(0);pointer-events:all;}
+#ai-panel{position:fixed;bottom:0;right:0;width:400px;height:100vh;background:#13182a;border-left:1px solid #1e2a40;z-index:99989;display:none;flex-direction:column;box-shadow:-8px 0 40px rgba(0,0,0,.4);}
+#ai-panel.open{display:flex;}
 #ai-header{padding:18px 20px 14px;border-bottom:1px solid #1e2a40;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 #ai-header-left{display:flex;align-items:center;gap:10px;}
 #ai-header-icon{width:32px;height:32px;background:#ff3008;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;}
@@ -191,7 +191,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 <body>
 <div id="pw-gate">
   <div id="pw-box">
-    <h2>🍽️ Rep Productivity Tracker</h2>
+    <h2>&#x1F37D;&#xFE0F; Rep Productivity Tracker</h2>
     <p>SevenRooms Sales Intelligence — 2026</p>
     <input type="password" id="pw-input" placeholder="Enter password" onkeydown="if(event.key==='Enter')checkPW()">
     <button onclick="checkPW()">Access Dashboard</button>
@@ -913,12 +913,19 @@ var AI_FILTER = null; // set of display names to show, or null = all
 
 /* ── open / close ── */
 function openAI(){
-  document.getElementById('ai-panel').classList.add('open');
-  document.getElementById('ai-input').focus();
-  if(!AI_BUILT) buildAI();
+  try {
+    var panel = document.getElementById('ai-panel');
+    if(!panel){ console.error('AI panel element not found'); return; }
+    panel.classList.add('open');
+    if(!AI_BUILT) buildAI();
+    try { document.getElementById('ai-input').focus(); } catch(e){}
+  } catch(err){ console.error('openAI error:', err); }
 }
 function closeAI(){
-  document.getElementById('ai-panel').classList.remove('open');
+  try {
+    var panel = document.getElementById('ai-panel');
+    if(panel) panel.classList.remove('open');
+  } catch(err){}
 }
 
 /* ── filter integration ── */
