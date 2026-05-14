@@ -132,11 +132,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 
 
 /* ── AI Assistant ── */
-#ai-fab{position:fixed;bottom:24px;right:24px;z-index:1000;background:#ff3008;color:#fff;border:none;border-radius:50px;padding:12px 20px;font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.04em;box-shadow:0 4px 20px rgba(255,48,8,.45);display:flex;align-items:center;gap:8px;transition:all .2s;}
+#ai-fab{position:fixed;bottom:24px;right:24px;z-index:9999;background:#ff3008;color:#fff;border:none;border-radius:50px;padding:12px 20px;font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.04em;box-shadow:0 4px 20px rgba(255,48,8,.45);display:flex;align-items:center;gap:8px;transition:all .2s;}
 #ai-fab:hover{background:#e02800;transform:translateY(-2px);box-shadow:0 6px 24px rgba(255,48,8,.5);}
 #ai-fab .fab-icon{font-size:16px;}
-#ai-panel{position:fixed;bottom:0;right:0;width:400px;height:100vh;background:#13182a;border-left:1px solid #1e2a40;z-index:1001;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);box-shadow:-8px 0 40px rgba(0,0,0,.4);}
-#ai-panel.open{transform:translateX(0);}
+#ai-panel{position:fixed;bottom:0;right:0;width:400px;height:100vh;background:#13182a;border-left:1px solid #1e2a40;z-index:9998;pointer-events:none;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);box-shadow:-8px 0 40px rgba(0,0,0,.4);}
+#ai-panel.open{transform:translateX(0);pointer-events:all;}
 #ai-header{padding:18px 20px 14px;border-bottom:1px solid #1e2a40;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 #ai-header-left{display:flex;align-items:center;gap:10px;}
 #ai-header-icon{width:32px;height:32px;background:#ff3008;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;}
@@ -174,44 +174,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 </head>
 <body><script>
 (function(){
-  var PW = "speedboat26";
-  var KEY = "srep_auth";
-  if(sessionStorage.getItem(KEY) === PW) return;
-  // Build overlay
-  var ov = document.createElement("div");
-  ov.id = "pw-overlay";
-  ov.style.cssText = "position:fixed;inset:0;background:#0f1420;display:flex;align-items:center;justify-content:center;z-index:99999;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;";
-  ov.innerHTML = `
-    <div style="text-align:center;padding:40px;">
-      <div style="font-size:28px;font-weight:800;color:#fff;margin-bottom:8px;letter-spacing:-.5px;">Rep Productivity Tracker</div>
-      <div style="font-size:13px;color:#8a9ab8;margin-bottom:32px;">2026 · DoorDash Sales</div>
-      <input id="pw-input" type="password" placeholder="Enter password" autofocus
-        style="width:260px;padding:12px 16px;border-radius:10px;border:1.5px solid #2d3650;background:#1e2330;color:#fff;font-size:15px;outline:none;display:block;margin:0 auto 12px;text-align:center;letter-spacing:.08em;"
-      />
-      <div id="pw-err" style="color:#ff6b6b;font-size:12px;min-height:18px;margin-bottom:12px;"></div>
-      <button id="pw-btn"
-        style="background:#ff3008;color:#fff;border:none;padding:12px 36px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.04em;">
-        ENTER
-      </button>
-    </div>
-  `;
+  var PW='speedboat26',KEY='srep_auth';
+  if(sessionStorage.getItem(KEY)===PW)return;
+  var ov=document.createElement('div');
+  ov.id='pw-overlay';
+  ov.style.cssText='position:fixed;inset:0;background:#0f1420;display:flex;align-items:center;justify-content:center;z-index:99999;font-family:-apple-system,BlinkMacSystemFont,sans-serif;';
+  ov.innerHTML='<div style="text-align:center;padding:40px;"><div style="font-size:28px;font-weight:800;color:#fff;margin-bottom:8px;">Rep Productivity Tracker</div><div style="font-size:13px;color:#8a9ab8;margin-bottom:32px;">2026 · DoorDash Sales</div><input id="pw-input" type="password" placeholder="Enter password" autofocus style="width:260px;padding:12px 16px;border-radius:10px;border:1.5px solid #2d3650;background:#1e2330;color:#fff;font-size:15px;outline:none;display:block;margin:0 auto 12px;text-align:center;"/><div id="pw-err" style="color:#ff6b6b;font-size:12px;min-height:18px;margin-bottom:12px;"></div><button id="pw-btn" style="background:#ff3008;color:#fff;border:none;padding:12px 36px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">ENTER</button></div>';
   document.body.prepend(ov);
-  document.body.style.overflow = "hidden";
+  document.body.style.overflow='hidden';
   function tryAuth(){
-    var val = document.getElementById("pw-input").value;
-    if(val === PW){
-      sessionStorage.setItem(KEY, PW);
-      document.getElementById("pw-overlay").remove();
-      document.body.style.overflow = "";
-    } else {
-      var err = document.getElementById("pw-err");
-      err.textContent = "Incorrect password — try again.";
-      document.getElementById("pw-input").value = "";
-      document.getElementById("pw-input").focus();
-    }
+    var val=document.getElementById('pw-input').value;
+    if(val===PW){sessionStorage.setItem(KEY,PW);document.getElementById('pw-overlay').remove();document.body.style.overflow='';}
+    else{document.getElementById('pw-err').textContent='Incorrect password — try again.';document.getElementById('pw-input').value='';document.getElementById('pw-input').focus();}
   }
-  document.getElementById("pw-btn").addEventListener("click", tryAuth);
-  document.getElementById("pw-input").addEventListener("keydown", function(e){ if(e.key==="Enter") tryAuth(); });
+  document.getElementById('pw-btn').addEventListener('click',tryAuth);
+  document.getElementById('pw-input').addEventListener('keydown',function(e){if(e.key==='Enter')tryAuth();});
 })();
 </script>
 <div id="sidebar">
@@ -236,6 +213,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
     <div class="sep"></div>
     <button id="toggle-btn">&#x1F4CA; Rollup</button>
     <span id="count-label"></span>
+    <div class="sep"></div>
+    <button onclick="openAI()" style="background:#ff3008;border:none;color:#fff;font-size:11px;font-weight:800;padding:5px 14px;border-radius:6px;cursor:pointer;letter-spacing:.04em;display:flex;align-items:center;gap:5px;">✦ Ask AI</button>
   </div>
   <div id="content"><div id="grid"></div></div>
 </div>
