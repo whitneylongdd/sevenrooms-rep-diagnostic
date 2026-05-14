@@ -227,6 +227,9 @@ function checkPW(){
     <h1>&#x1F4C8; Rep Productivity Tracker</h1>
     <button class="sort-btn active" data-sort="cw">Venues CW</button>
     <button class="sort-btn" data-sort="mrr">MRR Won</button>
+    <button class="sort-btn" data-sort="cvr">T90 CVR</button>
+    <button class="sort-btn" data-sort="trend">Trending ↑</button>
+    <button class="sort-btn" data-sort="name">Name A–Z</button>
     <div class="sep"></div>
     <button class="period-pill active" data-period="ytd">YTD</button>
     <button class="period-pill" data-period="q1">Q1</button>
@@ -406,10 +409,27 @@ function miniBarSVG(rep){
 /* ── Rep Card Grid ── */
 function renderGrid(reps){
   var fields=mf();
-  var cvrIdx=ps()[1]; /* period end = which month's T90 CVR to show */
+  var range=ps(), cvrIdx=range[1]; /* period end = which month's T90 CVR to show */
   var sorted=reps.slice().sort(function(a,b){
-    if(sort==="cw") return (b[fields.d]||0)-(a[fields.d]||0);
-    return (b[fields.m]||0)-(a[fields.m]||0);
+    if(sort==="cw")    return (b[fields.d]||0)-(a[fields.d]||0);
+    if(sort==="mrr")   return (b[fields.m]||0)-(a[fields.m]||0);
+    if(sort==="cvr"){
+      var ac=(a.cvr_timeline&&a.cvr_timeline[cvrIdx]!=null)?a.cvr_timeline[cvrIdx]:-1;
+      var bc=(b.cvr_timeline&&b.cvr_timeline[cvrIdx]!=null)?b.cvr_timeline[cvrIdx]:-1;
+      return bc-ac;
+    }
+    if(sort==="trend"){
+      /* momentum: sum of last 3 months deals vs prior 3 months (absolute) */
+      function momentum(r){
+        var tl=r.timeline||[]; var e=cvrIdx;
+        var rec=(tl[e]&&tl[e].deals||0)+(tl[e-1]&&tl[e-1].deals||0)+(tl[e-2]&&tl[e-2].deals||0);
+        var pri=(tl[e-3]&&tl[e-3].deals||0)+(tl[e-4]&&tl[e-4].deals||0)+(tl[e-5]&&tl[e-5].deals||0);
+        return pri>0?(rec-pri)/pri:(rec>0?1:0);
+      }
+      return momentum(b)-momentum(a);
+    }
+    if(sort==="name") return displayName(a.name||"").localeCompare(displayName(b.name||""));
+    return (b[fields.d]||0)-(a[fields.d]||0);
   });
   var g=document.getElementById("grid"); g.innerHTML="";
   g.style.display="";
@@ -596,10 +616,18 @@ function renderRollup(){
     vals.forEach(function(v){var td=document.createElement("td");td.textContent=fmt(v);tr.appendChild(td);});
     tbody.appendChild(tr);
   }
-  addRow("Venues CW",   venues, function(v){return fmtN(v,0);});
-  addRow("MRR Won",     mrrs,   fmtM);
-  addRow("Headcount",   hcs,    function(v){return fmtN(v,1);});
-  addRow("Venues / HC", vhcs,   function(v){return fmtN(v,1);}, "highlight-row");
+  /* Compute avg T90 CVR per month across filtered reps */
+  var cvrVals=[];
+  for(var mi=s;mi<=e;mi++){
+    var cvrReps=reps.filter(function(r){return r.cvr_timeline&&r.cvr_timeline[mi]!=null;});
+    var avgCvr=cvrReps.length?cvrReps.reduce(function(sum,r){return sum+r.cvr_timeline[mi];},0)/cvrReps.length:null;
+    cvrVals.push(avgCvr);
+  }
+  addRow("Venues CW",   venues,  function(v){return fmtN(v,0);});
+  addRow("MRR Won",     mrrs,    fmtM);
+  addRow("Avg T90 CVR", cvrVals, function(v){return v!=null?Math.round(v*100)+"%":"—";}, "highlight-row");
+  addRow("Headcount",   hcs,     function(v){return fmtN(v,1);});
+  addRow("Venues / HC", vhcs,    function(v){return fmtN(v,1);}, "highlight-row");
   tbl.appendChild(tbody);
   wrap.appendChild(tbl);
 
