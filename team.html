@@ -130,6 +130,46 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 .detail-tbl td{padding:7px 10px;border-bottom:1px solid #f3f5f9;color:#333;}
 .detail-tbl tr:last-child td{border-bottom:none;}
 
+
+/* ── AI Assistant ── */
+#ai-fab{position:fixed;bottom:24px;right:24px;z-index:1000;background:#ff3008;color:#fff;border:none;border-radius:50px;padding:12px 20px;font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.04em;box-shadow:0 4px 20px rgba(255,48,8,.45);display:flex;align-items:center;gap:8px;transition:all .2s;}
+#ai-fab:hover{background:#e02800;transform:translateY(-2px);box-shadow:0 6px 24px rgba(255,48,8,.5);}
+#ai-fab .fab-icon{font-size:16px;}
+#ai-panel{position:fixed;bottom:0;right:0;width:400px;height:100vh;background:#13182a;border-left:1px solid #1e2a40;z-index:1001;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);box-shadow:-8px 0 40px rgba(0,0,0,.4);}
+#ai-panel.open{transform:translateX(0);}
+#ai-header{padding:18px 20px 14px;border-bottom:1px solid #1e2a40;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+#ai-header-left{display:flex;align-items:center;gap:10px;}
+#ai-header-icon{width:32px;height:32px;background:#ff3008;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+#ai-title{font-size:14px;font-weight:800;color:#fff;letter-spacing:-.2px;}
+#ai-subtitle{font-size:10px;color:#5a6a88;margin-top:1px;}
+#ai-close{background:none;border:none;color:#5a6a88;font-size:20px;cursor:pointer;padding:4px;border-radius:6px;line-height:1;}
+#ai-close:hover{color:#fff;background:#1e2a40;}
+#ai-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;}
+#ai-suggestions{padding:0 16px 12px;border-bottom:1px solid #1e2a40;flex-shrink:0;}
+#ai-suggestions-label{font-size:9px;color:#4a5a78;text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-bottom:8px;}
+.ai-chip{display:inline-block;background:#1a2235;border:1px solid #2a3650;color:#8a9ab8;font-size:11px;padding:5px 10px;border-radius:20px;cursor:pointer;margin:0 4px 4px 0;transition:all .15s;white-space:nowrap;}
+.ai-chip:hover{background:#ff3008;border-color:#ff3008;color:#fff;}
+.ai-msg{display:flex;flex-direction:column;gap:4px;}
+.ai-msg.user .ai-bubble{background:#ff3008;color:#fff;align-self:flex-end;border-radius:14px 14px 4px 14px;}
+.ai-msg.ai .ai-bubble{background:#1a2235;color:#c8d0e0;align-self:flex-start;border-radius:4px 14px 14px 14px;border:1px solid #2a3650;}
+.ai-bubble{padding:10px 13px;font-size:12.5px;line-height:1.55;max-width:90%;}
+.ai-bubble strong{color:#fff;font-weight:700;}
+.ai-bubble .ai-rep-tag{display:inline-block;background:#ff300820;color:#ff7050;border:1px solid #ff300840;border-radius:4px;padding:1px 6px;font-size:11px;margin:1px 2px;font-weight:600;}
+.ai-bubble .ai-stat{color:#6ab0f5;}
+.ai-thinking{display:flex;gap:4px;padding:12px 14px;}
+.ai-thinking span{width:7px;height:7px;background:#3a4a68;border-radius:50%;animation:aipulse 1.2s ease-in-out infinite;}
+.ai-thinking span:nth-child(2){animation-delay:.2s;}
+.ai-thinking span:nth-child(3){animation-delay:.4s;}
+@keyframes aipulse{0%,80%,100%{transform:scale(0.6);opacity:.4}40%{transform:scale(1);opacity:1}}
+#ai-footer{padding:12px 16px;border-top:1px solid #1e2a40;flex-shrink:0;}
+#ai-input-row{display:flex;gap:8px;align-items:center;}
+#ai-input{flex:1;background:#1a2235;border:1.5px solid #2a3650;color:#fff;border-radius:10px;padding:10px 13px;font-size:13px;outline:none;font-family:-apple-system,sans-serif;}
+#ai-input:focus{border-color:#ff3008;}
+#ai-input::placeholder{color:#3a4a68;}
+#ai-send{background:#ff3008;border:none;color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+#ai-send:hover{background:#e02800;}
+#ai-clear-filter{display:none;margin-top:8px;background:#1a2235;border:1px solid #ff3008;color:#ff7050;border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;width:100%;}
+#ai-clear-filter:hover{background:#ff300815;}
 </style>
 </head>
 <body><script>
@@ -836,6 +876,457 @@ window.addEventListener("DOMContentLoaded",function(){
   renderGrid(filterReps());
 });
 
+</script>
+
+<!-- AI Assistant -->
+<button id="ai-fab" onclick="openAI()"><span class="fab-icon">✦</span> Ask Anything</button>
+<div id="ai-panel">
+  <div id="ai-header">
+    <div id="ai-header-left">
+      <div id="ai-header-icon">✦</div>
+      <div><div id="ai-title">Rep Intelligence</div><div id="ai-subtitle">Ask about your team's performance</div></div>
+    </div>
+    <button id="ai-close" onclick="closeAI()">✕</button>
+  </div>
+  <div id="ai-suggestions">
+    <div id="ai-suggestions-label">Try asking</div>
+    <div id="ai-chips"></div>
+  </div>
+  <div id="ai-body"></div>
+  <div id="ai-footer">
+    <div id="ai-input-row">
+      <input id="ai-input" placeholder="Ask about your reps..." autocomplete="off"/>
+      <button id="ai-send" onclick="aiSend()">➤</button>
+    </div>
+    <button id="ai-clear-filter" onclick="aiClearFilter()">✕ Clear filter — show all reps</button>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════
+   REP INTELLIGENCE — STATIC AI ASSISTANT
+   ════════════════════════════════════════ */
+
+var AI_FILTER = null; // set of display names to show, or null = all
+
+/* ── open / close ── */
+function openAI(){
+  document.getElementById('ai-panel').classList.add('open');
+  document.getElementById('ai-input').focus();
+  if(!AI_BUILT) buildAI();
+}
+function closeAI(){
+  document.getElementById('ai-panel').classList.remove('open');
+}
+
+/* ── filter integration ── */
+function aiApplyFilter(names){
+  AI_FILTER = names ? new Set(names) : null;
+  document.getElementById('ai-clear-filter').style.display = AI_FILTER ? 'block' : 'none';
+  renderView();
+}
+function aiClearFilter(){
+  aiApplyFilter(null);
+}
+
+/* Patch filterReps to respect AI_FILTER */
+var _origFilterReps = filterReps;
+filterReps = function(){
+  var base = _origFilterReps();
+  if(!AI_FILTER) return base;
+  return base.filter(function(r){ return AI_FILTER.has(displayName(r.name)); });
+};
+
+/* ── pre-computed stats ── */
+var AI_BUILT = false;
+var AI_STATS = [];
+
+var AI_SUGGESTIONS = [
+  "Who are the top NAM reps?",
+  "Show me consistent performers",
+  "Which reps are declining?",
+  "Who is trending up recently?",
+  "Best EMEA reps",
+  "Top MRR producers",
+  "Who had the best April?",
+  "Show struggling reps",
+  "Best APAC performers",
+  "Compare AE vs AM output"
+];
+
+function buildAI(){
+  if(AI_BUILT) return;
+  AI_BUILT = true;
+
+  /* build stats for every rep */
+  var MO_COUNT = 17; // Jan2025-May2026
+  AI_STATS = REPS.map(function(r){
+    var tl = r.timeline || [];
+    var ytdCW=0, ytdMRR=0, vals=[], mrrs=[];
+    for(var i=0;i<MO_COUNT;i++){
+      var d=(tl[i]&&tl[i].deals)||0;
+      var m=(tl[i]&&tl[i].mrr)||0;
+      ytdCW+=d; ytdMRR+=m;
+      vals.push(d); mrrs.push(m);
+    }
+    /* 2026 only: indices 12-16 */
+    var cw2026=vals.slice(12,17).reduce(function(a,b){return a+b;},0);
+    /* recent 3 months vs prior 3 */
+    var recent=vals.slice(14,17).reduce(function(a,b){return a+b;},0);
+    var prior=vals.slice(11,14).reduce(function(a,b){return a+b;},0);
+    var trend = prior>0?(recent-prior)/prior:(recent>0?0.99:0);
+    /* consistency: months active, coeff of variation */
+    var active=vals.filter(function(v){return v>0;});
+    var mean=active.length?active.reduce(function(a,b){return a+b;},0)/active.length:0;
+    var variance=active.length>1?active.reduce(function(s,v){return s+Math.pow(v-mean,2);},0)/active.length:0;
+    var cv=mean>0?Math.sqrt(variance)/mean:1;
+    var consistency=Math.max(0,1-cv); /* 1=perfectly consistent, 0=wildly variable */
+    /* best single month */
+    var bestMoVal=Math.max.apply(null,vals);
+    var bestMoIdx=vals.indexOf(bestMoVal);
+    return {
+      rep:r, name:displayName(r.name),
+      geo:r.geo||'', seg:r.segment||'', ae_am:r.ae_am||'',
+      mgr:r.manager||'', lvl:r.level||'',
+      ytdCW:ytdCW, ytdMRR:ytdMRR, cw2026:cw2026,
+      recent:recent, prior:prior, trend:trend,
+      mean:mean, consistency:consistency,
+      active:active.length, vals:vals, mrrs:mrrs,
+      bestMoVal:bestMoVal, bestMoIdx:bestMoIdx
+    };
+  }).filter(function(s){return s.ytdCW>0;});
+
+  /* build suggestion chips */
+  var wrap=document.getElementById('ai-chips');
+  AI_SUGGESTIONS.forEach(function(q){
+    var c=document.createElement('span');
+    c.className='ai-chip'; c.textContent=q;
+    c.onclick=function(){ aiAsk(q); };
+    wrap.appendChild(c);
+  });
+
+  /* welcome message */
+  aiAddMsg('ai','Hi! I'm your Rep Intelligence assistant. I know everything about your <strong>'
+    +AI_STATS.length+' active reps</strong> across '+
+    ['NAM','EMEA','APAC'].map(function(g){
+      return '<span class="ai-stat">'+AI_STATS.filter(function(s){return s.geo===g;}).length+' '+g+'</span>';
+    }).join(', ')+'. Ask me anything about performance, trends, or specific people.');
+}
+
+/* ── messaging ── */
+function aiAddMsg(role, html){
+  var body=document.getElementById('ai-body');
+  var wrap=document.createElement('div'); wrap.className='ai-msg '+role;
+  var bub=document.createElement('div'); bub.className='ai-bubble';
+  bub.innerHTML=html;
+  wrap.appendChild(bub);
+  body.appendChild(wrap);
+  body.scrollTop=body.scrollHeight;
+  return bub;
+}
+function aiThinking(){
+  var body=document.getElementById('ai-body');
+  var wrap=document.createElement('div'); wrap.className='ai-msg ai';
+  var bub=document.createElement('div'); bub.className='ai-bubble';
+  bub.innerHTML='<div class="ai-thinking"><span></span><span></span><span></span></div>';
+  wrap.appendChild(bub); body.appendChild(wrap);
+  body.scrollTop=body.scrollHeight;
+  return wrap;
+}
+function aiSend(){
+  var inp=document.getElementById('ai-input');
+  var q=inp.value.trim(); if(!q) return;
+  inp.value='';
+  aiAsk(q);
+}
+function aiAsk(q){
+  if(!AI_BUILT) buildAI();
+  aiAddMsg('user', escH(q));
+  var thinkEl=aiThinking();
+  setTimeout(function(){
+    thinkEl.remove();
+    var ans=aiQuery(q);
+    aiAddMsg('ai', ans.html);
+    if(ans.names && ans.names.length){
+      aiApplyFilter(ans.names);
+      /* switch to grid view if in rollup */
+      if(view!=='grid'){ view='grid'; renderView(); }
+    }
+  }, 350);
+}
+document.addEventListener('DOMContentLoaded',function(){
+  document.getElementById('ai-input').addEventListener('keydown',function(e){
+    if(e.key==='Enter') aiSend();
+  });
+});
+
+/* ══════════════════════════
+   QUERY ENGINE
+   ══════════════════════════ */
+var MOS_SHORT=['Jan'25','Feb'25','Mar'25','Apr'25','May'25','Jun'25',
+               'Jul'25','Aug'25','Sep'25','Oct'25','Nov'25','Dec'25',
+               'Jan'26','Feb'26','Mar'26','Apr'26','May'26'];
+var MOS_FULL=['January 2025','February 2025','March 2025','April 2025','May 2025','June 2025',
+              'July 2025','August 2025','September 2025','October 2025','November 2025','December 2025',
+              'January 2026','February 2026','March 2026','April 2026','May 2026'];
+
+function aiQuery(raw){
+  var q=raw.toLowerCase();
+
+  /* ── detect geo ── */
+  var geo=null;
+  if(/\bnam\b|north.?am/.test(q)) geo='NAM';
+  else if(/\bemea\b|europe|international/.test(q)) geo='EMEA';
+  else if(/\bapac\b|asia.?pac/.test(q)) geo='APAC';
+
+  /* ── detect segment ── */
+  var seg=null;
+  if(/\bsmb\b/.test(q)) seg='SMB';
+  else if(/strategic/.test(q)) seg='Strategic';
+
+  /* ── detect role ── */
+  var role=null;
+  if(/\bae\b|account.?exec/.test(q)) role='AE';
+  else if(/\bam\b|account.?man/.test(q)) role='AM';
+
+  /* ── detect specific month ── */
+  var moIdx=null;
+  var moWords=['january','february','march','april','may','june','july','august',
+               'september','october','november','december'];
+  for(var mi=0;mi<moWords.length;mi++){
+    if(q.indexOf(moWords[mi])>=0){
+      /* prefer 2026 if just a month name, else check year */
+      var yr2026=q.indexOf('2026')>=0;
+      var yr2025=q.indexOf('2025')>=0;
+      moIdx = yr2025 ? mi : mi+12; /* default to 2026 month */
+      if(moIdx>16) moIdx=mi; /* out of range, fall back */
+      break;
+    }
+  }
+
+  /* ── detect specific rep name ── */
+  var repMatch=null;
+  for(var ri=0;ri<AI_STATS.length;ri++){
+    var nm=AI_STATS[ri].name.toLowerCase();
+    var parts=nm.split(' ');
+    if(parts.some(function(p){return p.length>3&&q.indexOf(p)>=0;})){
+      repMatch=AI_STATS[ri]; break;
+    }
+  }
+
+  /* ── apply cohort filters ── */
+  function cohort(stats){
+    var s=stats;
+    if(geo) s=s.filter(function(x){return x.geo===geo;});
+    if(seg) s=s.filter(function(x){return x.seg&&x.seg.indexOf(seg)>=0;});
+    if(role) s=s.filter(function(x){return x.ae_am===role;});
+    return s;
+  }
+  var pool=cohort(AI_STATS);
+  var geoLabel=geo||(seg?'':'')||(role?'':'all');
+  var cohortLabel=(geo||'')+(seg?' '+seg:'')+(role?' '+role:'') || 'all';
+
+  /* ── specific rep ── */
+  if(repMatch) return answerRep(repMatch, pool);
+
+  /* ── AE vs AM comparison ── */
+  if(/ae.{0,10}vs|am.{0,10}vs|vs.{0,10}ae|vs.{0,10}am|compare.{0,10}ae|compare.{0,10}am/.test(q)){
+    return answerAEvAM(cohort(AI_STATS));
+  }
+
+  /* ── manager-level ── */
+  if(/manager|by manager|per manager|team/.test(q)&&!/sales manager/.test(q)){
+    return answerByManager(pool);
+  }
+
+  /* ── specific month ── */
+  if(moIdx!==null){
+    return answerMonth(pool, moIdx, cohortLabel);
+  }
+
+  /* ── consistent ── */
+  if(/consisten|reliable|steady|dependable|floor/.test(q)){
+    return answerConsistent(pool, cohortLabel);
+  }
+
+  /* ── declining / struggling ── */
+  if(/declin|struggl|worst|under|behind|low|weak|concern/.test(q)){
+    return answerDeclining(pool, cohortLabel);
+  }
+
+  /* ── trending up / improving ── */
+  if(/improv|trending|rising|momentum|hot|surge|heat/.test(q)){
+    return answerTrending(pool, cohortLabel);
+  }
+
+  /* ── MRR ── */
+  if(/\bmrr\b|revenue|dollar|money/.test(q)){
+    return answerTopMRR(pool, cohortLabel);
+  }
+
+  /* ── 2026 ── */
+  if(/2026|this year|ytd 2026/.test(q)){
+    return answerTop(pool, cohortLabel, 'cw2026', '2026 YTD');
+  }
+
+  /* ── default: top performers ── */
+  return answerTop(pool, cohortLabel, 'ytdCW', 'YTD Venues CW');
+}
+
+/* ══ answer builders ══ */
+function fmtTrend(t){
+  if(t>0.15) return ' <span style="color:#4ade80">▲ '+Math.round(t*100)+'%</span>';
+  if(t<-0.15) return ' <span style="color:#f87171">▼ '+Math.round(Math.abs(t)*100)+'%</span>';
+  return ' <span style="color:#94a3b8">→ stable</span>';
+}
+function repTag(name){ return '<span class="ai-rep-tag">'+escH(name)+'</span>'; }
+
+function answerTop(pool, label, field, fieldLabel){
+  if(!pool.length) return {html:'No reps found for that filter.', names:null};
+  var sorted=pool.slice().sort(function(a,b){return b[field]-a[field];});
+  var top=sorted.slice(0,8);
+  var html='<strong>Top '+label+' reps by '+fieldLabel+':</strong><br><br>';
+  top.forEach(function(s,i){
+    html+=(i+1)+'. '+repTag(s.name)+' <span class="ai-stat">'+s[field]+' venues</span>'+fmtTrend(s.trend)+'<br>';
+  });
+  html+='<br><em style="color:#5a6a88;font-size:11px;">Showing '+top.length+' of '+pool.length+' reps. Cards filtered below.</em>';
+  return {html:html, names:top.map(function(s){return s.name;})};
+}
+
+function answerTopMRR(pool, label){
+  if(!pool.length) return {html:'No reps found.', names:null};
+  var sorted=pool.slice().sort(function(a,b){return b.ytdMRR-a.ytdMRR;});
+  var top=sorted.slice(0,8);
+  var html='<strong>Top '+label+' reps by YTD MRR won:</strong><br><br>';
+  top.forEach(function(s,i){
+    html+=(i+1)+'. '+repTag(s.name)+' <span class="ai-stat">$'+(s.ytdMRR/1000).toFixed(1)+'k MRR</span>'+fmtTrend(s.trend)+'<br>';
+  });
+  html+='<br><em style="color:#5a6a88;font-size:11px;">Cards filtered below.</em>';
+  return {html:html, names:top.map(function(s){return s.name;})};
+}
+
+function answerConsistent(pool, label){
+  if(!pool.length) return {html:'No reps found.', names:null};
+  /* need at least 6 active months */
+  var eligible=pool.filter(function(s){return s.active>=6;});
+  if(!eligible.length) eligible=pool;
+  var sorted=eligible.slice().sort(function(a,b){
+    /* rank by consistency × mean — want high floor AND high average */
+    return (b.consistency*b.mean)-(a.consistency*a.mean);
+  });
+  var top=sorted.slice(0,8);
+  var html='<strong>Most consistent '+label+' reps:</strong><br>';
+  html+='<span style="color:#5a6a88;font-size:11px;">(High average output + low month-to-month variance)</span><br><br>';
+  top.forEach(function(s,i){
+    var score=Math.round(s.consistency*100);
+    html+=(i+1)+'. '+repTag(s.name)+
+      ' avg <span class="ai-stat">'+s.mean.toFixed(1)+'/mo</span>'+
+      ' · consistency <span class="ai-stat">'+score+'%</span>'+
+      fmtTrend(s.trend)+'<br>';
+  });
+  html+='<br><em style="color:#5a6a88;font-size:11px;">Cards filtered below.</em>';
+  return {html:html, names:top.map(function(s){return s.name;})};
+}
+
+function answerDeclining(pool, label){
+  if(!pool.length) return {html:'No reps found.', names:null};
+  var eligible=pool.filter(function(s){return s.prior>0||s.recent>0;});
+  var sorted=eligible.slice().sort(function(a,b){return a.trend-b.trend;}); /* most negative first */
+  var declining=sorted.filter(function(s){return s.trend<-0.1;}).slice(0,8);
+  if(!declining.length){
+    return {html:'Good news — no significant declines detected among '+label+' reps in the last 3 months vs. prior 3.', names:null};
+  }
+  var html='<strong>Declining '+label+' reps</strong> (last 3 mo vs prior 3 mo):<br><br>';
+  declining.forEach(function(s,i){
+    html+=(i+1)+'. '+repTag(s.name)+
+      ' recent: <span style="color:#f87171">'+s.recent+' venues</span>'+
+      ' vs prior: <span class="ai-stat">'+s.prior+'</span>'+
+      ' <span style="color:#f87171">(▼'+Math.round(Math.abs(s.trend)*100)+'%)</span><br>';
+  });
+  html+='<br><em style="color:#5a6a88;font-size:11px;">Cards filtered below.</em>';
+  return {html:html, names:declining.map(function(s){return s.name;})};
+}
+
+function answerTrending(pool, label){
+  if(!pool.length) return {html:'No reps found.', names:null};
+  var eligible=pool.filter(function(s){return s.prior>0&&s.recent>0;});
+  var sorted=eligible.slice().sort(function(a,b){return b.trend-a.trend;});
+  var hot=sorted.filter(function(s){return s.trend>0.1;}).slice(0,8);
+  if(!hot.length){
+    return {html:'No reps with strong upward momentum detected right now among '+label+'.', names:null};
+  }
+  var html='<strong>Trending up — '+label+' reps</strong> (last 3 mo vs prior 3 mo):<br><br>';
+  hot.forEach(function(s,i){
+    html+=(i+1)+'. '+repTag(s.name)+
+      ' <span class="ai-stat">+'+Math.round(s.trend*100)+'%</span>'+
+      ' · '+s.prior+' → <strong style="color:#4ade80">'+s.recent+'</strong> venues<br>';
+  });
+  html+='<br><em style="color:#5a6a88;font-size:11px;">Cards filtered below.</em>';
+  return {html:html, names:hot.map(function(s){return s.name;})};
+}
+
+function answerMonth(pool, moIdx, label){
+  var moLabel=MOS_FULL[moIdx]||'that month';
+  var eligible=pool.filter(function(s){return moIdx<s.vals.length&&s.vals[moIdx]>0;});
+  if(!eligible.length) return {html:'No '+label+' reps had closed won deals in '+moLabel+'.', names:null};
+  var sorted=eligible.slice().sort(function(a,b){return b.vals[moIdx]-a.vals[moIdx];});
+  var top=sorted.slice(0,8);
+  var html='<strong>Top '+label+' reps in '+moLabel+':</strong><br><br>';
+  top.forEach(function(s,i){
+    html+=(i+1)+'. '+repTag(s.name)+' <span class="ai-stat">'+s.vals[moIdx]+' venues</span><br>';
+  });
+  html+='<br><em style="color:#5a6a88;font-size:11px;">Cards filtered below.</em>';
+  return {html:html, names:top.map(function(s){return s.name;})};
+}
+
+function answerRep(s, pool){
+  var rank=pool.slice().sort(function(a,b){return b.ytdCW-a.ytdCW;}).findIndex(function(x){return x.name===s.name;})+1;
+  var pctile=Math.round((1-rank/pool.length)*100);
+  var html='<strong>'+escH(s.name)+'</strong><br>';
+  html+='<span style="color:#5a6a88;font-size:11px;">'+escH(s.geo+' '+s.seg+' · '+s.ae_am)+'</span><br><br>';
+  html+='📊 <span class="ai-stat">'+s.ytdCW+' venues CW</span> YTD · ranked <strong>#'+rank+'</strong> in '+
+    (s.geo||'team')+' ('+pctile+'th pctile)<br>';
+  html+='💰 <span class="ai-stat">$'+(s.ytdMRR/1000).toFixed(1)+'k MRR</span> YTD<br>';
+  html+='📈 Trend: '+fmtTrend(s.trend)+' vs prior 3 months<br>';
+  html+='⚡ Consistency: <span class="ai-stat">'+Math.round(s.consistency*100)+'%</span> · avg <span class="ai-stat">'+s.mean.toFixed(1)+' venues/mo</span><br>';
+  if(s.bestMoVal>0) html+='🏆 Best month: <span class="ai-stat">'+MOS_SHORT[s.bestMoIdx]+' ('+s.bestMoVal+' venues)</span><br>';
+  return {html:html, names:[s.name]};
+}
+
+function answerAEvAM(pool){
+  var aes=pool.filter(function(s){return s.ae_am==='AE';});
+  var ams=pool.filter(function(s){return s.ae_am==='AM';});
+  function avg(arr,field){ return arr.length?arr.reduce(function(s,x){return s+x[field];},0)/arr.length:0; }
+  var html='<strong>AE vs AM Performance Comparison:</strong><br><br>';
+  html+='<strong>AEs</strong> ('+aes.length+' reps)<br>';
+  html+='· Avg YTD CW: <span class="ai-stat">'+avg(aes,'ytdCW').toFixed(1)+'</span><br>';
+  html+='· Avg MRR: <span class="ai-stat">$'+(avg(aes,'ytdMRR')/1000).toFixed(1)+'k</span><br>';
+  html+='· Avg consistency: <span class="ai-stat">'+Math.round(avg(aes,'consistency')*100)+'%</span><br><br>';
+  html+='<strong>AMs</strong> ('+ams.length+' reps)<br>';
+  html+='· Avg YTD CW: <span class="ai-stat">'+avg(ams,'ytdCW').toFixed(1)+'</span><br>';
+  html+='· Avg MRR: <span class="ai-stat">$'+(avg(ams,'ytdMRR')/1000).toFixed(1)+'k</span><br>';
+  html+='· Avg consistency: <span class="ai-stat">'+Math.round(avg(ams,'consistency')*100)+'%</span><br>';
+  return {html:html, names:null};
+}
+
+function answerByManager(pool){
+  var byMgr={};
+  pool.forEach(function(s){
+    var m=s.mgr&&s.mgr!=='#REF!'&&s.mgr!=='#N/A'?s.mgr:'Unknown';
+    if(!byMgr[m]) byMgr[m]={mgr:m,reps:[],totalCW:0,totalMRR:0};
+    byMgr[m].reps.push(s);
+    byMgr[m].totalCW+=s.ytdCW;
+    byMgr[m].totalMRR+=s.ytdMRR;
+  });
+  var sorted=Object.values(byMgr).filter(function(m){return m.mgr!=='Unknown';})
+    .sort(function(a,b){return b.totalCW/b.reps.length-a.totalCW/a.reps.length;});
+  var html='<strong>Team performance by manager</strong> (avg CW/rep):<br><br>';
+  sorted.slice(0,8).forEach(function(m,i){
+    var avg=(m.totalCW/m.reps.length).toFixed(1);
+    html+=(i+1)+'. <strong>'+escH(m.mgr)+'</strong> · '+m.reps.length+' reps · avg <span class="ai-stat">'+avg+' venues</span><br>';
+  });
+  return {html:html, names:null};
+}
 </script>
 </body>
 </html>
